@@ -8,14 +8,14 @@ use strict;
 use FindBin qw($Bin);
 
 my $log_dir = "$Bin/../logs";
-my $web_dir = "$Bin/web";
+my $html_source_dir = "$Bin/html";
 my $html_dir = "/disk4/html/demo/dev";
 
 system("mkdir -p $log_dir");
 
 print "Copying scripts into $html_dir\n";
 system ("rm -rf $html_dir");
-system("rsync -r --exclude=.svn --delete $web_dir/*  $html_dir");
+system("rsync -ra --exclude=.svn --delete $html_source_dir/*  $html_dir");
 
 
 #my $moses_home = "/disk3/bhaddow/moses";
