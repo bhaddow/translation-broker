@@ -15,7 +15,7 @@ system("mkdir -p $log_dir");
 
 print "Copying scripts into $html_dir\n";
 system ("rm -rf $html_dir");
-system("rsync -r --exclude=.svn $web_dir/*  $html_dir");
+system("rsync -r --exclude=.svn --delete $web_dir/*  $html_dir");
 
 
 #my $moses_home = "/disk3/bhaddow/moses";
