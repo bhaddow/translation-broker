@@ -184,6 +184,10 @@ my @segments;
 
 $ENV{PATH} = '';
 
+
+my $host = "localhost";
+my $port = "7891";
+
 #------------------------------------------------------------------------------
 # Fetch the source page
 
@@ -194,25 +198,18 @@ die "No URL?" unless $url;
 $url = "http://$url" unless ($url =~ m!^[a-z]+://!);
 my $sysid = $cgi->param('sysid');
 die "No sysid?" unless $sysid;
-my $address = $cgi->param('address');
-die "No server address?" unless $address;
-# This should be of the form host:port,port,port,...
-my ($host,$portstring) = split /:/,$address;
-my @ports = split /,/,$portstring;
-my @MOSES_ADDRESSES;
-foreach my $port (@ports) {
-    push @MOSES_ADDRESSES,"$host:$port"; 
-}
-#my $url="http://www.lemonde.fr";
-#my $address="thor:9001";
-
 
 # The tokenizer tries to adapt its rules depending on the language it's dealing
 # with, so we indicate that here.
 
-#TODO: Get these from config file
-my $INPUT_LANG  = 'fr';
-my $OUTPUT_LANG = 'en';
+my $INPUT_LANG  = $cgi->param('source_language');
+my $OUTPUT_LANG = $cgi->param('target_language');
+
+
+#my $url = "http://www.lemonde.fr";
+#my $sysid = "fr-en-raw";
+#my $INPUT_LANG="en";
+#my $OUTPUT_LANG = "fr";
 
 
 # In order to tokenize and detokenize strings in a way that stays consistent
@@ -461,12 +458,10 @@ my $thread_body = sub {
     $detokenizer->start;
 
     # each thread also connects to its own Moses server
-    my ($host, $port) = split /:/, $MOSES_ADDRESSES[$moses_i];
-    #my ($host, $port) = split /:/, $address;
     my $moses = new RemoteProcess ($host, $port) ||
         die "Can't connect to '$host:$port'";
     $moses->start;
-
+    $moses->write_line($sysid);
     for (;;) {
 
         # Snatch the next unassigned job from the queue
@@ -509,24 +504,25 @@ my $thread_body = sub {
             $num_printed++;
         }
     }
+    $moses->write_line("DONESTR");
 };
 
-if (@MOSES_ADDRESSES == 1) {
+#if (@MOSES_ADDRESSES == 1) {
 
     # If there's only one instance of Moses, there's no point in forking a
     # single thread and waiting for it to complete, so we just run the thread
     # code directly in the main thread
     $thread_body->(0);
 
-} else {
+#} else {
 
     # Start all threads and wait for them all to finish
-    my @threads = map {
-        threads->create ($thread_body, $_);
-    } (0 .. $#MOSES_ADDRESSES);
-    $_->join foreach @threads;
+#    my @threads = map {
+#        threads->create ($thread_body, $_);
+#    } (0 .. $#MOSES_ADDRESSES);
+#    $_->join foreach @threads;
 
-}
+#}
 
 #------------------------------------------------------------------------------
 # Translation subs

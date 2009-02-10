@@ -48,19 +48,23 @@ foreach my $p (keys %params) {
 }
 
 # Read server info
-open CFG, "server.cfg" or die "Unable to open server config";
-my %descs;
-my %addresses;
-while (<CFG>) {
-    next if /#/;
-    my @fields = split;
-    my $name = $fields[0];
-    my $host = $fields[2];
-    my $port = $fields[3];
-    my $desc = join " ",@fields[4..$#fields];
-    $descs{$name} = $desc;
-    $addresses{$name} = "$host:$port";
-}
+#open CFG, "server.cfg" or die "Unable to open server config";
+#my %descs;
+#my %addresses;
+#while (<CFG>) {
+#    next if /#/;
+#    my @fields = split;
+#    my $name = $fields[0];
+#    my $host = $fields[2];
+#    my $port = $fields[3];
+#    my $desc = join " ",@fields[4..$#fields];
+#    $descs{$name} = $desc;
+#    $addresses{$name} = "$host:$port";
+#}
+
+my %systems = (
+    "fr-en-raw" => ["French-English (Europarl)","fr","en"]
+);
 
 
 #------------------------------------------------------------------------------
@@ -89,11 +93,10 @@ if (!$params{url}) {
         "      <input type='submit' value='Translate'>\n" .
         "      <p>\n" .
         "      <select name='sysid'>\n";
-        my $name;
-        foreach $name (keys %descs) {
-            my $desc = $descs{$name};
+        foreach my $sysid (keys %systems) {
+            my $desc = $systems{$sysid}[0];
             print 
-                "          <option value='$name'>$desc</option>\n";
+                "          <option value='$sysid'>$desc</option>\n";
         }
 
     print 
@@ -108,13 +111,14 @@ if (!$params{url}) {
         unless ($params{url} =~ m!^[a-z]+://!);
     my $URL = uri_escape ($params{url});
     my $sysid = $params{sysid};
-    my $address = $addresses{$sysid};
+    my $source_language = $systems{$sysid}[1];
+    my $target_language = $systems{$sysid}[2];
 
     if (!$params{frame}) {
         print
             "  <frameset rows='30,*' border='1' frameborder='1'>\n" .
             "    <frame src='$SELF_URL?frame=top&url=$URL'>\n" .
-            "    <frame src='$TRANSLATE_CGI?url=$URL&address=$address&sysid=$sysid'>\n" .
+            "    <frame src='$TRANSLATE_CGI?url=$URL&sysid=$sysid&source_language=$source_language&target_language=$target_language'>\n" .
             "  </frameset>\n";
 
     } else {

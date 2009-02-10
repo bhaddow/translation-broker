@@ -53,6 +53,14 @@ sub do_line {
     return $ret;
 }
 
+sub write_line {
+    my ($self,$line) = @_;
+    my ($in) = ($self->{child_in});
+
+    print $in encode ('UTF-8', $line), "\n";
+    $in->flush ();
+}
+
 sub num_done { shift->{num_done} }
 
 #------------------------------------------------------------------------------

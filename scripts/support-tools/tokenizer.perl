@@ -1,33 +1,37 @@
 #!/usr/bin/perl -w
 
-# $Id: tokenizer.perl 50 2007-04-04 17:39:54Z josh $
+# $Id: tokenizer.perl 175 2008-04-08 17:09:35Z josh $
 # Sample Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
 
+# This added by Herve Saint-Amand for compatibility with translate.cgi
+$|++;
+
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
-binmode(STDERR, ":utf8");
 
 use IO::Handle;
+use FindBin qw($Bin);
 use strict;
-
-STDOUT->autoflush(1);
-STDERR->autoflush(1);
-
-
 #use Time::HiRes;
+
+my $mydir = "$Bin";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
+my $SGM = 0;
 
 #my $start = [ Time::HiRes::gettimeofday( ) ];
+
 while (@ARGV) {
 	$_ = shift;
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
+	/^-sgm$/ && ($SGM = 1, next);
+
 }
 
 if ($HELP) {
@@ -35,7 +39,7 @@ if ($HELP) {
 	exit;
 }
 if (!$QUIET) {
-	print STDERR "Tokenizer Version 1.0\n";
+	print STDERR "Tokenizer v3\n";
 	print STDERR "Language: $language\n";
 }
 
@@ -46,17 +50,30 @@ if (scalar(%NONBREAKING_PREFIX) eq 0){
 }
 
 while(<STDIN>) {
-	if (/^<.+>$/ || /^\s*$/) {
-		#don't try to tokenize XML/HTML tag lines
-		print $_;
-	}
-	else {
-		print &tokenize($_);
+	if ($SGM) {
+		chomp();
+		if (/^(<seg id=["]*[^"]+["]*>)(.*)(<\/seg>)$/) {
+			print($1);
+			my $output = &tokenize($2);
+			chomp($output);
+			print $output;
+			print($3."\n");		
+		} else {
+			print $_."\n";
+		}
+	} else {
+		if (/^<.+>$/ || /^\s*$/) {
+			#don't try to tokenize XML/HTML tag lines
+			print $_;
+		}
+		else {
+			print &tokenize($_);
+		}
 	}
 }
 
 #my $duration = Time::HiRes::tv_interval( $start );
-#print ("EXECUTION TIME: ".$duration."\n");
+#print STDERR ("EXECUTION TIME: ".$duration."\n");
 
 
 sub tokenize {
@@ -94,7 +111,7 @@ sub tokenize {
 		$text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1 '$2/g;
 		#special case for "1990's"
 		$text =~ s/([\p{IsN}])[']([s])/$1 '$2/g;
-	} elsif ($language eq "fr") {
+	} elsif (($language eq "fr") or ($language eq "it")) {
 		#split contractions left	
 		$text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
 		$text =~ s/([^\p{IsAlpha}])[']([\p{IsAlpha}])/$1 ' $2/g;
@@ -104,23 +121,6 @@ sub tokenize {
 		$text =~ s/\'/ \' /g;
 	}
 	
-	# . abbreviator / end of sentence 
-	#my $t = "";
-	#$text =~ s/\s+/ /g;
-	#while ($text =~ /.+?(\S+)\. +(\S+)( *.*)$/) {
-	#	my $pre = $1; 
-	#	my $post = $2; 
-	#	my $rest = $3;
-	#	my $skipped = substr($text,0,length($text)-2-length($pre.$post.$rest));
-	#	if ($pre =~ /\./ || $NONBREAKING_PREFIX{$1} || $post =~ /^[\p{IsLower}]/) {	# next word is lowercase
-	#		$t .= $skipped.$pre.". ";
-	#	}
-	#	else {
-	#		$t .= $skipped.$pre." . ";
-	#	}
-	#	$text = $post.$rest;
-	#}
-	
 	#word token method
 	my @words = split(/\s/,$text);
 	$text = "";
@@ -128,7 +128,9 @@ sub tokenize {
 		my $word = $words[$i];
 		if ( $word =~ /^(\S+)\.$/) {
 			my $pre = $1;
-			if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || $NONBREAKING_PREFIX{$pre} || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/))) {
+			if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/))) {
+				#no change
+			} elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/))) {
 				#no change
 			} else {
 				$word = $pre." .";
@@ -136,12 +138,6 @@ sub tokenize {
 		}
 		$text .= $word." ";
 	}		
-
-	
-	
-	#clean up last piece
-	#$text = $t . $text;
-	#$text =~ s/\. *$/ ./;
 
 	# clean up extraneous spaces
 	$text =~ s/ +/ /g;
@@ -161,29 +157,32 @@ sub tokenize {
 }
 
 sub load_prefixes {
-	#create a hash, with value 1, for any titles or abbreviations we want to not break
-	my ($lang, $PREFIX_REF) = @_;
-	if (($language eq "en") or ($language eq "es") or ($language eq "de") or ($language eq "fr")) {
-		#generic cases for basic latin/european languages
-		my @BASIC_PREFIXES = ("Adj","Adm","Adv","Asst","Ave","Bldg","Brig","Bros","Capt","Cmdr","Col","Comdr",
-				      "Con","Corp","Cpl","Dr","Ens","Gen","Gov","Hon","Hosp","Insp","Lt","Maj",
-				      "Messrs","Mlle","Mme","Mr","Mrs","Ms","Msgr","Op","Ord","Pfc","Ph","Prof","Pvt",
-				      "Rep","Reps","Res","Rev","Rt","Sen","Sens","Sgt","Sr","St","Supt","Surg","v","vs",
-				      "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z");
-		foreach my $prefix (@BASIC_PREFIXES) {
-			$PREFIX_REF->{$prefix} = 1;
-		}
+	my ($language, $PREFIX_REF) = @_;
+	
+	my $prefixfile = "$mydir/nonbreaking_prefix.$language";
+	
+	#default back to English if we don't have a language-specific prefix file
+	if (!(-e $prefixfile)) {
+		$prefixfile = "$mydir/nonbreaking_prefix.en";
+		print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
+		die ("ERROR: No abbreviations files found in $mydir\n") unless (-e $prefixfile);
 	}
-	if ($language eq "de") {
-		#In german, IV. and 3. December contain dots we don't want to abbreviate for
-		my @GERMAN_PREFIXES = ("II","III","IV","VI","VII","VIII","IX","Mio","Mrd","bzw");
-		#Add all numbers 1-99
-		for (my $i=1;$i<100;$i++) {
-			push(@GERMAN_PREFIXES,"".$i);	
+	
+	if (-e "$prefixfile") {
+		open(PREFIX, "<:utf8", "$prefixfile");
+		while (<PREFIX>) {
+			my $item = $_;
+			chomp($item);
+			if (($item) && (substr($item,0,1) ne "#")) {
+				if ($item =~ /(.*)[\s]+(\#NUMERIC_ONLY\#)/) {
+					$PREFIX_REF->{$1} = 2;
+				} else {
+					$PREFIX_REF->{$item} = 1;
+				}
+			}
 		}
-		foreach my $prefix (@GERMAN_PREFIXES) {
-			$PREFIX_REF->{$prefix} = 1;
-		}
+		close(PREFIX);
 	}
-} 	
+	
+}
 

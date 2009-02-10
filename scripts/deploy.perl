@@ -9,6 +9,7 @@ use FindBin qw($Bin);
 
 my $log_dir = "$Bin/../logs";
 my $html_source_dir = "$Bin/html";
+my $tools_dir = "$Bin/support-tools";
 my $html_dir = "/disk4/html/demo/dev";
 
 system("mkdir -p $log_dir");
@@ -16,6 +17,7 @@ system("mkdir -p $log_dir");
 print "Copying scripts into $html_dir\n";
 system ("rm -rf $html_dir");
 system("rsync -ra --exclude=.svn --delete $html_source_dir/*  $html_dir");
+system("rsync -ra --exclude=.svn --delete $tools_dir/  $html_dir/web/bin");
 
 
 #my $moses_home = "/disk3/bhaddow/moses";
