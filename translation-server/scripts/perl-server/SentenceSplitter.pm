@@ -4,8 +4,10 @@ use OutAndError;
 use strict;
 use IO::Handle;
 use utf8;
+use FindBin qw($Bin);
 
-my $mydir =  "/var/www/html/webtrans/support-tools";
+#my $mydir =  "/var/www/html/webtrans/support-tools";
+my $tools = "$Bin/../support-tools";
 
 sub new {
 
@@ -20,8 +22,8 @@ sub new {
 		
 	my %NONBREAKING_PREFIX;
 	
-	if (-e "$mydir/nonbreaking_prefix.$language") {
-		open(PREFIX, "<:utf8", "$mydir/nonbreaking_prefix.$language");
+	if (-e "$tools/nonbreaking_prefix.$language") {
+		open(PREFIX, "<:utf8", "$tools/nonbreaking_prefix.$language");
 		while (<PREFIX>) {
 			my $item = $_;
 			chomp($item);

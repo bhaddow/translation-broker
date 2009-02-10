@@ -3,6 +3,7 @@
 use strict;
 use IO::Socket;
 use utf8;
+use FindBin qw($Bin);
 
 my $debug = 1;
 
@@ -15,7 +16,7 @@ use OutAndError;
 
 my $moses = "/home/pkoehn/moses/moses-cmd/src/moses.1905.irst.64bit";
 my $moses_recase = "/home/pkoehn/moses/moses-cmd/src/moses.1905.irst.64bit";
-my $tools = "/disk4/html/demo/support-tools";
+my $tools = "$Bin/../support-tools";
 my $model_dir = "/disk4/webtrans-models";
 
 my $en_recaser = AppWrapper::new({
@@ -66,11 +67,29 @@ my $de_detok = AppWrapper::new({
 #	arg=>"-l es"
 #});
 
+my $de_tok = AppWrapper::new({
+	name=>"de tokenizer", 
+	cmd=>"$tools/tokenizer.perl", 
+	arg=>"-l de"
+});
+
+my $fr_tok = AppWrapper::new({
+	name=>"fr tokenizer", 
+	cmd=>"$tools/tokenizer.perl", 
+	arg=>"-l fr"
+});
+
+my $es_tok = AppWrapper::new({
+	name=>"es tokenizer", 
+	cmd=>"$tools/tokenizer.perl", 
+	arg=>"-l es"
+});
+
 my $en_tok = AppWrapper::new({
 	name=>"en tokenizer", 
 	cmd=>"$tools/tokenizer.perl", 
 	arg=>"-l en"
-}),
+});
 
 my $lowercaser = AppWrapper::new({
 	name=>"lowercaser", 
@@ -78,96 +97,71 @@ my $lowercaser = AppWrapper::new({
 	arg=>""
 });
 
-my %translation_systems = ( 
-    "fr-en"=>[
-	SentenceSplitter::new({lang=>"fr"}),
-	AppWrapper::new({
-		name=>"fr tokenizer", 
-		cmd=>"$tools/tokenizer.perl", 
-		arg=>"-l fr"
-	}),
-	$lowercaser,
-	AppWrapper::new({
+my $fr_en_moses = AppWrapper::new({
 		name=>"moses", 
 		cmd=>$moses, 
 		arg=>"-config  $model_dir/fr-en.matrix07b/moses.ini.1 -v 2 -s 100"
-	}),
+});
+
+my $de_en_moses = 	AppWrapper::new({
+		name=>"moses", 
+		cmd=>$moses, 
+		arg=>"-config  $model_dir/de-en.matrix07b/moses.ini.3 -v 2 -s 100"
+});
+
+my $es_en_moses = AppWrapper::new({
+		name=>"moses", 
+		cmd=>$moses, 
+		arg=>"-config  $model_dir/es-en.matrix07b/moses.ini.2 -v 2 -s 100"
+});
+
+my $en_de_moses = AppWrapper::new({
+		name=>"moses", 
+		cmd=>$moses, 
+		arg=>"-config  $model_dir/en-de.matrix07b/moses.ini.4 -v 2 -s 100"
+});
+
+my %translation_systems = ( 
+    "fr-en"=>[
+	SentenceSplitter::new({lang=>"fr"}),
+    $fr_tok,
+	$lowercaser,
+    $fr_en_moses,
 	$en_recaser,
 	$en_detok
     ],
     "de-en"=>[
 	SentenceSplitter::new({lang=>"de"}),
-	AppWrapper::new({
-		name=>"de tokenizer", 
-		cmd=>"$tools/tokenizer.perl", 
-		arg=>"-l de"
-	}),
+    $de_tok,
 	$lowercaser,
-	AppWrapper::new({
-		name=>"moses", 
-		cmd=>$moses, 
-		arg=>"-config  $model_dir/de-en.matrix07b/moses.ini.3 -v 2 -s 100"
-	}),
+    $de_en_moses,
 	$en_recaser,
 	$en_detok
     ],
     "es-en"=>[
 	SentenceSplitter::new({lang=>"es"}),
-	AppWrapper::new({
-		name=>"es tokenizer", 
-		cmd=>"$tools/tokenizer.perl", 
-		arg=>"-l es"
-	}),
+    $es_tok,
 	$lowercaser,
-	AppWrapper::new({
-		name=>"moses", 
-		cmd=>$moses, 
-		arg=>"-config  $model_dir/es-en.matrix07b/moses.ini.2 -v 2 -s 100"
-	}),
+    $es_en_moses,
 	$en_recaser,
 	$en_detok
     ],
     "en-de"=>[
 	SentenceSplitter::new({lang=>"en"}),
-        $en_tok,
+    $en_tok,
 	$lowercaser,
-	AppWrapper::new({
-		name=>"moses", 
-		cmd=>$moses, 
-		arg=>"-config  $model_dir/en-de.matrix07b/moses.ini.4 -v 2 -s 100"
-	}),
+    $en_de_moses,
 	$de_recaser,
 	$de_detok
-#    ],
-#    "en-es"=>[
-#	SentenceSplitter::new({lang=>"en"}),
-#        $en_tok,
-#	$lowercaser,
-#	AppWrapper::new({
-#		name=>"moses", 
-#		cmd=>$moses, 
-#		arg=>"-config  $model_dir/en-es.matrix07b/moses.ini.8 -v 2 -s 100"
-#	}),
-#	$es_recaser,
-#	$es_detok
-#    ],
-#    "en-fr"=>[
-#	SentenceSplitter::new({lang=>"en"}),
-#        $en_tok,
-#	$lowercaser,
-#	AppWrapper::new({
-#		name=>"moses", 
-#		cmd=>$moses, 
-#		arg=>"-config  $model_dir/en-fr.matrix07b/moses.ini.10 -v 2 -s 100"
-#	}),
-#	$fr_recaser,
-#	$fr_detok
+    ],
+    "fr-en-raw"=>[
+    $fr_en_moses,
     ]
 );
 
 my $sock = new IO::Socket::INET(
 	LocalHost => 'localhost',
-	LocalPort => 7890,
+	LocalPort => 7891,
 	Proto => 'tcp',
 	Listen => SOMAXCONN,
 	Reuse => 1);
@@ -189,7 +183,7 @@ while (($new_sock, $c_addr) = $sock->accept()) {
 		chomp($content_string);
 		if (!$trans_system_id) {
 			$trans_system_id = $content_string;
-			print ("Got System ID: $trans_system_id\n") if $debug;
+			print ("Got System ID: \"$trans_system_id\"\n") if $debug;
 			next;
 		}
 		if ($content_string eq "DONESTR") {
