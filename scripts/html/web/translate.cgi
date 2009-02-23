@@ -206,7 +206,7 @@ my $INPUT_LANG  = $cgi->param('source_language');
 my $OUTPUT_LANG = $cgi->param('target_language');
 
 
-#my $url = "http://www.lemonde.fr";
+#my $url = "http://www.lemonde.fr/economie/article/2009/02/23/le-nombre-de-foyers-assujettis-a-l-isf-en-hausse-de-7-2_1159045_3234.html";
 #my $sysid = "fr-en-raw";
 #my $INPUT_LANG="en";
 #my $OUTPUT_LANG = "fr";

@@ -156,7 +156,16 @@ my %translation_systems = (
     ],
     "fr-en-raw"=>[
     $fr_en_moses,
-    ]
+    ],
+    "de-en-raw"=>[
+    $de_en_moses,
+    ],
+    "es-en-raw"=>[
+    $es_en_moses,
+    ],
+    "en-de-raw"=>[
+    $en_de_moses,
+    ],
 );
 
 my $sock = new IO::Socket::INET(
