@@ -52,13 +52,16 @@ sub do_line {
     my ($in, $out) = ($self->{child_in}, $self->{child_out});
 
     $line =~ s/\s+/ /g;
+    return $line if !$line or $line =~ /^\s+$/; # don't send empty lines
     print $in encode ('UTF-8', $line), "\n";
     $in->flush ();
 
-    # Just get the first line
+    # Just get the first line - it's the translation
     my $ret = decode ('UTF-8', scalar <$out>);
     chomp $ret;
     while (<$out>) {
+        # Wait for the moses translation detail, which indicates the end
+        # of the moses message
         last if /^\[\[/;
     }
     $ret =~ s/%%%.*//g;

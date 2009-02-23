@@ -47,23 +47,11 @@ foreach my $p (keys %params) {
         if (defined $cgi->param ($p));
 }
 
-# Read server info
-#open CFG, "server.cfg" or die "Unable to open server config";
-#my %descs;
-#my %addresses;
-#while (<CFG>) {
-#    next if /#/;
-#    my @fields = split;
-#    my $name = $fields[0];
-#    my $host = $fields[2];
-#    my $port = $fields[3];
-#    my $desc = join " ",@fields[4..$#fields];
-#    $descs{$name} = $desc;
-#    $addresses{$name} = "$host:$port";
-#}
-
 my %systems = (
-    "fr-en-raw" => ["French-English (Europarl)","fr","en"]
+    "fr-en-raw" => ["French-English (Europarl)","fr","en"],
+    "de-en-raw" => ["German-English (Europarl)","de","en"],
+    "es-en-raw" => ["Spanish-English (Europarl)","es","en"],
+    "en-de-raw" => ["English-German (Europarl)","en","de"]
 );
 
 
