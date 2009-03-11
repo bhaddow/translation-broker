@@ -1,6 +1,6 @@
 <?php
 
-$debug = true;
+$debug = false;
 
 
 function debug($msg) {
@@ -15,17 +15,17 @@ error_reporting(E_ALL);
 
 function open_socket_connection ($ip, $port) {
 	
-print "here now... open_socket_connection ($ip, $port)";
+#print "here now... open_socket_connection ($ip, $port)";
 	/* Create a TCP/IP socket. */
 	$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-print "here now... $socket";
+#print "here now... $socket";
 	if ($socket === false) {
 		print "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n";
 		return false;
 	} else {
 		debug("OK.\n");
 	}
-print "here now...";
+#print "here now...";
 	
 	debug("Attempting to connect to '$ip' on port '$port'...");
 	$result = socket_connect($socket, $ip, $port);
@@ -41,9 +41,9 @@ print "here now...";
 
 function translate ($input, $system_id, $location) {
 
-   print "hello world!";
+#   print "hello world!";
 	$socket = open_socket_connection($location['ip'],$location['port']);
-   print "socket -> $socket\n";
+#   print "socket -> $socket\n";
 	
 	$result = '';
 	

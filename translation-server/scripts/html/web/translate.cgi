@@ -186,7 +186,7 @@ $ENV{PATH} = '';
 
 
 my $host = "localhost";
-my $port = "7891";
+my $port = "__PORT__";
 
 #------------------------------------------------------------------------------
 # Fetch the source page

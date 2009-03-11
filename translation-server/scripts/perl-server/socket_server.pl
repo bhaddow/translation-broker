@@ -16,7 +16,7 @@ use OutAndError;
 
 my $moses = "/home/pkoehn/moses/moses-cmd/src/moses.1905.irst.64bit";
 my $moses_recase = "/home/pkoehn/moses/moses-cmd/src/moses.1905.irst.64bit";
-my $tools = "$Bin/../support-tools";
+my $tools = "$Bin/support-tools";
 my $model_dir = "/disk4/webtrans-models";
 
 my $en_recaser = AppWrapper::new({
@@ -170,7 +170,7 @@ my %translation_systems = (
 
 my $sock = new IO::Socket::INET(
 	LocalHost => 'localhost',
-	LocalPort => 7891,
+	LocalPort => __PORT__,
 	Proto => 'tcp',
 	Listen => SOMAXCONN,
 	Reuse => 1);
