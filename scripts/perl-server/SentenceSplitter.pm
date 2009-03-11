@@ -7,7 +7,7 @@ use utf8;
 use FindBin qw($Bin);
 
 #my $mydir =  "/var/www/html/webtrans/support-tools";
-my $tools = "$Bin/../support-tools";
+my $tools = "$Bin/support-tools";
 
 sub new {
 

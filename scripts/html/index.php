@@ -12,6 +12,7 @@ $input = $_POST['input'];
 $sysid = $_POST['sysid'];
 $rdebug =  array_key_exists('debug',$_POST);
 $alignment =  array_key_exists('alignment',$_POST);
+$port = "__PORT__";
 
 if (!$input) $input="";
 $input = stripslashes($input);
@@ -121,6 +122,7 @@ foreach (array_keys($systems) as $syskey) {
 <input type="Submit" value="Translate">
 <P>
 </form>
+<a href="web">Web Translation</a></br>
 <?php 
 if ($input) {
   print "<h2>Translation:</h2>\n";
@@ -128,7 +130,7 @@ if ($input) {
 include_once("mt_functions.php");
 
 
-$location = array("ip"=>"127.0.0.1","port"=>"7890");
+$location = array("ip"=>"127.0.0.1","port"=>$port);
 
 $translation_array_string = "";
 
@@ -220,7 +222,7 @@ if ($input) {
  fwrite($fh,"=== RAW INPUT:\n$input\n");
  $moses_input = "";
  print "<h2>Help to improve statistical machine translation!</h2>\n";
- print "<FORM ACTION=\"/webtrans/\" METHOD=POST>\n";
+ print "<FORM ACTION=\"/\" METHOD=POST>\n";
  print "<INPUT TYPE=HIDDEN NAME=sysid VALUE=\"$sysid\">\n";
  print "<INPUT TYPE=HIDDEN NAME=TIME VALUE=$time>\n";
  for($i=1;$i<sizeof($translation_array);$i++) {
