@@ -14,7 +14,12 @@ package org.statmt.tbroker;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.XmlRpcHandler;
@@ -28,12 +33,38 @@ public class Translator  implements XmlRpcHandler{
     
     private static final Logger _logger = Logger.getLogger(Translator.class);
    
-    
+    private static Translator _instance;
     private TranslationTool _tool;
     
-    public Translator() throws IOException {
-        _logger.debug("Created a translator");
+    private Translator(HierarchicalConfiguration config) throws IOException {
+        //Create the suport tools
+        Map<String,TranslationTool> supportTools = new HashMap<String,TranslationTool>();
+        List supportToolsConfig  = config.configurationsAt("support-tools.tool");
+        for (Object o : supportToolsConfig) {
+            HierarchicalConfiguration h = (HierarchicalConfiguration)o;
+            System.out.println("root: " + h.getRootNode().getName());
+            for (Iterator i = h.getKeys(); i.hasNext();) {
+                System.out.println(i.next());
+            }
+        }
+        System.exit(1);
         _tool = new PipedTool("en-tok", new String[]{"/home/bhaddow/statmt/repository/experiments/trunk/scripts/tokenizer.perl", "-l", "en"});
+    }
+    
+    /**
+     * Call this before using the Translator.
+     * @param config
+     * @throws IOException
+     */
+    public static synchronized void init(HierarchicalConfiguration config) throws IOException {
+        _instance = new Translator(config);
+    }
+    
+    public static  Translator instance() throws IOException {
+        if (_instance == null) {
+            throw new RuntimeException("Translator not initialised");
+        }
+        return _instance;
     }
     
    

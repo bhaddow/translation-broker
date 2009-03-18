@@ -12,7 +12,6 @@
  *  ========================================================================*/
 package org.statmt.tbroker;
 
-import java.io.IOException;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.server.XmlRpcHandlerMapping;
@@ -23,11 +22,9 @@ public class TranslationServlet extends XmlRpcServlet {
     @Override
     protected XmlRpcHandlerMapping newXmlRpcHandlerMapping()
             throws XmlRpcException {
-        try {
+            //NOTE:   this is called from Servlet.init()
             return new TranslationHandler();
-        } catch (IOException e) {
-            throw new XmlRpcException("Unable to create handler",e);
-        }
+        
     }
     
 
