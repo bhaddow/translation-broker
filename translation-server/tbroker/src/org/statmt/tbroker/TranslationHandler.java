@@ -22,22 +22,24 @@ import org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException;
 
 public class TranslationHandler implements XmlRpcHandlerMapping {
     
-    private Translator _translator;
     private static final Logger _logger = Logger.getLogger(TranslationHandler.class);
     
-    public TranslationHandler() throws IOException {
-        _translator = new Translator();
-    }
+   
 
     @Override
     public XmlRpcHandler getHandler(String handlerName)
             throws XmlRpcNoSuchHandlerException, XmlRpcException {
         _logger.debug("Request name: " + handlerName);
-        if (handlerName.equals("translate")) {
-            return _translator;
-        } else {
-            throw new XmlRpcNoSuchHandlerException("No handler for " + handlerName);
+        try {
+            if (handlerName.equals("translate")) {
+                    return Translator.instance();
+            } else {
+                throw new XmlRpcNoSuchHandlerException("No handler for " + handlerName);
+            }
+        }  catch (IOException e) {
+            throw new XmlRpcException("Failed to create handler",e);
         }
+        
     }
 
 }

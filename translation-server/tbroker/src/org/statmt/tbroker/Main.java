@@ -12,6 +12,8 @@
  *  ========================================================================*/
 package org.statmt.tbroker;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.webserver.ServletWebServer;
@@ -26,20 +28,25 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws Exception {
+        if (args.length != 1) {
+            System.err.println("Usage: java " + Main.class.getName() + " config-file");
+            System.exit(1);
+        }
+        //logging
         BasicConfigurator.configure();
-        //configure
-        int port = 8080;
         
-        //Start tools
-        
-        
+        //configure 
+        HierarchicalConfiguration config = new XMLConfiguration(args[0]);
+        int port = config.getInt("port");
+      
         //Tool chains
+        Translator.init(config);
         
         //Start server
         XmlRpcServlet servlet = new TranslationServlet();
         
         ServletWebServer webServer = new ServletWebServer(servlet, port);
-        _logger.info("server starting");
+        _logger.info("server starting on port " + port);
         webServer.start();
     }
 
