@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <config>
     <port>8080</port>
-    <support-scripts-dir>/home/bhaddow/statmt/repository/experiments/trunk/scripts</support-scripts-dir>
+    <support-tools-dir>/home/bhaddow/statmt/repository/experiments/trunk/scripts</support-tools-dir>
     <support-tools>
         <tool>
             <name>en-tok</name>

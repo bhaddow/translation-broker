@@ -12,6 +12,7 @@
  *  ========================================================================*/
 package org.statmt.tbroker;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,13 +40,20 @@ public class Translator  implements XmlRpcHandler{
     private Translator(HierarchicalConfiguration config) throws IOException {
         //Create the suport tools
         Map<String,TranslationTool> supportTools = new HashMap<String,TranslationTool>();
+        String supportToolsDir = config.getString("support-tools-dir");
         List supportToolsConfig  = config.configurationsAt("support-tools.tool");
-        for (Object o : supportToolsConfig) {
-            HierarchicalConfiguration h = (HierarchicalConfiguration)o;
-            System.out.println("root: " + h.getRootNode().getName());
-            for (Iterator i = h.getKeys(); i.hasNext();) {
-                System.out.println(i.next());
+        for (Iterator i = supportToolsConfig.iterator(); i.hasNext(); ) {
+            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+            String name = h.getString("name");
+            String exe = h.getString("executable");
+            List args = h.getList("args.arg");
+            String[] cmd = new String[1 + args.size()];
+            cmd[0] = supportToolsDir + File.separator + exe;
+            for (int j = 0; j < args.size(); ++j) {
+            	cmd[j+1] = args.get(j).toString();
             }
+            TranslationTool tool = new PipedTool(name,cmd);
+            supportTools.put(name, tool);
         }
         System.exit(1);
         _tool = new PipedTool("en-tok", new String[]{"/home/bhaddow/statmt/repository/experiments/trunk/scripts/tokenizer.perl", "-l", "en"});
