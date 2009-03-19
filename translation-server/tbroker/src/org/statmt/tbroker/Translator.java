@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.XmlRpcHandler;
@@ -39,24 +40,22 @@ public class Translator  implements XmlRpcHandler{
     
     private Translator(HierarchicalConfiguration config) throws IOException {
         //Create the suport tools
-        Map<String,TranslationTool> supportTools = new HashMap<String,TranslationTool>();
-        String supportToolsDir = config.getString("support-tools-dir");
-        List supportToolsConfig  = config.configurationsAt("support-tools.tool");
-        for (Iterator i = supportToolsConfig.iterator(); i.hasNext(); ) {
+        Map<String,TranslationTool> tools = new HashMap<String,TranslationTool>();
+        List  pipeToolsConfig  = config.configurationsAt("pipetool");
+        for (Iterator i = pipeToolsConfig.iterator(); i.hasNext(); ) {
             HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
             String name = h.getString("name");
-            String exe = h.getString("executable");
-            List args = h.getList("args.arg");
+            String exe = h.getString("command");
+            List args = h.getList("arg");
             String[] cmd = new String[1 + args.size()];
-            cmd[0] = supportToolsDir + File.separator + exe;
+            cmd[0] = exe;
             for (int j = 0; j < args.size(); ++j) {
             	cmd[j+1] = args.get(j).toString();
             }
-            TranslationTool tool = new PipedTool(name,cmd);
-            supportTools.put(name, tool);
+            System.out.println(name + " " + exe + " " + args);
         }
-        System.exit(1);
-        _tool = new PipedTool("en-tok", new String[]{"/home/bhaddow/statmt/repository/experiments/trunk/scripts/tokenizer.perl", "-l", "en"});
+        //System.exit(1);
+        //_tool = new PipedTool("en-tok", new String[]{"/home/bhaddow/statmt/repository/experiments/trunk/scripts/tokenizer.perl", "-l", "en"});
     }
     
     /**
