@@ -27,12 +27,12 @@ public class TestClient {
      */
     public static void main(String[] args)  throws Exception {
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-        config.setServerURL(new URL("http://127.0.0.1:8080/xmlrpc"));
+        config.setServerURL(new URL("http://hefty:8080/xmlrpc"));
         XmlRpcClient client = new XmlRpcClient();
         client.setConfig(config);
-        String[] source = new String[]{"The source string.","And this is the source's next sentence."};
+        String[] source = new String[]{"Je ne sais pas.."};
         //source.add("The source string . ");
-        Object[] params = new Object[]{"systemid", source};
+        Object[] params = new Object[]{"fr-en", source};
         System.out.println(Arrays.toString(source));
         Object[] result =  (Object[])client.execute("translate", params);
         System.out.println(Arrays.toString(result));

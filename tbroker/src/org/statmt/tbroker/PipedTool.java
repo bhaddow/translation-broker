@@ -31,14 +31,13 @@ import org.apache.log4j.Logger;
 public class PipedTool extends TranslationTool {
     
     private static final Logger _logger = Logger.getLogger(TranslationTool.class);
-    private String _toolName;
     private PrintWriter _processInput;
     private OutputReader _outputReader;
    
     private BlockingDeque<String> _output;
     
     public PipedTool(String toolName, String[] progargs) throws IOException {
-        _toolName = toolName;
+        super(toolName);
         _logger.info("Creating tool " + toolName + " with args " + Arrays.toString(progargs));
         Process process = Runtime.getRuntime().exec(progargs);
         _outputReader = new OutputReader(process.getInputStream());
@@ -84,7 +83,7 @@ public class PipedTool extends TranslationTool {
                         _output.addLast(line);
                     }
             } catch (Exception e) {
-                _logger.error("Tool " + _toolName + " failed: ",e);
+                _logger.error("Tool " + getName() + " failed: ",e);
             }
         }
     }
@@ -102,11 +101,11 @@ public class PipedTool extends TranslationTool {
                 BufferedReader in = new BufferedReader(new InputStreamReader(_processError,"utf8"));
                 while ((line = in.readLine()) != null) {
                     if (_logger.isDebugEnabled()) {
-                        _logger.debug(_toolName + " " + line);
+                        _logger.debug(getName() + " " + line);
                     }
                 }
             } catch (Exception e) {
-                _logger.error("Tool " + _toolName + " failed: ",e);
+                _logger.error("Tool " +getName() + " failed: ",e);
             }
         }
     }

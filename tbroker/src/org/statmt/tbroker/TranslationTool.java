@@ -18,11 +18,21 @@ package org.statmt.tbroker;
  */
 public abstract class TranslationTool {
     
+    private String _name;
+    
+    public TranslationTool(String name) {
+        _name = name;
+    }
+    
     
     /**
      * Batched version of transform operation.
      * @param input
      */
     public abstract String[] transform(String[] input);
+    
+    public String getName() {
+        return _name;
+    }
 
 }

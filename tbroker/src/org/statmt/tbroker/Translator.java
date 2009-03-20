@@ -36,10 +36,10 @@ public class Translator  implements XmlRpcHandler{
     private static final Logger _logger = Logger.getLogger(Translator.class);
    
     private static Translator _instance;
-    private TranslationTool _tool;
+    private Map<String,ToolChain> _toolChains = new HashMap<String, ToolChain>();
     
     private Translator(HierarchicalConfiguration config) throws IOException {
-        //Create the suport tools
+        //Create the  tools
         Map<String,TranslationTool> tools = new HashMap<String,TranslationTool>();
         List  pipeToolsConfig  = config.configurationsAt("pipetool");
         for (Iterator i = pipeToolsConfig.iterator(); i.hasNext(); ) {
@@ -52,8 +52,28 @@ public class Translator  implements XmlRpcHandler{
             for (int j = 0; j < args.size(); ++j) {
             	cmd[j+1] = args.get(j).toString();
             }
-            System.out.println(name + " " + exe + " " + args);
+            tools.put(name,new PipedTool(name,cmd));
         }
+        
+        //create tool chains
+        List toolChainsConfig = config.configurationsAt("toolchain");
+        for (Iterator i = toolChainsConfig.iterator(); i.hasNext();) {
+            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+            String name = h.getString("name");
+            List toolsInChain = h.getList("tool");
+            ToolChain toolChain = new ToolChain(name);
+            for (Iterator j = toolsInChain.iterator(); j.hasNext();) {
+                String toolName = j.next().toString();
+                TranslationTool tool = tools.get(toolName);
+                if (tool == null) {
+                    throw new RuntimeException("Error: missing tool: "+ toolName);
+                }
+                _logger.info("Adding tool " + tool.getName() + " to tool chain " + toolChain.getName());
+                toolChain.addTool(tool);
+            }
+            _toolChains.put(name,toolChain);
+        }
+        
         //System.exit(1);
         //_tool = new PipedTool("en-tok", new String[]{"/home/bhaddow/statmt/repository/experiments/trunk/scripts/tokenizer.perl", "-l", "en"});
     }
@@ -94,11 +114,12 @@ public class Translator  implements XmlRpcHandler{
      */
     private Object[]  translate(String systemId, Object[] sources) {
         _logger.debug("received source sentence: " + Arrays.toString(sources));
+        ToolChain tool = _toolChains.get(systemId);
         String[] sourceStrings = new String[sources.length];
         for (int i = 0; i < sourceStrings.length; ++i) {
             sourceStrings[i] = sources[i].toString();
         }
-        return  _tool.transform(sourceStrings);
+        return  tool.transform(sourceStrings);
     }
 
 
