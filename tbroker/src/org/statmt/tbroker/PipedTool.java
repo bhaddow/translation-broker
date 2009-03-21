@@ -49,21 +49,15 @@ public class PipedTool extends TranslationTool {
 
 
     @Override
-    public synchronized String[]  transform(String[] input) {
-        for (String inputLine: input) {
-           _processInput.println(inputLine);
-        }
+    public synchronized void  transform(TranslationJob job) {
+        _processInput.println(job.getText());
         _processInput.flush();
-        //NOTE: Assumes the output is the same length as the input
         try {
-            for (int i = 0; i < input.length; ++i) {
-                //TODO: timeout
-                input[i] = _output.takeFirst(); 
-            }
+        	String outputText = _output.takeFirst();
+        	job.setText(outputText);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return input;
     }
     
     class OutputReader extends Thread {

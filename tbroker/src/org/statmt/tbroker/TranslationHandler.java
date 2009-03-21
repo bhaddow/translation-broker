@@ -31,7 +31,7 @@ public class TranslationHandler implements XmlRpcHandlerMapping {
             throws XmlRpcNoSuchHandlerException, XmlRpcException {
         _logger.debug("Request name: " + handlerName);
         try {
-            if (handlerName.equals("translate")) {
+            if (handlerName.equals("translate") || handlerName.equals("list")) {
                     return Translator.instance();
             } else {
                 throw new XmlRpcNoSuchHandlerException("No handler for " + handlerName);

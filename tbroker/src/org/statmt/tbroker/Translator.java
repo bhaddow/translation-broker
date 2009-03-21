@@ -12,16 +12,13 @@
  *  ========================================================================*/
 package org.statmt.tbroker;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.XmlRpcHandler;
@@ -35,6 +32,8 @@ public class Translator  implements XmlRpcHandler{
     
     private static final Logger _logger = Logger.getLogger(Translator.class);
    
+   
+    
     private static Translator _instance;
     private Map<String,ToolChain> _toolChains = new HashMap<String, ToolChain>();
     
@@ -61,7 +60,9 @@ public class Translator  implements XmlRpcHandler{
             HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
             String name = h.getString("name");
             List toolsInChain = h.getList("tool");
-            ToolChain toolChain = new ToolChain(name);
+            boolean tokenisedInput = h.getBoolean("tokinput",false);
+            boolean lowercasedInput = h.getBoolean("lcinput",false);
+            ToolChain toolChain = new ToolChain(name,lowercasedInput,tokenisedInput);
             for (Iterator j = toolsInChain.iterator(); j.hasNext();) {
                 String toolName = j.next().toString();
                 TranslationTool tool = tools.get(toolName);
@@ -97,13 +98,22 @@ public class Translator  implements XmlRpcHandler{
    
     @Override
     public Object execute(XmlRpcRequest request) throws XmlRpcException {
-        _logger.debug("Received request: " + request.getMethodName());
-        if (request.getParameterCount() != 2) {
-            throw new XmlRpcException("Incorrect number of parameters");
+    	String name = request.getMethodName();
+        _logger.debug("Received request: " + name);
+        
+        if (name.equals("translate")) {
+        	if (request.getParameterCount() != 1) {
+                throw new XmlRpcException("Incorrect number of parameters");
+            }
+	        Map params = (Map)request.getParameter(0);
+	        TranslationJob job = new TranslationJob(params);
+	        translate(job);
+	        return job.getResult();
+        } else if (name.equals("list")) {
+        	return list();
+        } else {
+        	throw new XmlRpcException("Unknown method: " + name);
         }
-        String systemId = request.getParameter(0).toString();
-        Object[] sources = (Object[])request.getParameter(1);
-        return translate(systemId,sources);
     }
 
     /**
@@ -112,14 +122,32 @@ public class Translator  implements XmlRpcHandler{
      * @param sources
      * @return
      */
-    private Object[]  translate(String systemId, Object[] sources) {
-        _logger.debug("received source sentence: " + Arrays.toString(sources));
-        ToolChain tool = _toolChains.get(systemId);
-        String[] sourceStrings = new String[sources.length];
-        for (int i = 0; i < sourceStrings.length; ++i) {
-            sourceStrings[i] = sources[i].toString();
+    private void  translate(TranslationJob job) throws XmlRpcException  {
+        _logger.debug("received source sentence: " + job.getText());
+        ToolChain tool = _toolChains.get(job.getSystemId());
+        if (tool == null) {
+        	throw new XmlRpcException("Unknown system id: " + job.getSystemId());
         }
-        return  tool.transform(sourceStrings);
+        tool.transform(job);
+    }
+    
+    /**
+     * Supply list of tools.
+     * @throws XmlRpcException
+     */
+    private Map[] list() throws XmlRpcException {
+    	Map[] tools = new Map[_toolChains.size()];
+    	int j = 0;
+    	for (Iterator<String> i = _toolChains.keySet().iterator(); i.hasNext();) {
+    		String name = i.next();
+    		ToolChain toolChain = _toolChains.get(name);
+    		Map toolConfig = new HashMap();
+    		toolConfig.put("name", name);
+    		toolConfig.put("tokinput", toolChain.tokenisedInput());
+    		toolConfig.put("lcinput",toolChain.lowercasedInput());
+    		tools[j++] = toolConfig;
+    	}
+    	return tools;
     }
 
 

@@ -26,10 +26,9 @@ public abstract class TranslationTool {
     
     
     /**
-     * Batched version of transform operation.
      * @param input
      */
-    public abstract String[] transform(String[] input);
+    public abstract void transform(TranslationJob job);
     
     public String getName() {
         return _name;
