@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<config>
+    <port>8080</port>
+    <tools-dir>/home/bhaddow/statmt/moses/scripts-20090113-1018</tools-dir>
+    <support-tools-dir>/home/bhaddow/work/translation-server/scripts/support-tools</support-tools-dir>
+    <tokeniser>${support-tools-dir}/tokenizer.perl</tokeniser>
+    <detokeniser>${support-tools-dir}/detokenizer.perl</detokeniser>
+    <lowercaser>${support-tools-dir}/lowercase.perl</lowercaser>
+    <recaser>${support-tools-dir}/recase.perl</recaser>
+    <moses>/home/bhaddow/statmt/moses/moses-cmd/src/moses</moses>
+
+    <!-- Command line tools -->
+    <pipetool>
+        <name>en-tok</name>
+        <command>${tokeniser}</command>
+        <arg>-l</arg>
+        <arg>en</arg>
+    </pipetool>
+    <pipetool>
+        <name>lower</name>
+        <command>${lowercaser}</command>
+    </pipetool>
+
+    <!-- Translation tool chains -->
+    <toolchain>
+        <name>fr-en</name>
+        <tool>en-tok</tool>
+        <tool>lower</tool>
+        <lcinput>false</lcinput>
+    </toolchain>
+</config>
