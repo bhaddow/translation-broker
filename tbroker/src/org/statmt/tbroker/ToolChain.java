@@ -24,14 +24,18 @@ public class ToolChain extends TranslationTool {
     private List<TranslationTool> _tools = new ArrayList<TranslationTool>();
     private boolean _lowercasedInput;
     private boolean _tokenisedInput;
+    private String _description;
     
-    public ToolChain(String name, boolean lowercasedInput, boolean tokenisedInput) {
+    public ToolChain(String name, String description, boolean lowercasedInput, boolean tokenisedInput) {
         super(name);
+        _description = description;
         _lowercasedInput = lowercasedInput;
         _tokenisedInput = tokenisedInput;
     }
       
-    
+    public String getDescription() {
+        return _description;
+    }
     
     public boolean lowercasedInput() {
 		return _lowercasedInput;
@@ -46,6 +50,7 @@ public class ToolChain extends TranslationTool {
 	public void addTool(TranslationTool tool) {
         _tools.add(tool);
     }
+
 
     @Override
     public void transform(TranslationJob job) {

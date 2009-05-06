@@ -59,10 +59,11 @@ public class Translator  implements XmlRpcHandler{
         for (Iterator i = toolChainsConfig.iterator(); i.hasNext();) {
             HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
             String name = h.getString("name");
+            String description = h.getString("description");
             List toolsInChain = h.getList("tool");
             boolean tokenisedInput = h.getBoolean("tokinput",false);
             boolean lowercasedInput = h.getBoolean("lcinput",false);
-            ToolChain toolChain = new ToolChain(name,lowercasedInput,tokenisedInput);
+            ToolChain toolChain = new ToolChain(name,description,lowercasedInput,tokenisedInput);
             for (Iterator j = toolsInChain.iterator(); j.hasNext();) {
                 String toolName = j.next().toString();
                 TranslationTool tool = tools.get(toolName);
@@ -143,6 +144,7 @@ public class Translator  implements XmlRpcHandler{
     		ToolChain toolChain = _toolChains.get(name);
     		Map toolConfig = new HashMap();
     		toolConfig.put("name", name);
+    		toolConfig.put("description", toolChain.getDescription());
     		toolConfig.put("tokinput", toolChain.tokenisedInput());
     		toolConfig.put("lcinput",toolChain.lowercasedInput());
     		tools[j++] = toolConfig;
