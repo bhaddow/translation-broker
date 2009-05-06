@@ -49,6 +49,7 @@
     <!-- Translation tool chains -->
     <toolchain>
         <name>fr-en</name>
+        <description>French->English (Europarl)</description>
         <tool>fr-tok</tool>
         <tool>lower</tool>
         <tool>fr-en-moses</tool>
