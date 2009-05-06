@@ -1,0 +1,30 @@
+<project name="Translation Broker" default="compile" basedir="." >
+
+    <property name="compile.debug" value="true"/>
+    <property name="class.dir" value="${basedir}/bin" />
+    <property name="src.dir" value="${basedir}/src" />
+
+
+    <path id="compile.classpath">
+        <fileset dir="${basedir}/lib" >
+            <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <target name="prepare" description="Prepare for compile" >
+        <mkdir dir="${class.dir}" />
+    </target>
+    
+    <target name="compile" depends="prepare" 
+        description = "Compile Java sources" >
+        <javac srcdir="${src.dir}" destdir="${class.dir}"
+            debug="${compile.debug}" >
+            <classpath refid="compile.classpath" />
+        </javac>
+    </target>
+
+    <target name="clean" description="Remove build directory" >
+        <delete dir="${class.dir}" />
+    </target>
+
+</project>
