@@ -22,7 +22,7 @@ $systems=array();
 for ($i = 0; $i < $resp->value()->arraySize(); ++$i) {
     $system = $resp->value()->arrayMem($i);
     $name = $system->structMem("name")->scalarVal();
-    $desc = $system->structMem("name")->scalarVal();
+    $desc = $system->structMem("description")->scalarVal();
     $systems[$name] = $desc;
 }
 
