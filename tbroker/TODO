@@ -1,0 +1,4 @@
+- fix textbox client to use new server for translation
+- option to get debug output from moses
+- fix web client to use new server
+- decorator to load balance the likes of PipedTool
