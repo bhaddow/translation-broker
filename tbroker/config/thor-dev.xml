@@ -56,4 +56,12 @@
         <tool>en-recaser</tool>
         <tool>en-detok</tool>
     </toolchain>
+    <toolchain>
+        <name>fr-en-bare</name>
+        <description>French->English (Europarl)</description>
+        <tokinput>true</tokinput>
+        <lcinput>true</lcinput>
+        <tool>fr-en-moses</tool>
+    </toolchain>
+
 </config>

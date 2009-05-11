@@ -25,7 +25,7 @@ system("chmod a+w $html_dir/log");
 print "Copying scripts into $html_dir\n";
 system("rsync -rav --exclude=.svn --exclude=*.perl --exclude=log --delete $html_source_dir/  $html_dir");
 
-print "Setting ports\n";
+print "Setting port to $port\n";
 foreach my $file ("$html_dir/index.php") {
        system("perl -pi -e   's/__PORT__/$port/g' $file");
    }  
