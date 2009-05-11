@@ -1,6 +1,8 @@
 package org.statmt.tbroker;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
@@ -14,9 +16,11 @@ public class TranslationJob {
 	
 	public static final String FIELD_TEXT = "text";
 	public static final String FIELD_SYSID = "systemid";
+	public static final String FIELD_DEBUG = "debug";
 	
 	private String _text;
 	private String _systemId;
+	private List<String> _debug;
 
 	/**
 	 * Does the demarshalling
@@ -31,6 +35,10 @@ public class TranslationJob {
 		if (_systemId == null) {
 			throw new XmlRpcException("Missing system id");
 		}
+		if (params.get(FIELD_DEBUG) != null) {
+		    _debug = new ArrayList<String>();
+		}
+		
 	}
 	
 	public String getSystemId() {
@@ -45,9 +53,18 @@ public class TranslationJob {
 		_text = text;
 	}
 	
+	public void addDebug(String msg) {
+	    if (_debug != null) {
+	        _debug.add(msg);
+	    }
+	}
+	
 	public Map getResult() {
 		Map result = new HashMap();
 		result.put(FIELD_TEXT, _text);
+		if (_debug != null) {
+		    result.put(FIELD_DEBUG, _debug);
+		}
 		return result;
 	}
 }
