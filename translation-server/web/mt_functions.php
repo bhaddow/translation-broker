@@ -2,6 +2,7 @@
 
 $debug = false;
 
+include_once("xmlrpc.inc");
 
 function debug($msg) {
 	global $debug;
@@ -13,56 +14,20 @@ function debug($msg) {
 error_reporting(E_ALL);
 
 
-function open_socket_connection ($ip, $port) {
-	
-#print "here now... open_socket_connection ($ip, $port)";
-	/* Create a TCP/IP socket. */
-	$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-#print "here now... $socket";
-	if ($socket === false) {
-		print "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n";
-		return false;
-	} else {
-		debug("OK.\n");
-	}
-#print "here now...";
-	
-	debug("Attempting to connect to '$ip' on port '$port'...");
-	$result = socket_connect($socket, $ip, $port);
-	if ($result === false) {
-		print "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
-		return false;
-	} else {
-		debug("OK.\n");
-	}
-	return $socket;
-
-}
-
-function translate ($input, $system_id, $location) {
-
-#   print "hello world!";
-	$socket = open_socket_connection($location['ip'],$location['port']);
-#   print "socket -> $socket\n";
-	
-	$result = '';
-	
-	debug("Sending request... ");
-	socket_write($socket, "$system_id\n", strlen("$system_id\n"));
-	socket_write($socket, $input, strlen($input));
-	socket_write($socket,"DONESTR\n", strlen("DONESTR\n"));
-	debug("OK.\n");	
-	
-	debug("Reading response... ");
-	while ($out = socket_read($socket, 2048)) {
-		$result .= $out;
-	}
-	debug("OK.\n");
-
-	debug("Closing socket...");
-	socket_close($socket);
-	debug("OK.\n");
-	
+function translate ($input, $system_id, $port) {
+    $client = new xmlrpc_client("/xmlrpc", "localhost", $port);
+    $request = new xmlrpcmsg('translate');
+    $param = new xmlrpcval(
+        array(
+            "text" => new xmlrpcval($input,"string"),
+            "systemid" => new xmlrpcval($system_id,"string")
+            ), "struct");
+    $request->addParam($param);
+    $resp = $client->send($request);
+    if ($resp->faultCode()) {
+        die("Unable to communicate with translation server");
+    }
+    $result = array("translation" => $resp->value()->structMem("text")->scalarVal());
 	return $result;
 
 }

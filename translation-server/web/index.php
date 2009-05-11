@@ -1,7 +1,7 @@
 <?php
 header('Content-type: text/html; charset=utf-8');
 
-include('xmlrpc.inc');
+include_once('xmlrpc.inc');
 
 $input = $_POST['input'];
 $sysid = $_POST['sysid'];
@@ -14,7 +14,7 @@ $client = new xmlrpc_client("/xmlrpc", "localhost", $port);
 $request = new xmlrpcmsg('list');
 $resp = $client->send($request);
 if ($resp->faultCode()) {
-   die("Unable to communicate with broker");
+   die("Unable to communicate with translation server");
 }
 
 $systems=array();
@@ -23,15 +23,12 @@ for ($i = 0; $i < $resp->value()->arraySize(); ++$i) {
     $system = $resp->value()->arrayMem($i);
     $name = $system->structMem("name")->scalarVal();
     $desc = $system->structMem("description")->scalarVal();
-    $systems[$name] = $desc;
+    $tokinput = $system->structMem("tokinput")->scalarVal();
+    $lcinput = $system->structMem("lcinput")->scalarVal();
+    if (!$tokinput && !$lcinput) {
+        $systems[$name] = $desc;
+    }
 }
-
-
-#$systems = array("fr-en"=>"French-English (Europarl)"
-#                ,"de-en"=>"German-English (Europarl)"
-#                ,"es-en"=>"Spanish-English (Europarl)"
-#                ,"en-de"=>"English-German (Europarl)"
-#	 	);
 
 if (!$input) $input="";
 $input = stripslashes($input);
@@ -149,19 +146,14 @@ if ($input) {
 include_once("mt_functions.php");
 
 
-$location = array("ip"=>"127.0.0.1","port"=>$port);
 
 $translation_array_string = "";
 
-if ($input) $translation_array_string = translate($input."\n",$sysid,$location);
+if ($input) $translation_result = translate($input,$sysid,$port);
+$translation = $translation_result["translation"];
 
-$translation_array = split(" %%% ",$translation_array_string);
-$last_step = $translation_array[sizeof($translation_array)-5];
-for($i=1;$i<sizeof($translation_array);$i+=5) {
-  if ($translation_array[$i] == $last_step) {
-    $translation .= $translation_array[$i+2]." ";
-  }
-}
+$translation_array = array(); # TODO
+
 print "<span class=\"translation\">$translation</span><P>\n";
 
 # output phrase alignment
