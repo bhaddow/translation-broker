@@ -21,7 +21,7 @@ public abstract class TranslationTool {
     private String _name;
     
     public TranslationTool(String name) {
-        _name = name;
+        _name = name;   
     }
     
     

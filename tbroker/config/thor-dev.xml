@@ -6,6 +6,9 @@
     <model-dir>/disk4/webtrans-models</model-dir>
     <moses-dir>/disk3/bhaddow/moses</moses-dir>
 
+
+    <moses-init-msg>The global weight vector</moses-init-msg>
+
     <tokeniser>${support-tools-dir}/tokenizer.perl</tokeniser>
     <detokeniser>${support-tools-dir}/detokenizer.perl</detokeniser>
     <lowercaser>${support-tools-dir}/lowercase.perl</lowercaser>
@@ -26,8 +29,15 @@
     <pipetool>
         <name>fr-en-moses</name>
         <command>${moses}</command>
+        <debug>true</debug> <!-- retain debug messages -->
+        <!-- discard all debug messages until this one -->
+        <debug-init-complete>${moses-init-msg}</debug-init-complete>
         <arg>-f</arg>
         <arg>${model-dir}/fr-en.matrix07b/moses.ini.1</arg>
+        <arg>-s</arg>
+        <arg>100</arg>
+        <arg>-v</arg>
+        <arg>2</arg>
         <arg>-s</arg>
         <arg>100</arg>
     </pipetool>

@@ -45,13 +45,15 @@ public class Translator  implements XmlRpcHandler{
             HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
             String name = h.getString("name");
             String exe = h.getString("command");
+            boolean debug = h.getBoolean("debug",false);
+            String debugInitComplete = h.getString("debug-init-complete","");
             List args = h.getList("arg");
             String[] cmd = new String[1 + args.size()];
             cmd[0] = exe;
             for (int j = 0; j < args.size(); ++j) {
             	cmd[j+1] = args.get(j).toString();
             }
-            tools.put(name,new PipedTool(name,cmd));
+            tools.put(name,new PipedTool(name,cmd,debug,debugInitComplete));
         }
         
         //create tool chains

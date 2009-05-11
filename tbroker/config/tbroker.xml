@@ -24,8 +24,15 @@
     <pipetool>
         <name>fr-en-moses</name>
         <command>${moses}</command>
+        <debug>true</debug> <!-- retain debug messages -->
+        <!-- discard all debug messages until this one -->
+        <debug-init-complete>The global weight vector</debug-init-complete>
         <arg>-f</arg>
-        <arg>/afs/inf.ed.ac.uk/group/bhaddow/models/fr-en.wmt09/moses.ini</arg>
+        <arg>/afs/inf.ed.ac.uk/group/bhaddow/models/fr-en.matrix07b/moses.ini.1</arg>
+        <arg>-v</arg>
+        <arg>2</arg>
+        <arg>-s</arg>
+        <arg>100</arg>
     </pipetool>
     <pipetool>
         <name>en-recaser</name>

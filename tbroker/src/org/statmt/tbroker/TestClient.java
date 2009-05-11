@@ -51,10 +51,18 @@ public class TestClient {
         Map<String, String> params = new HashMap<String, String>();
         params.put("systemid", "fr-en");
         params.put("text",source);
+        params.put("debug","yes");
         //Object[] params = new Object[]{"fr-en", source};
         System.out.println(params);
         Map result = (Map)client.execute("translate", new Object[]{params});
         System.out.println(result);
+        Object[] debug = (Object[])result.get("debug");
+        if (debug != null) {
+            System.out.println("debug:");
+            for (Object o: debug) {
+                System.out.println(o);
+            }
+        }
     }
 
 }
