@@ -149,10 +149,10 @@ include_once("mt_functions.php");
 
 $translation_array_string = "";
 
-if ($input) $translation_result = translate($input,$sysid,$port);
+if ($input) $translation_result = translate($input,$sysid,$port,$rdebug || $alignment);
 $translation = $translation_result["translation"];
 
-$translation_array = array(); # TODO
+$translation_array = $translation_result["debug"];
 
 print "<span class=\"translation\">$translation</span><P>\n";
 
@@ -210,18 +210,12 @@ if ($alignment) {
 }
 
 if ($rdebug) {
-	for($i=1;$i<sizeof($translation_array);$i++) {
-		
-		$tool = $translation_array[$i++];
-		$success = $translation_array[$i++];
-		$msg = "";
-		if ($success == 0) $out = "<font color='red'>FAILURE</font>";
-		print("<h2>$tool $msg</h2>");
-		$out = $translation_array[$i++];
-		$err = $translation_array[$i++];
-		if ($out != "") { print("<h4>STDOUT</h4>\n<PRE>$out</PRE>\n"); }
-		if ($err != "") { print("<h4>STDERR</h4>\n<PRE>$err</PRE>\n"); }
-	}
+    print "<h4>Moses debug</h4>";
+    print "<pre>";
+    foreach (array_keys($translation_array) as $var) {
+        print $translation_array[$var] . "\n";
+    }
+    print "</pre>";
 }
 
 # log
