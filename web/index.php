@@ -8,6 +8,7 @@ $sysid = $_POST['sysid'];
 $rdebug =  array_key_exists('debug',$_POST);
 $alignment =  array_key_exists('alignment',$_POST);
 $port = __PORT__;
+$dev = "__DEV__";
 
 $port=7893;
 $client = new xmlrpc_client("/xmlrpc", "localhost", $port);
@@ -110,18 +111,17 @@ function log_correction() {
       fwrite($fh,"=== IN $match[1]\n" .$_POST["IN-" .$match[1]]."\n");
       fwrite($fh,"=== MT $match[1]\n" .$_POST["MT-" .$match[1]]."\n");
       fwrite($fh,"=== OUT $match[1]\n".$_POST["OUT-".$match[1]]."\n");
-      $i++;
     }
   }
   fclose($fh);
-  print "<h2>Thank you for contributing $i sentence".(($i==1)?"":"s")."!</h2>";
+  print "<h2>Thank you for contributing!</h2>";
 }
 
 head();
 if ($_POST['CORRECTION']) { log_correction(); };
 
+print "<form action=\"index.php\" method=\"POST\">\n";
 ?>
-<form action="index.php" method="POST">
 <h2>Source:</h2>
 <textarea name="input" cols=80 rows=5><?php print $input;?></textarea>
 <P>
@@ -149,65 +149,55 @@ include_once("mt_functions.php");
 
 $translation_array_string = "";
 
-if ($input) $translation_result = translate($input,$sysid,$port,$rdebug || $alignment);
+if ($input) $translation_result = translate($input,$sysid,$port,true);
 $translation = $translation_result["translation"];
 
 $translation_array = $translation_result["debug"];
 
 print "<span class=\"translation\">$translation</span><P>\n";
 
+$source_tokens = array_slice(explode(" ", $translation_array[1]),1);
+$moses_input_line = join(" ", $source_tokens);
+
 # output phrase alignment
 if ($alignment) {
 	#find mapping
-	$moses_input = "";
 	for($i=1;$i<sizeof($translation_array);$i++) {
-		$tool = $translation_array[$i++];
-		$success = $translation_array[$i++];
-		$out = $translation_array[$i++];
-		$err = $translation_array[$i++];
-		if ($tool == "moses") {
-                   $moses_input_list = split("\n",$moses_input);
-		   $err_list = split("\n",$err);
-                   $line_number = 0;
-                   foreach ($err_list as $parse_str) {
-                        if (! preg_match("/^\[\[/",$parse_str)) continue;
-			$tgt_display = array();
-			$src_display = array();		
-			$matchups = split("[][]",$parse_str);
-			$range="";
-			$target="";
-                        $moses_input_line = $moses_input_list[$line_number++];
-			$source_tokens = explode(" ",$moses_input_line);
-			foreach ($matchups as $item) {
-				$item = trim($item);
-				if (!$item) continue;
-				if (!$range) $range = $item;
-				else if (!$target) $target = $item;
-				if ($target && $range) {
-					list($src_start,$src_end) = explode("..",$range);
-					$target = substr($target,1);
-					$src_display[] = join(" ",array_slice($source_tokens,$src_start,$src_end-$src_start+1));
-					$tgt_display[] = $target;
-					$target = "";
-					$range = "";				
-				}
-			
-			}
-			?><table><tr>
-			<?php 
-			foreach ($tgt_display as $tgt_token) {
-				print("<td align=center style=\"background-color:LightGray;padding:5px\">$tgt_token</td>");
-			}
-			?></tr><tr> <?php
-			foreach ($src_display as $src_token) {
-				print("<td align=center style=\"background-color:Lavender;padding:5px\">$src_token</td>");
-			}
-			print "</table>\n";
-                    }
-		}
-		$moses_input = $out;
-	}
+        $parse_str = $translation_array[$i];
+        if (! preg_match("/^\[\[/",$parse_str)) continue;
+        $tgt_display = array();
+        $src_display = array();		
+        $matchups = split("[][]",$parse_str);
+        $range="";
+        $target="";
+        foreach ($matchups as $item) {
+            $item = trim($item);
+            if (!$item) continue;
+            if (!$range) $range = $item;
+            else if (!$target) $target = $item;
+            if ($target && $range) {
+                list($src_start,$src_end) = explode("..",$range);
+                $target = substr($target,1);
+                $src_display[] = join(" ",array_slice($source_tokens,$src_start,$src_end-$src_start+1));
+                $tgt_display[] = $target;
+                $target = "";
+                $range = "";				
+            }
+        
+         }
+    }
+	print "<table><tr>\n";
+    foreach ($tgt_display as $tgt_token) {
+        print("<td align=center style=\"background-color:LightGray;padding:5px\">$tgt_token</td>");
+    }
+    ?></tr><tr> <?php
+    foreach ($src_display as $src_token) {
+        print("<td align=center style=\"background-color:Lavender;padding:5px\">$src_token</td>");
+    }
+    print "</table>\n";
 }
+
+
 
 if ($rdebug) {
     print "<h4>Moses debug</h4>";
@@ -220,42 +210,23 @@ if ($rdebug) {
 
 # log
 if ($input) {
- $fh = fopen("/disk4/html/demo/log/translations.$sysid","a");
+ $fh = fopen("/disk4/html/demo/log/translations.$dev$sysid","a");
  $time = time();
  $time = date("D M j G:i:s T Y",$time)." ($time)";
  fwrite($fh,"=== REQUEST AT $time\n");
  fwrite($fh,"=== RAW INPUT:\n$input\n");
  $moses_input = "";
  print "<h2>Help to improve statistical machine translation!</h2>\n";
- print "<FORM ACTION=\"/\" METHOD=POST>\n";
+ print "<FORM ACTION=\"index.php\" METHOD=POST>\n";
  print "<INPUT TYPE=HIDDEN NAME=sysid VALUE=\"$sysid\">\n";
  print "<INPUT TYPE=HIDDEN NAME=TIME VALUE=$time>\n";
- for($i=1;$i<sizeof($translation_array);$i++) {
-  $tool = $translation_array[$i++];
-  $success = $translation_array[$i++];
-  $out = $translation_array[$i++];
-  $err = $translation_array[$i++];
-  if ($tool == "splitter") {
-    $moses_input = $out;
-  }
-  else if (preg_match("/detokenizer/",$tool)) {
-    $in_list = split("\n",$moses_input);
-    $out_list = split("\n",$out);
-    $line_number = 0;
-    foreach ($out_list as $out_line) {
-        $in_line = $in_list[$line_number];
-        if ($in_line != "") {
-            print "$in_list[$line_number]<BR>\n";
-            print "<INPUT TYPE=HIDDEN NAME=IN-$i-$line_number VALUE=\"".htmlspecialchars($in_line)."\">\n";
-            print "<INPUT TYPE=HIDDEN NAME=MT-$i-$line_number VALUE=\"".htmlspecialchars($out_line)."\">\n";
-             print "<TEXTAREA COLS=80 ROWS=3 NAME=OUT-$i-$line_number>$out_line</TEXTAREA><P>";
-            fwrite($fh,"=== IN [$i-$line_number]\n$in_line\n");
-            fwrite($fh,"=== OUT [$i-$line_number]\n$out_line\n"); 
-        }
-	$line_number++;
-    }
-  }
- }
+
+ print $moses_input_line . "<br>\n";
+ print "<INPUT TYPE=HIDDEN NAME=IN VALUE=\"".htmlspecialchars($moses_input_line)."\">\n";
+ print "<INPUT TYPE=HIDDEN NAME=MT VALUE=\"".htmlspecialchars($translation)."\">\n";
+ print "<TEXTAREA COLS=80 ROWS=3 NAME=OUT>$translation</TEXTAREA><P>";
+            fwrite($fh,"=== IN \n$moses_input_line\n");
+            fwrite($fh,"=== OUT \n$translation\n"); 
  fclose($fh);
  print "<INPUT TYPE=SUBMIT NAME=CORRECTION VALUE=\"Submit correction\">\n";
  print "</FORM>\n";
