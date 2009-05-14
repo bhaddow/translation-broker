@@ -1,7 +1,6 @@
 - textbox client should:
     - respond sensibly to server error
-    - parse alignment info
-    - display correction box
+    - insert translation numbers in corrections
 - fix web translation client to use new server
 - deployment of new server
 - decorator to load balance the likes of PipedTool

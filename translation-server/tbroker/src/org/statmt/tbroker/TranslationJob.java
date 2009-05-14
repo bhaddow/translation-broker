@@ -37,7 +37,6 @@ public class TranslationJob {
 		}
 		if (params.get(FIELD_DEBUG) != null) {
 		    _debug = new ArrayList<String>();
-            System.out.println("Collecting debug");
 		}
 		
 	}
