@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -38,12 +39,14 @@ public class PipedTool extends TranslationTool {
     private BlockingDeque<String> _error; //for stderr
     
     private boolean _catchDebug = false;
-    private String _initFinishedMessage = "";
+    private String _initFinishedMessage = ""; //marks end of initialisation
+    private String _finishedMessage = "";  //marks end of job
     
-    public PipedTool(String toolName, String[] progargs, boolean catchDebug, String initFinishedMessage) throws IOException {
+    public PipedTool(String toolName, String[] progargs, boolean catchDebug, String initFinishedMessage, String finishedMessage) throws IOException {
         super(toolName);
         _catchDebug = catchDebug;
         _initFinishedMessage = initFinishedMessage;
+        _finishedMessage = finishedMessage;
         _output = new LinkedBlockingDeque<String>();
         if (_catchDebug) {
             _error = new LinkedBlockingDeque<String>();
@@ -78,11 +81,18 @@ public class PipedTool extends TranslationTool {
         	job.setText(outputText);
         	
         	if (_catchDebug) {
-            	//see what came out on stderr
-            	String errorText = null;
-            	while ((errorText = _error.poll()) != null) {
-            	    job.addDebug(errorText);
-            	}
+        	    while(true) {
+        	        String errorText = _error.poll(60,TimeUnit.SECONDS);
+        	        if (errorText == null) {
+        	            _logger.info("Timed out waiting for debug message");
+        	            break;
+        	        }
+        	        job.addDebug(errorText);
+        	        if (errorText.startsWith(_finishedMessage)) {
+        	            break;
+        	        }
+        	    }
+            	
         	}
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

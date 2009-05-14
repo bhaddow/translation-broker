@@ -30,8 +30,10 @@
         <name>fr-en-moses</name>
         <command>${moses}</command>
         <debug>true</debug> <!-- retain debug messages -->
-        <!-- discard all debug messages until this one -->
-        <debug-init-complete>${moses-init-msg}</debug-init-complete>
+        <!-- discard all initial debug messages until this one -->
+        <init-end-msg>The global weight vector</init-end-msg>
+        <!-- this message signifies the end of a job -->
+        <end-msg>Finished translating</end-msg>
         <arg>-f</arg>
         <arg>${model-dir}/fr-en.matrix07b/moses.ini.1</arg>
         <arg>-s</arg>
