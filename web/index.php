@@ -38,63 +38,7 @@ function head() {
   global $rdebug;
 ?><html><head>
 <title>Moses Online MT Demo</title>
-<style type="text/css">
-
-body, table, tr, td<?php if (!$rdebug) print(", textarea");?>
-{
-font-family:verdana, helvetica, arial, sans-serif;
-font-size:12px;
-color:navy;
-}
-rdebu
-textarea
-{
-font-size:12px;
-<?php if ($rdebug) print("font-family:courier;font-size:12px;");?>
-<?php if (!$rdebug) print("font-family:verdana, helvetica, arial, sans-serif;font-size:14px;");?>
-
-}
-
-td
-{
-font-size:13px;
-}
-
-body 
-{
-background-image:url(WebLogo.jpg);
-background-repeat:no-repeat;
-background-position:top right;
-}
-
-.translation
-{
-font-family:verdana, helvetica, arial, sans-serif;
-font-size:14px;
-color:navy;
-}
-
-table, tr, td
-{
-background-color:white;
-}
-
-.tableHeading
-{
-background-color:navy;
-font-color:yellow;
-text-align:center;
-font-weight:bold;
-}
-
-.cost
-{
-text-align:center;
-font-weight:bold;
-}
-
-</style>
-
+<link rel=StyleSheet href="demo.css" type="text/css" >
 </head>
 <body>
 <h1>Moses Machine Translation Demo</h1>
@@ -138,7 +82,7 @@ foreach (array_keys($systems) as $syskey) {
 <input type="Submit" value="Translate">
 <P>
 </form>
-<a href="web">Web Translation</a></br>
+<h3>Looking to translate a web page? Then click <a href="web.cgi">here</a></h3></br>
 <?php 
 if ($input) {
   print "<h2>Translation:</h2>\n";

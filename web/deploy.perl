@@ -25,10 +25,10 @@ if ($ARGV[0] eq "prod") {
 system("mkdir -p  $html_dir/log");
 system("chmod a+w $html_dir/log");
 print "Copying scripts into $html_dir\n";
-system("rsync -rav --exclude=.svn --exclude=*.perl --exclude=log --delete $html_source_dir/  $html_dir");
+system("rsync -rav --exclude=.svn --exclude=deploy.perl --exclude=*.swp --exclude=log --delete $html_source_dir/  $html_dir");
 
 print "Setting port  to $port, and setting dev variable\n";
-foreach my $file ("$html_dir/index.php") {
+foreach my $file ("$html_dir/index.php", "$html_dir/web.cgi", "$html_dir/translate.cgi") {
        system("perl -pi -e   's/__PORT__/$port/g' $file");
        system("perl -pi -e   's/__DEV__/$dev/g' $file");
    }  

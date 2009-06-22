@@ -1,6 +1,8 @@
 - textbox client should:
     - respond sensibly to server error
     - insert translation numbers in corrections
-- fix web translation client to use new server
+- web client needs source/target languages
 - deployment of new server
+- sentence splitting in new textbox client
 - decorator to load balance the likes of PipedTool
+- configure log4j to show date and time

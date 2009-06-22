@@ -1,0 +1,54 @@
+body, table, tr, td, textarea
+{
+font-family:verdana, helvetica, arial, sans-serif;
+font-size:12px;
+color:navy;
+}
+rdebu
+textarea
+{
+font-size:12px;
+<?php if ($rdebug) print("font-family:courier;font-size:12px;");?>
+<?php if (!$rdebug) print("font-family:verdana, helvetica, arial, sans-serif;font-size:14px;");?>
+
+}
+
+td
+{
+font-size:13px;
+}
+
+body 
+{
+background-image:url(WebLogo.jpg);
+background-repeat:no-repeat;
+background-position:top right;
+}
+
+.translation
+{
+font-family:verdana, helvetica, arial, sans-serif;
+font-size:14px;
+color:navy;
+}
+
+table, tr, td
+{
+background-color:white;
+}
+
+.tableHeading
+{
+background-color:navy;
+font-color:yellow;
+text-align:center;
+font-weight:bold;
+}
+
+.cost
+{
+text-align:center;
+font-weight:bold;
+}
+
+

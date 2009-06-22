@@ -127,7 +127,7 @@ public class Translator  implements XmlRpcHandler{
      * @return
      */
     private void  translate(TranslationJob job) throws XmlRpcException  {
-        _logger.debug("received source sentence: " + job.getText());
+        _logger.debug("received source sentence: '" + job.getText() + "'");
         ToolChain tool = _toolChains.get(job.getSystemId());
         if (tool == null) {
         	throw new XmlRpcException("Unknown system id: " + job.getSystemId());
