@@ -1,7 +1,8 @@
+- Before deployment, need to:
+    - create prod configuration
 - textbox client should:
     - respond sensibly to server error
     - insert translation numbers in corrections
-- web client needs source/target languages
 - deployment of new server
 - sentence splitting in new textbox client
 - decorator to load balance the likes of PipedTool

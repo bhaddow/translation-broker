@@ -40,8 +40,6 @@
         <arg>100</arg>
         <arg>-v</arg>
         <arg>2</arg>
-        <arg>-s</arg>
-        <arg>100</arg>
     </pipetool>
     <pipetool>
         <name>en-recaser</name>
@@ -62,6 +60,8 @@
     <toolchain>
         <name>fr-en</name>
         <description>French->English (Europarl)</description>
+        <source>fr</source>
+        <target>en</target>
         <tool>fr-tok</tool>
         <tool>lower</tool>
         <tool>fr-en-moses</tool>
@@ -71,6 +71,8 @@
     <toolchain>
         <name>fr-en-bare</name>
         <description>French->English (Europarl)</description>
+        <source>fr</source>
+        <target>en</target>
         <tokinput>true</tokinput>
         <lcinput>true</lcinput>
         <tool>fr-en-moses</tool>
