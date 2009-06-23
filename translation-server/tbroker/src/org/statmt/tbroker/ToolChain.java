@@ -25,16 +25,34 @@ public class ToolChain extends TranslationTool {
     private boolean _lowercasedInput;
     private boolean _tokenisedInput;
     private String _description;
+    private String _sourceLanguage;
+    private String _targetLanguage;
     
-    public ToolChain(String name, String description, boolean lowercasedInput, boolean tokenisedInput) {
+    public ToolChain(String name, String description, String sourceLanguage, String targetLanguage, boolean lowercasedInput, boolean tokenisedInput) {
         super(name);
+        if (sourceLanguage == null || targetLanguage == null) {
+            throw new IllegalArgumentException("Need to specify source and target language for tool chain " + name);
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("Need to provide description for tool chain " + name);
+        }
         _description = description;
         _lowercasedInput = lowercasedInput;
         _tokenisedInput = tokenisedInput;
+        _sourceLanguage = sourceLanguage;
+        _targetLanguage = targetLanguage;
     }
       
     public String getDescription() {
         return _description;
+    }
+    
+    public String getSourceLanguage() {
+        return _sourceLanguage;
+    }
+    
+    public String getTargetLanguage() {
+        return _targetLanguage;
     }
     
     public boolean lowercasedInput() {

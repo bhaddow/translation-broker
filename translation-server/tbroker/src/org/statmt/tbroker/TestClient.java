@@ -40,6 +40,8 @@ public class TestClient {
         	Map toolConfig = (Map)tool;
         	System.out.println("name: " + toolConfig.get("name"));
         	System.out.println("description: " + toolConfig.get("description"));
+        	System.out.println("source: "  + toolConfig.get("source"));
+        	System.out.println("target: " + toolConfig.get("target"));
         	System.out.println("requires lowercase: " + toolConfig.get("lcinput"));
         	System.out.println("requires tokenised: " + toolConfig.get("tokinput"));
         	System.out.println();
