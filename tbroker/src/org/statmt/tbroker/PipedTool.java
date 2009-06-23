@@ -104,6 +104,7 @@ public class PipedTool extends TranslationTool {
         private InputStream _processOutput;
         
         public OutputReader(InputStream processOutput) {
+            setDaemon(true);
             _processOutput = processOutput;
         }
         
@@ -125,6 +126,7 @@ public class PipedTool extends TranslationTool {
         private InputStream _processError;
         
         public ErrorReader(InputStream processError) {
+            setDaemon(true);
             _processError = processError;
         }
         
