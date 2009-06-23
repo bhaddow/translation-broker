@@ -63,9 +63,8 @@ foreach my $system (@$systemlist) {
     next unless $tokinput && $lcinput;
     my $sysid = $system->{name};
     my $description = $system->{description};
-    #TODO: these should be configurable
-    my $source_lang = "fr";
-    my $target_lang = "en";
+    my $source_lang = $system->{source};
+    my $target_lang = $system->{target};
     $systems{$sysid} = [$description,$source_lang,$target_lang];
 }
 
