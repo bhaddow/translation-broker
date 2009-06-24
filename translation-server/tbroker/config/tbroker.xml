@@ -4,52 +4,54 @@
     <tools-dir>/home/bhaddow/statmt/moses/scripts-20090113-1018</tools-dir>
     <!-- <support-tools-dir>/home/bhaddow/statmt/repository/experiments/trunk/scripts</support-tools-dir> -->
     <support-tools-dir>/home/bhaddow/translation-server/scripts/support-tools</support-tools-dir>
-    <tokeniser>${support-tools-dir}/tokenizer.perl</tokeniser>
-    <detokeniser>${support-tools-dir}/detokenizer.perl</detokeniser>
-    <lowercaser>${support-tools-dir}/lowercase.perl</lowercaser>
-    <recaser>/home/bhaddow/translation-server/scripts/support-tools/recase.perl</recaser>
-    <moses>/home/bhaddow/statmt/moses/moses-cmd/src/moses</moses>
 
-    <!-- Command line tools -->
-    <pipetool>
-        <name>fr-tok</name>
-        <command>${tokeniser}</command>
-        <arg>-l</arg>
-        <arg>fr</arg>
-    </pipetool>
-    <pipetool>
-        <name>lower</name>
-        <command>${lowercaser}</command>
-    </pipetool>
-    <pipetool>
-        <name>fr-en-moses</name>
-        <command>${moses}</command>
-        <debug>true</debug> <!-- retain debug messages -->
+    <!-- Translation tools -->
+
+    <moses-pipes>
+        <command>/home/bhaddow/statmt/moses/moses-cmd/src/moses</command>
         <!-- discard all initial debug messages until this one -->
         <init-end-msg>The global weight vector</init-end-msg>
         <!-- this message signifies the end of a job -->
         <end-msg>Finished translating</end-msg>
-        <arg>-f</arg>
-        <arg>/afs/inf.ed.ac.uk/group/bhaddow/models/fr-en.matrix07b/moses.ini.1</arg>
-        <arg>-v</arg>
-        <arg>2</arg>
-        <arg>-s</arg>
-        <arg>100</arg>
-    </pipetool>
-    <pipetool>
-        <name>en-recaser</name>
-        <command>${recaser}</command>
-        <arg>--moses</arg>
-        <arg>${moses}</arg>
-        <arg>--model</arg>
-        <arg>/afs/inf.ed.ac.uk/group/bhaddow/models/en-recase-matrix07b/moses.ini</arg>
-    </pipetool>
-    <pipetool>
-        <name>en-detok</name>
-        <command>${detokeniser}</command>
-        <arg>-l</arg>
-        <arg>en</arg>
-    </pipetool>
+        <stack>100</stack>
+        <verbosity>2</verbosity>
+        <moses-pipe>
+            <name>fr-en-moses</name>
+            <model>/afs/inf.ed.ac.uk/group/bhaddow/models/fr-en.matrix07b/moses.ini.1</model>
+        </moses-pipe>
+    </moses-pipes>
+
+    <tokenisers>
+        <command>${support-tools-dir}/tokenizer.perl</command>
+        <tokeniser>
+            <name>fr-tok</name>
+            <language>fr</language>
+        </tokeniser> 
+    </tokenisers>
+
+    <lowercasers>
+        <command>${support-tools-dir}/lowercase.perl</command>
+        <lowercaser>
+            <name>lower</name>
+        </lowercaser>
+    </lowercasers>
+
+    <recasers>
+        <command>/home/bhaddow/translation-server/scripts/support-tools/recase.perl</command>
+        <moses>/home/bhaddow/statmt/moses/moses-cmd/src/moses</moses>
+        <recaser>
+            <name>en-recaser</name>
+            <model>/afs/inf.ed.ac.uk/group/bhaddow/models/en-recase-matrix07b/moses.ini</model>
+        </recaser>
+    </recasers>
+
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>en-detok</name>
+            <language>en</language>
+        </detokeniser>
+    </detokenisers>
 
     <!-- Translation tool chains -->
     <toolchain>

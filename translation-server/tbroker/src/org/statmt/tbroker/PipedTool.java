@@ -41,6 +41,10 @@ public class PipedTool extends TranslationTool {
     private boolean _catchDebug = false;
     private String _initFinishedMessage = ""; //marks end of initialisation
     private String _finishedMessage = "";  //marks end of job
+   
+    public PipedTool(String toolName, String[] progargs) throws IOException {
+        this(toolName,progargs,false,"","");
+    }
     
     public PipedTool(String toolName, String[] progargs, boolean catchDebug, String initFinishedMessage, String finishedMessage) throws IOException {
         super(toolName);
@@ -70,7 +74,7 @@ public class PipedTool extends TranslationTool {
             }
         }
     }
-
+    
 
     @Override
     public synchronized void  transform(TranslationJob job) {
