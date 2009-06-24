@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<config>
+    <port>7894</port>
+
+    <support-tools-dir>/disk4/translation-server/scripts/support-tools</support-tools-dir>
+    <model-dir>/disk4/webtrans-models</model-dir>
+    <moses-dir>/disk3/bhaddow/moses</moses-dir>
+    <moses>${moses-dir}/moses-cmd/src/moses</moses>
+
+    <!-- Translation tools -->
+    <moses-pipes>
+        <command>${moses}</command>
+        <!-- discard all initial debug messages until this one -->
+        <init-end-msg>The global weight vector</init-end-msg>
+        <!-- this message signifies the end of a job -->
+        <end-msg>Finished translating</end-msg>
+        <stack>100</stack>
+        <verbosity>2</verbosity>
+        <moses-pipe>
+            <name>fr-en-moses</name>
+            <model>${model-dir}/fr-en.matrix07b/moses.ini.1</model>
+        </moses-pipe>
+        <moses-pipe>
+            <name>de-en-moses</name>
+            <model>${model-dir}/de-en.matrix07b/moses.ini.3</model>
+        </moses-pipe>
+        <moses-pipe>
+            <name>es-en-moses</name>
+            <model>${model-dir}/es-en.matrix07b/moses.ini.2</model>
+        </moses-pipe>
+        <moses-pipe>
+            <name>en-de-moses</name>
+            <model>${model-dir}/en-de.matrix07b/moses.ini.4</model>
+        </moses-pipe>
+    </moses-pipes>
+
+    <tokenisers>
+        <command>${support-tools-dir}/tokenizer.perl</command>
+        <tokeniser>
+            <name>fr-tok</name>
+            <language>fr</language>
+        </tokeniser>
+        <tokeniser>
+            <name>en-tok</name>
+            <language>en</language>
+        </tokeniser>
+        <tokeniser>
+            <name>de-tok</name>
+            <language>de</language>
+        </tokeniser>
+        <tokeniser>
+            <name>es-tok</name>
+            <language>es</language>
+        </tokeniser>
+    </tokenisers>
+
+    <lowercasers>
+        <command>${support-tools-dir}/lowercase.perl</command>
+        <lowercaser>
+            <name>lower</name>
+        </lowercaser>
+    </lowercasers>
+        
+
+    <recasers>
+        <command>${support-tools-dir}/recase.perl</command>
+        <moses>${moses}</moses>
+        <recaser>
+            <name>de-recaser</name>
+            <model>${model-dir}/recasing/matrix07b/model.4/moses.ini.4</model>
+        </recaser>
+        <recaser>
+            <name>en-recaser</name>
+            <model>${model-dir}/recasing/matrix07b/model.1/moses.ini.1</model>
+        </recaser>
+    </recasers>
+
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>de-detok</name>
+            <language>de</language>
+        </detokeniser>
+        <detokeniser>
+            <name>en-detok</name>
+            <language>en</language>
+        </detokeniser>
+    </detokenisers>
+
+
+    <!-- Translation tool chains -->
+    <toolchain>
+        <name>fr-en</name>
+        <description>French->English (Europarl)</description>
+        <source>fr</source>
+        <target>en</target>
+        <tool>fr-tok</tool>
+        <tool>lower</tool>
+        <tool>fr-en-moses</tool>
+        <tool>en-recaser</tool>
+        <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>de-en</name>
+        <description>German->English (Europarl)</description>
+        <source>de</source>
+        <target>en</target>
+        <tool>de-tok</tool>
+        <tool>lower</tool>
+        <tool>de-en-moses</tool>
+        <tool>en-recaser</tool>
+        <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>es-en</name>
+        <description>Spanish->English (Europarl)</description>
+        <source>es</source>
+        <target>en</target>
+        <tool>es-tok</tool>
+        <tool>lower</tool>
+        <tool>es-en-moses</tool>
+        <tool>en-recaser</tool>
+        <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>en-de</name>
+        <description>English->German (Europarl)</description>
+        <source>en</source>
+        <target>de</target>
+        <tool>en-tok</tool>
+        <tool>lower</tool>
+        <tool>en-de-moses</tool>
+        <tool>de-recaser</tool>
+        <tool>de-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>fr-en-bare</name>
+        <description>French->English (Europarl)</description>
+        <source>fr</source>
+        <target>en</target>
+        <tokinput>true</tokinput>
+        <lcinput>true</lcinput>
+        <tool>fr-en-moses</tool>
+    </toolchain>
+    <toolchain>
+        <name>de-en-bare</name>
+        <description>German->English (Europarl)</description>
+        <source>de</source>
+        <target>en</target>
+        <tokinput>true</tokinput>
+        <lcinput>true</lcinput>
+        <tool>de-en-moses</tool>
+    </toolchain>
+    <toolchain>
+        <name>es-en-bare</name>
+        <description>Spanish->English (Europarl)</description>
+        <source>es</source>
+        <target>en</target>
+        <tokinput>true</tokinput>
+        <lcinput>true</lcinput>
+        <tool>es-en-moses</tool>
+    </toolchain>
+    <toolchain>
+        <name>en-de-bare</name>
+        <description>English->German (Europarl)</description>
+        <source>en</source>
+        <target>de</target>
+        <tokinput>true</tokinput>
+        <lcinput>true</lcinput>
+        <tool>en-de-moses</tool>
+    </toolchain>
+</config>

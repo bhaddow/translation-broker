@@ -10,7 +10,6 @@ $alignment =  array_key_exists('alignment',$_POST);
 $port = __PORT__;
 $dev = "__DEV__";
 
-$port=7893;
 $client = new xmlrpc_client("/xmlrpc", "localhost", $port);
 $request = new xmlrpcmsg('list');
 $resp = $client->send($request);
