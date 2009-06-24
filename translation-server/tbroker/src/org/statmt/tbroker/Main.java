@@ -32,8 +32,6 @@ public class Main {
             System.err.println("Usage: java " + Main.class.getName() + " config-file");
             System.exit(1);
         }
-        //logging
-        BasicConfigurator.configure();
         
         //configure 
         HierarchicalConfiguration config = new XMLConfiguration(args[0]);

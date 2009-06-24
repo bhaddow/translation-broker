@@ -108,6 +108,7 @@ if (!$params{url}) {
         "       </select>\n" .
         "    </form>\n" .
         "<h3>Looking to translate a text snippet? Then click <a href=\"index.php\">here</a></h3></br>\n" .
+        "<hr>This site is maintained by the <A HREF=\"http://www.statmt.org/ued/\">Machine Translation Group</A> at the University of Edinburgh.<br>&nbsp;\n" .
         "  </body>\n";
 
 } else {
