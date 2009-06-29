@@ -31,6 +31,7 @@ public class TranslationJob {
 		if (_text == null) {
 			throw new XmlRpcException("Missing text");
 		}
+        _text = _text.replace("\n", " ");
 		_systemId = (String)params.get(FIELD_SYSID);
 		if (_systemId == null) {
 			throw new XmlRpcException("Missing system id");
