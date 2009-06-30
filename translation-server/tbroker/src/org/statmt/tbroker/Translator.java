@@ -131,7 +131,8 @@ public class Translator  implements XmlRpcHandler{
             List toolsInChain = h.getList("tool");
             boolean tokenisedInput = h.getBoolean("tokinput",false);
             boolean lowercasedInput = h.getBoolean("lcinput",false);
-            ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,lowercasedInput,tokenisedInput);
+            boolean doSentenceSplit = h.getBoolean("split",false);
+            ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,doSentenceSplit,lowercasedInput,tokenisedInput);
             for (Iterator j = toolsInChain.iterator(); j.hasNext();) {
                 String toolName = j.next().toString();
                 TranslationTool tool = tools.get(toolName);

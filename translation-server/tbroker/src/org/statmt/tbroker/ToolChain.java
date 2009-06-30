@@ -24,11 +24,12 @@ public class ToolChain extends TranslationTool {
     private List<TranslationTool> _tools = new ArrayList<TranslationTool>();
     private boolean _lowercasedInput;
     private boolean _tokenisedInput;
+    private boolean _doSentenceSplit;
     private String _description;
     private String _sourceLanguage;
     private String _targetLanguage;
     
-    public ToolChain(String name, String description, String sourceLanguage, String targetLanguage, boolean lowercasedInput, boolean tokenisedInput) {
+    public ToolChain(String name, String description, String sourceLanguage, String targetLanguage, boolean doSentenceSplit, boolean lowercasedInput, boolean tokenisedInput) {
         super(name);
         if (sourceLanguage == null || targetLanguage == null) {
             throw new IllegalArgumentException("Need to specify source and target language for tool chain " + name);
@@ -41,6 +42,7 @@ public class ToolChain extends TranslationTool {
         _tokenisedInput = tokenisedInput;
         _sourceLanguage = sourceLanguage;
         _targetLanguage = targetLanguage;
+        _doSentenceSplit = doSentenceSplit;
     }
       
     public String getDescription() {
@@ -73,6 +75,9 @@ public class ToolChain extends TranslationTool {
     @Override
     public void transform(TranslationJob job) {
         _logger.debug("Toolchain " + getName() + " processing request");
+        if (_doSentenceSplit) {
+        	//TODO 
+        }
         for (TranslationTool tool: _tools) {
             _logger.debug(tool.getName() + "> " + job.getText());
             tool.transform(job);
