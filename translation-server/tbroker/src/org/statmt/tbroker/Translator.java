@@ -43,70 +43,80 @@ public class Translator  implements XmlRpcHandler{
         Map<String,TranslationTool> tools = new HashMap<String,TranslationTool>();
        
         //piped moses tools
-        SubnodeConfiguration subconf = config.configurationAt("moses-pipes");
-        String exe = subconf.getString("command");
-        int verbosity = subconf.getInt("verbosity",0);
-        int stack = subconf.getInt("stack",200);
-        String initCompleteMsg = subconf.getString("init-end-msg","");
-        String jobCompleteMsg  = subconf.getString("end-msg","");
-        List mconfs = subconf.configurationsAt("moses-pipe");
-        for (Iterator i = mconfs.iterator(); i.hasNext();) {
-            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
-            String name = h.getString("name");
-            String model = h.getString("model");
-            verbosity = h.getInt("verbosity",verbosity);
-            stack = h.getInt("stack", stack);
-            String cmd[] = new String[]{exe, "-f", model, "-s", stack+"", "-v", verbosity+""};
-            boolean debug = (verbosity > 0);
-            tools.put(name,new PipedTool(name,cmd,debug,initCompleteMsg, jobCompleteMsg));
+        if (!config.configurationsAt("moses-pipes").isEmpty()) {
+	        SubnodeConfiguration subconf = config.configurationAt("moses-pipes");
+	        String exe = subconf.getString("command");
+	        int verbosity = subconf.getInt("verbosity",0);
+	        int stack = subconf.getInt("stack",200);
+	        String initCompleteMsg = subconf.getString("init-end-msg","");
+	        String jobCompleteMsg  = subconf.getString("end-msg","");
+	        List mconfs = subconf.configurationsAt("moses-pipe");
+	        for (Iterator i = mconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String model = h.getString("model");
+	            verbosity = h.getInt("verbosity",verbosity);
+	            stack = h.getInt("stack", stack);
+	            String cmd[] = new String[]{exe, "-f", model, "-s", stack+"", "-v", verbosity+""};
+	            boolean debug = (verbosity > 0);
+	            tools.put(name,new PipedTool(name,cmd,debug,initCompleteMsg, jobCompleteMsg));
+	        }
         }
         
         //tokenisers
-        subconf = config.configurationAt("tokenisers");
-        exe = subconf.getString("command");
-        List tconfs = subconf.configurationsAt("tokeniser");
-        for (Iterator i = tconfs.iterator(); i.hasNext();) {
-            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
-            String name = h.getString("name");
-            String language = h.getString("language");
-            String cmd[] = new String[]{exe, "-l",language};
-            tools.put(name,new PipedTool(name,cmd));
+        if (!config.configurationsAt("tokenisers").isEmpty()) {
+	        SubnodeConfiguration subconf = config.configurationAt("tokenisers");
+	        String exe = subconf.getString("command");
+	        List tconfs = subconf.configurationsAt("tokeniser");
+	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String language = h.getString("language");
+	            String cmd[] = new String[]{exe, "-l",language};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
         }
         
-      //tokenisers
-        subconf = config.configurationAt("detokenisers");
-        exe = subconf.getString("command");
-        List dconfs = subconf.configurationsAt("detokeniser");
-        for (Iterator i = dconfs.iterator(); i.hasNext();) {
-            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
-            String name = h.getString("name");
-            String language = h.getString("language");
-            String cmd[] = new String[]{exe, "-l",language};
-            tools.put(name,new PipedTool(name,cmd));
+      //detokenisers
+        if (!config.configurationsAt("detokenisers").isEmpty()) {
+        	SubnodeConfiguration subconf = config.configurationAt("detokenisers");
+        	String exe = subconf.getString("command");
+	        List dconfs = subconf.configurationsAt("detokeniser");
+	        for (Iterator i = dconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String language = h.getString("language");
+	            String cmd[] = new String[]{exe, "-l",language};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
         }
         
         //lowercasers
-        subconf = config.configurationAt("lowercasers");
-        exe = subconf.getString("command");
-        List lconfs = subconf.configurationsAt("lowercaser");
-        for (Iterator i = lconfs.iterator(); i.hasNext();) {
-            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
-            String name = h.getString("name");
-            String cmd[] = new String[]{exe};
-            tools.put(name,new PipedTool(name,cmd));
+        if (!config.configurationsAt("lowercasers").isEmpty()) {
+        	SubnodeConfiguration subconf = config.configurationAt("lowercasers");
+	        String exe = subconf.getString("command");
+	        List lconfs = subconf.configurationsAt("lowercaser");
+	        for (Iterator i = lconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String cmd[] = new String[]{exe};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
         }
         
         //recasers
-        subconf = config.configurationAt("recasers");
-        exe = subconf.getString("command");
-        String moses = subconf.getString("moses");
-        List rconfs = subconf.configurationsAt("recaser");
-        for (Iterator i = rconfs.iterator(); i.hasNext();) {
-            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
-            String name = h.getString("name");
-            String model = h.getString("model");
-            String cmd[] = new String[]{exe,"--moses", moses, "--model", model};
-            tools.put(name,new PipedTool(name,cmd));
+        if (!config.configurationsAt("recasers").isEmpty()) {
+        	SubnodeConfiguration subconf = config.configurationAt("recasers");
+        	String exe = subconf.getString("command");
+	        String moses = subconf.getString("moses");
+	        List rconfs = subconf.configurationsAt("recaser");
+	        for (Iterator i = rconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String model = h.getString("model");
+	            String cmd[] = new String[]{exe,"--moses", moses, "--model", model};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
         }
         
         
