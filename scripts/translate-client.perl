@@ -4,8 +4,9 @@ use strict;
 use XMLRPC::Lite;
 
 
-print XMLRPC::Lite
+my %params = ("systemid" => "fr-en", "text" => "Translate me! I'm the second sentence.");
+my $ret = XMLRPC::Lite
       -> proxy('http://localhost:8080/xmlrpc')
-      -> call('Translator.translate', "source", "systemId" )
+      -> call('translate',\%params )
       -> result;
-print "\n";
+print $ret->{"text"} . "\n";
