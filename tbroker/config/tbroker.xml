@@ -4,6 +4,7 @@
     <tools-dir>/home/bhaddow/statmt/moses/scripts-20090113-1018</tools-dir>
     <!-- <support-tools-dir>/home/bhaddow/statmt/repository/experiments/trunk/scripts</support-tools-dir> -->
     <support-tools-dir>/home/bhaddow/translation-server/scripts/support-tools</support-tools-dir>
+    <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
 
@@ -59,6 +60,7 @@
         <description>French->English (Europarl)</description>
         <source>fr</source>
         <target>en</target>
+        <split>true</split>
         <tool>fr-tok</tool>
         <tool>lower</tool>
         <tool>fr-en-moses</tool>

@@ -12,25 +12,27 @@
  *  ========================================================================*/
 package org.statmt.tbroker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class ToolChain extends TranslationTool {
+public class ToolChain  {
     
     private static final Logger _logger = Logger.getLogger(ToolChain.class);
     
     private List<TranslationTool> _tools = new ArrayList<TranslationTool>();
     private boolean _lowercasedInput;
     private boolean _tokenisedInput;
-    private boolean _doSentenceSplit;
+    private SentenceSplitter _splitter;
     private String _description;
     private String _sourceLanguage;
     private String _targetLanguage;
+    private String _name;
     
-    public ToolChain(String name, String description, String sourceLanguage, String targetLanguage, boolean doSentenceSplit, boolean lowercasedInput, boolean tokenisedInput) {
-        super(name);
+    public ToolChain(String name, String description, String sourceLanguage, String targetLanguage, SentenceSplitter sentenceSplitter, boolean lowercasedInput, boolean tokenisedInput) {
+        _name = name;
         if (sourceLanguage == null || targetLanguage == null) {
             throw new IllegalArgumentException("Need to specify source and target language for tool chain " + name);
         }
@@ -42,7 +44,15 @@ public class ToolChain extends TranslationTool {
         _tokenisedInput = tokenisedInput;
         _sourceLanguage = sourceLanguage;
         _targetLanguage = targetLanguage;
-        _doSentenceSplit = doSentenceSplit;
+        if (sentenceSplitter != null) {
+            _splitter = sentenceSplitter;
+       } else {
+           _splitter = new NewlineSentenceSplitter();
+       }
+    }
+    
+    public String getName() {
+        return _name;
     }
       
     public String getDescription() {
@@ -72,17 +82,25 @@ public class ToolChain extends TranslationTool {
     }
 
 
-    @Override
-    public void transform(TranslationJob job) {
+
+    public TranslationJob[] process(TranslationJob inputJob) throws IOException {
         _logger.debug("Toolchain " + getName() + " processing request");
-        if (_doSentenceSplit) {
-        	//TODO 
+        TranslationJob[] jobs = new TranslationJob[]{inputJob};
+        if (_splitter != null) {
+        	String[] outputText  = _splitter.split(inputJob.getText());
+        	jobs = new TranslationJob[outputText.length];
+            for (int i = 0; i < jobs.length; ++i) {
+               jobs[i] = new TranslationJob(inputJob.getSystemId(), outputText[i],inputJob.isDebugOn());
+            }
         }
         for (TranslationTool tool: _tools) {
-            _logger.debug(tool.getName() + "> " + job.getText());
-            tool.transform(job);
-            _logger.debug(tool.getName() +"< " + job.getText());
+            for (TranslationJob job: jobs ) {
+                _logger.debug(tool.getName() + "> " + job.getText());
+                tool.transform(job);
+                _logger.debug(tool.getName() +"< " + job.getText());
+            }
         }
+        return jobs;
     }
 
 }

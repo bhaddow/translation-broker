@@ -31,7 +31,6 @@ public class TranslationJob {
 		if (_text == null) {
 			throw new XmlRpcException("Missing text");
 		}
-        _text = _text.replace("\n", " ");
 		_systemId = (String)params.get(FIELD_SYSID);
 		if (_systemId == null) {
 			throw new XmlRpcException("Missing system id");
@@ -40,6 +39,14 @@ public class TranslationJob {
 		    _debug = new ArrayList<String>();
 		}
 		
+	}
+	
+	public TranslationJob(String systemId, String text, boolean debug) {
+	    _text = text;
+	    _systemId = systemId;
+	    if (debug) {
+	        _debug = new ArrayList<String>();
+	    }
 	}
 	
 	public String getSystemId() {
@@ -52,6 +59,10 @@ public class TranslationJob {
 	
 	public void setText(String text) {
 		_text = text;
+	}
+	
+	public boolean isDebugOn() {
+	    return (_debug != null);
 	}
 	
 	public void addDebug(String msg) {
