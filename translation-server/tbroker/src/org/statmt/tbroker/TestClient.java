@@ -48,7 +48,7 @@ public class TestClient {
         }
         
         //do some translation
-        String source = "Je ne sais pas..";
+        String source = "Je ne sais pas. J'ai douze ans. ";
         //source.add("The source string . ");
         Map<String, String> params = new HashMap<String, String>();
         params.put("systemid", "fr-en");
@@ -56,13 +56,16 @@ public class TestClient {
         params.put("debug","yes");
         //Object[] params = new Object[]{"fr-en", source};
         System.out.println(params);
-        Map result = (Map)client.execute("translate", new Object[]{params});
+        Object[] results = (Object[])client.execute("translate", new Object[]{params});
+        for (Object o : results) {
+        Map result = (Map)o;
         System.out.println(result);
-        Object[] debug = (Object[])result.get("debug");
-        if (debug != null) {
-            System.out.println("debug:");
-            for (Object o: debug) {
-                System.out.println(o);
+            Object[] debug = (Object[])result.get("debug");
+            if (debug != null) {
+                System.out.println("debug:");
+                for (Object d: debug) {
+                    System.out.println(d);
+                }
             }
         }
     }

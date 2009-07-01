@@ -26,7 +26,7 @@ import org.apache.xmlrpc.XmlRpcHandler;
 import org.apache.xmlrpc.XmlRpcRequest;
 
 /**
- * Handles the translation requests.
+ * Handles the translation requests and configures the tool chains..
  * @author bhaddow
  */
 public class Translator  implements XmlRpcHandler{
@@ -131,8 +131,16 @@ public class Translator  implements XmlRpcHandler{
             List toolsInChain = h.getList("tool");
             boolean tokenisedInput = h.getBoolean("tokinput",false);
             boolean lowercasedInput = h.getBoolean("lcinput",false);
-            boolean doSentenceSplit = h.getBoolean("split",false);
-            ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,doSentenceSplit,lowercasedInput,tokenisedInput);
+            SentenceSplitter sentenceSplitter = null;
+            if (h.getBoolean("split",false)) {
+                String splitterCommand = config.getString("splitter");
+                if (splitterCommand == null) {
+                    throw new RuntimeException("No sentence splitter specified");
+                }
+                _logger.debug("Sentence splitter command: " + splitterCommand);
+                sentenceSplitter = new PipedSentenceSplitter(splitterCommand,sourceLanguage);
+            }
+            ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,sentenceSplitter,lowercasedInput,tokenisedInput);
             for (Iterator j = toolsInChain.iterator(); j.hasNext();) {
                 String toolName = j.next().toString();
                 TranslationTool tool = tools.get(toolName);
@@ -177,8 +185,12 @@ public class Translator  implements XmlRpcHandler{
             }
 	        Map params = (Map)request.getParameter(0);
 	        TranslationJob job = new TranslationJob(params);
-	        translate(job);
-	        return job.getResult();
+	        TranslationJob[] resultJobs = translate(job);
+	        Object[] result = new Object[resultJobs.length];
+	        for (int i = 0; i < result.length; ++i) {
+	            result[i] = resultJobs[i].getResult();
+	        }
+	        return result;
         } else if (name.equals("list")) {
         	return list();
         } else {
@@ -192,13 +204,17 @@ public class Translator  implements XmlRpcHandler{
      * @param sources
      * @return
      */
-    private void  translate(TranslationJob job) throws XmlRpcException  {
+    private TranslationJob[]  translate(TranslationJob job) throws XmlRpcException  {
         _logger.debug("received source sentence: '" + job.getText() + "'");
         ToolChain tool = _toolChains.get(job.getSystemId());
         if (tool == null) {
         	throw new XmlRpcException("Unknown system id: " + job.getSystemId());
         }
-        tool.transform(job);
+        try {
+            return tool.process(job);
+        } catch (IOException e) {
+            throw new XmlRpcException("Problem processing job",e);
+        }
     }
     
     /**
