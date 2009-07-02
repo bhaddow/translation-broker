@@ -19,6 +19,6 @@ $param{text} = $encoded;
 $param{systemid} = "fr-en-bare";
 
 $result = $proxy->call('translate',\%param)->result;
-print $result->{text} . "\n";
+print $result->[0]->{text} . "\n";
 
 
