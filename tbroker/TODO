@@ -1,3 +1,5 @@
+- web client - capitalisation, esp in German
+- better models
 - textbox client should:
     - respond sensibly to server error
     - insert translation numbers in corrections
