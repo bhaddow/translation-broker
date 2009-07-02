@@ -3,8 +3,8 @@ header('Content-type: text/html; charset=utf-8');
 
 include_once('xmlrpc.inc');
 
-$input = $_POST['input'];
-$sysid = $_POST['sysid'];
+$input = isset($_POST['input']) ? $_POST['input'] : "";
+$sysid = isset($_POST['sysid']) ? $_POST['sysid'] : "";
 $rdebug =  array_key_exists('debug',$_POST);
 $alignment =  array_key_exists('alignment',$_POST);
 $port = __PORT__;
@@ -61,7 +61,7 @@ function log_correction() {
 }
 
 head();
-if ($_POST['CORRECTION']) { log_correction(); };
+if (isset($_POST['CORRECTION'])) { log_correction(); };
 
 print "<form action=\"index.php\" method=\"POST\">\n";
 ?>
@@ -92,88 +92,98 @@ include_once("mt_functions.php");
 
 $translation_array_string = "";
 
-if ($input) $translation_result = translate($input,$sysid,$port,true);
-$translation = $translation_result["translation"];
+if ($input) {
+    $moses_input_line = ""; 
+    $translation_result = translate($input,$sysid,$port,true);
+    foreach (array_keys($translation_result) as $i) {
 
-$translation_array = $translation_result["debug"];
+        $translation = $translation_result[$i]["translation"];
+        $translation_array = $translation_result[$i]["debug"];
+        $translation_array_string = $translation_array_string . 
+            $translation . "\n";
 
-print "<span class=\"translation\">$translation</span><P>\n";
+        print "<span class=\"translation\">$translation</span><P>\n";
 
-$source_tokens = array_slice(explode(" ", $translation_array[1]),1);
-$moses_input_line = join(" ", $source_tokens);
+        $source_tokens = array_slice(explode(" ", $translation_array[1]),1);
+        $moses_input_line = $moses_input_line .  join(" ", $source_tokens) . "\n";
 
 # output phrase alignment
-if ($alignment) {
-	#find mapping
-	for($i=1;$i<sizeof($translation_array);$i++) {
-        $parse_str = $translation_array[$i];
-        if (! preg_match("/^\[\[/",$parse_str)) continue;
-        $tgt_display = array();
-        $src_display = array();		
-        $matchups = split("[][]",$parse_str);
-        $range="";
-        $target="";
-        foreach ($matchups as $item) {
-            $item = trim($item);
-            if (!$item) continue;
-            if (!$range) $range = $item;
-            else if (!$target) $target = $item;
-            if ($target && $range) {
-                list($src_start,$src_end) = explode("..",$range);
-                $target = substr($target,1);
-                $src_display[] = join(" ",array_slice($source_tokens,$src_start,$src_end-$src_start+1));
-                $tgt_display[] = $target;
-                $target = "";
-                $range = "";				
+        if ($alignment) {
+            #find mapping
+            for($i=1;$i<sizeof($translation_array);$i++) {
+                $parse_str = $translation_array[$i];
+                if (! preg_match("/^\[\[/",$parse_str)) continue;
+                $tgt_display = array();
+                $src_display = array();		
+                $matchups = split("[][]",$parse_str);
+                $range="";
+                $target="";
+                foreach ($matchups as $item) {
+                    $item = trim($item);
+                    if (!$item) continue;
+                    if (!$range) $range = $item;
+                    else if (!$target) $target = $item;
+                    if ($target && $range) {
+                        list($src_start,$src_end) = explode("..",$range);
+                        $target = substr($target,1);
+                        $src_display[] = join(" ",array_slice($source_tokens,$src_start,$src_end-$src_start+1));
+                        $tgt_display[] = $target;
+                        $target = "";
+                        $range = "";				
+                    }
+                
+                 }
             }
-        
-         }
+            print "<table><tr>\n";
+            foreach ($tgt_display as $tgt_token) {
+                print("<td align=center style=\"background-color:LightGray;padding:5px\">$tgt_token</td>");
+            }
+            ?></tr><tr> <?php
+            foreach ($src_display as $src_token) {
+                print("<td align=center style=\"background-color:Lavender;padding:5px\">$src_token</td>");
+            }
+            print "</table>\n";
+        }
     }
-	print "<table><tr>\n";
-    foreach ($tgt_display as $tgt_token) {
-        print("<td align=center style=\"background-color:LightGray;padding:5px\">$tgt_token</td>");
+
+
+
+    if ($rdebug) {
+        print "<h4>Moses debug</h4>";
+        print "<pre>";
+        foreach (array_keys($translation_result) as $i) {
+            $translation_array = $translation_result[$i]["debug"];
+            foreach (array_keys($translation_array) as $var) {
+                print $translation_array[$var] . "\n";
+            }
+        }
+        print "</pre>";
     }
-    ?></tr><tr> <?php
-    foreach ($src_display as $src_token) {
-        print("<td align=center style=\"background-color:Lavender;padding:5px\">$src_token</td>");
-    }
-    print "</table>\n";
+
+    $fh = fopen("/disk4/html/demo/log/translations.$dev$sysid","a");
+    $time = time();
+    $time = date("D M j G:i:s T Y",$time)." ($time)";
+    fwrite($fh,"=== REQUEST AT $time\n");
+    fwrite($fh,"=== RAW INPUT:\n$input\n");
+    $moses_input = "";
+    print "<h2>Help to improve statistical machine translation!</h2>\n";
+    print "<FORM ACTION=\"index.php\" METHOD=POST>\n";
+    print "<INPUT TYPE=HIDDEN NAME=sysid VALUE=\"$sysid\">\n";
+    print "<INPUT TYPE=HIDDEN NAME=TIME VALUE=$time>\n";
+
+    print $moses_input_line . "<br>\n";
+    print "<INPUT TYPE=HIDDEN NAME=IN VALUE=\"".htmlspecialchars($moses_input_line)."\">\n";
+    print "<INPUT TYPE=HIDDEN NAME=MT VALUE=\"".htmlspecialchars($translation_array_string)."\">\n";
+    print "<TEXTAREA COLS=80 ROWS=3 NAME=OUT>$translation_array_string</TEXTAREA><P>";
+                fwrite($fh,"=== IN \n$moses_input_line");
+                fwrite($fh,"=== OUT \n$translation_array_string"); 
+    fclose($fh);
+
+
+    print "<INPUT TYPE=SUBMIT NAME=CORRECTION VALUE=\"Submit correction\">\n";
+    print "</FORM>\n";
 }
 
-
-
-if ($rdebug) {
-    print "<h4>Moses debug</h4>";
-    print "<pre>";
-    foreach (array_keys($translation_array) as $var) {
-        print $translation_array[$var] . "\n";
-    }
-    print "</pre>";
-}
-
-# log
-if ($input) {
- $fh = fopen("/disk4/html/demo/log/translations.$dev$sysid","a");
- $time = time();
- $time = date("D M j G:i:s T Y",$time)." ($time)";
- fwrite($fh,"=== REQUEST AT $time\n");
- fwrite($fh,"=== RAW INPUT:\n$input\n");
- $moses_input = "";
- print "<h2>Help to improve statistical machine translation!</h2>\n";
- print "<FORM ACTION=\"index.php\" METHOD=POST>\n";
- print "<INPUT TYPE=HIDDEN NAME=sysid VALUE=\"$sysid\">\n";
- print "<INPUT TYPE=HIDDEN NAME=TIME VALUE=$time>\n";
-
- print $moses_input_line . "<br>\n";
- print "<INPUT TYPE=HIDDEN NAME=IN VALUE=\"".htmlspecialchars($moses_input_line)."\">\n";
- print "<INPUT TYPE=HIDDEN NAME=MT VALUE=\"".htmlspecialchars($translation)."\">\n";
- print "<TEXTAREA COLS=80 ROWS=3 NAME=OUT>$translation</TEXTAREA><P>";
-            fwrite($fh,"=== IN \n$moses_input_line\n");
-            fwrite($fh,"=== OUT \n$translation\n"); 
- fclose($fh);
- print "<INPUT TYPE=SUBMIT NAME=CORRECTION VALUE=\"Submit correction\">\n";
- print "</FORM>\n";
-}
 print "<hr>This site is maintained by the <A HREF=\"http://www.statmt.org/ued/\">Machine Translation Group</A> at the University of Edinburgh.<br>&nbsp;";
 print "</body></html>\n";
 

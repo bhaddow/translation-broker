@@ -760,7 +760,7 @@ sub _translate_text_moses {
     if (!$result) {
         die "Failed to communicate with server";
     }
-    my $traced_text = $result->{text};
+    my $traced_text = $result->[0]->{text};
 
 
     #my $traced_text = $moses->do_line ($text);

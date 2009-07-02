@@ -2,10 +2,11 @@
 <config>
     <port>7894</port>
 
-    <support-tools-dir>/disk4/translation-server/scripts/support-tools</support-tools-dir>
+    <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
     <model-dir>/disk4/webtrans-models</model-dir>
     <moses-dir>/disk3/bhaddow/moses</moses-dir>
     <moses>${moses-dir}/moses-cmd/src/moses</moses>
+    <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
     <moses-pipes>
@@ -94,6 +95,7 @@
         <description>French->English (Europarl)</description>
         <source>fr</source>
         <target>en</target>
+        <split>true</split>
         <tool>fr-tok</tool>
         <tool>lower</tool>
         <tool>fr-en-moses</tool>
@@ -105,6 +107,7 @@
         <description>German->English (Europarl)</description>
         <source>de</source>
         <target>en</target>
+        <split>true</split>
         <tool>de-tok</tool>
         <tool>lower</tool>
         <tool>de-en-moses</tool>
@@ -116,6 +119,7 @@
         <description>Spanish->English (Europarl)</description>
         <source>es</source>
         <target>en</target>
+        <split>true</split>
         <tool>es-tok</tool>
         <tool>lower</tool>
         <tool>es-en-moses</tool>
@@ -127,6 +131,7 @@
         <description>English->German (Europarl)</description>
         <source>en</source>
         <target>de</target>
+        <split>true</split>
         <tool>en-tok</tool>
         <tool>lower</tool>
         <tool>en-de-moses</tool>
