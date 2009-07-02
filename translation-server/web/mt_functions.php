@@ -39,14 +39,25 @@ function translate ($input, $system_id, $port, $debug) {
     if ($resp->faultCode()) {
         die("Unable to communicate with translation server");
     }
-    $result = array("translation" => $resp->value()->structMem("text")->scalarVal());
-    if ($debug) {
-        $result["debug"] = array();
-        $debugMsgs = $resp->value()->structMem("debug");
-        for ($i = 0; $i < $debugMsgs->arraySize(); ++$i) {
-            $result["debug"][$i] = $debugMsgs->arrayMem($i)->scalarVal();
+    $result = array();
+    for ($i = 0; $i < $resp->value()->arraySize(); ++$i) {
+        $field = $resp->value()->arrayMem($i);
+        $result[$i] = array("translation" => $field->structMem("text")->scalarVal());
+        if ($debug) {
+            $result[$i]["debug"] = array();
+            $debugMsgs = $field->structMem("debug");
+            for ($j = 0; $j < $debugMsgs->arraySize(); ++$j) {
+                $result[$i]["debug"][$j] = $debugMsgs->arrayMem($j)->scalarVal();
+            }
         }
     }
+#    if ($debug) {
+#        $result["debug"] = array();
+#        $debugMsgs = $resp->value()->structMem("debug");
+#        for ($i = 0; $i < $debugMsgs->arraySize(); ++$i) {
+#            $result["debug"][$i] = $debugMsgs->arrayMem($i)->scalarVal();
+#        }
+#    }
 	return $result;
 
 }
