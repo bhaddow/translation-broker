@@ -63,6 +63,16 @@ public class Translator  implements XmlRpcHandler{
 	        }
         }
         
+        if (!config.configurationAt("moses-servers").isEmpty()) {
+            SubnodeConfiguration subconf = config.configurationAt("moses-servers");
+            List mconfs = subconf.configurationsAt("moses-server");
+            for (Iterator i = mconfs.iterator(); i.hasNext(); ) {
+                HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+                String name = h.getString("name");
+                tools.put(name, new MosesServerTool(name,h));
+            }
+        }
+         
         //tokenisers
         if (!config.configurationsAt("tokenisers").isEmpty()) {
 	        SubnodeConfiguration subconf = config.configurationAt("tokenisers");
@@ -131,6 +141,7 @@ public class Translator  implements XmlRpcHandler{
             List toolsInChain = h.getList("tool");
             boolean tokenisedInput = h.getBoolean("tokinput",false);
             boolean lowercasedInput = h.getBoolean("lcinput",false);
+            boolean parallel = h.getBoolean("parallel", false);
             SentenceSplitter sentenceSplitter = null;
             if (h.getBoolean("split",false)) {
                 String splitterCommand = config.getString("splitter");
@@ -141,6 +152,7 @@ public class Translator  implements XmlRpcHandler{
                 sentenceSplitter = new PipedSentenceSplitter(splitterCommand,sourceLanguage);
             }
             ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,sentenceSplitter,lowercasedInput,tokenisedInput);
+            toolChain.setParallel(parallel);
             for (Iterator j = toolsInChain.iterator(); j.hasNext();) {
                 String toolName = j.next().toString();
                 TranslationTool tool = tools.get(toolName);
