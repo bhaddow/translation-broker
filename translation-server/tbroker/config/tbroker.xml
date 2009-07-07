@@ -3,7 +3,7 @@
     <port>8080</port>
     <tools-dir>/home/bhaddow/statmt/moses/scripts-20090113-1018</tools-dir>
     <!-- <support-tools-dir>/home/bhaddow/statmt/repository/experiments/trunk/scripts</support-tools-dir> -->
-    <support-tools-dir>/home/bhaddow/translation-server/scripts/support-tools</support-tools-dir>
+    <support-tools-dir>/home/bhaddow/translation-server/web/bin</support-tools-dir>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
@@ -22,6 +22,14 @@
         </moses-pipe>
     </moses-pipes>
 
+    <moses-servers>
+        <moses-server>
+            <name>de-en-mserver</name>
+            <host>localhost</host>
+            <port>8081</port>
+        </moses-server>
+    </moses-servers>
+
     <tokenisers>
         <command>${support-tools-dir}/tokenizer.perl</command>
         <tokeniser>
@@ -38,7 +46,7 @@
     </lowercasers>
 
     <recasers>
-        <command>/home/bhaddow/translation-server/scripts/support-tools/recase.perl</command>
+        <command>${support-tools-dir}/recase.perl</command>
         <moses>/home/bhaddow/statmt/moses/moses-cmd/src/moses</moses>
         <recaser>
             <name>en-recaser</name>
@@ -66,5 +74,13 @@
         <tool>fr-en-moses</tool>
         <tool>en-recaser</tool>
         <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>de-en-server</name>
+        <description>German test server</description>
+        <source>de</source>
+        <parallel>true</parallel>
+        <target>en</target>
+        <tool>de-en-mserver</tool>
     </toolchain>
 </config>

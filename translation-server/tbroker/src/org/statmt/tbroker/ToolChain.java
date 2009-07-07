@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.xmlrpc.XmlRpcException;
 
 public class ToolChain  {
     
@@ -26,6 +27,7 @@ public class ToolChain  {
     private boolean _lowercasedInput;
     private boolean _tokenisedInput;
     private SentenceSplitter _splitter;
+    private boolean _parallel;
     private String _description;
     private String _sourceLanguage;
     private String _targetLanguage;
@@ -70,6 +72,10 @@ public class ToolChain  {
     public boolean lowercasedInput() {
 		return _lowercasedInput;
 	}
+    
+    public void setParallel(boolean parallel) {
+        _parallel = parallel;
+    }
 
 
 	public boolean tokenisedInput() {
@@ -83,7 +89,7 @@ public class ToolChain  {
 
 
 
-    public TranslationJob[] process(TranslationJob inputJob) throws IOException {
+    public TranslationJob[] process(TranslationJob inputJob) throws IOException{
         _logger.debug("Toolchain " + getName() + " processing request");
         TranslationJob[] jobs = new TranslationJob[]{inputJob};
         if (_splitter != null) {
@@ -93,14 +99,39 @@ public class ToolChain  {
                jobs[i] = new TranslationJob(inputJob.getSystemId(), outputText[i],inputJob.isDebugOn());
             }
         }
+        if (_parallel) {
+            Thread[] threads = new Thread[jobs.length];
+            for (int i = 0; i < jobs.length; ++i) {
+                final TranslationJob job = jobs[i];
+                threads[i] = new Thread() {
+                    public void run() {
+                        processJob(job);
+                    }
+                };
+                threads[i].start();
+            }
+            for (int i = 0; i < jobs.length; ++i) {
+                    try {
+                        threads[i].join();
+                    } catch (InterruptedException e) {
+                        _logger.error("join() failed",e);
+                    }
+            }
+        } else {
+                for (TranslationJob job: jobs ) {
+                   processJob(job);
+                }
+        }
+        return jobs;
+    }
+    
+    private void processJob(TranslationJob job) {
         for (TranslationTool tool: _tools) {
-            for (TranslationJob job: jobs ) {
                 _logger.debug(tool.getName() + "> " + job.getText());
                 tool.transform(job);
                 _logger.debug(tool.getName() +"< " + job.getText());
-            }
+            
         }
-        return jobs;
     }
 
 }
