@@ -63,6 +63,7 @@ use Subprocess;
 # forwarded to other machines. There wouldn't be much point in running 16
 # instances of Moses on the same machine.
 
+my $client_count = 4;
 #my @MOSES_ADDRESSES = map "localhost:90$_",
 #    qw/01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16/;
 # We call 'soft tags' HTML tags whose presence is tolerated inside
@@ -475,6 +476,7 @@ my $thread_body = sub {
         # Print out any sequential block of done jobs
         lock $num_printed;
         while ($num_printed < @input && defined $output[$num_printed]) {
+            print STDERR "Num printed: $num_printed\n";
             my $print;
 
             if (ref $segments[$num_printed]) {
@@ -486,7 +488,7 @@ my $thread_body = sub {
                     ($output[$num_printed], @buf_tag_index);
 
                 # wrap in code to popup the original text onmouseover
-                if ($buf_tag_index[0] ne '__NOPOPUP__') {
+                if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
                     $print = &add_original_text_popup
                         ($input[$num_printed], $print);
                 } else {
@@ -509,7 +511,7 @@ my $thread_body = sub {
     # If there's only one instance of Moses, there's no point in forking a
     # single thread and waiting for it to complete, so we just run the thread
     # code directly in the main thread
-    $thread_body->(0);
+#    $thread_body->(0);
 
 #} else {
 
@@ -520,6 +522,12 @@ my $thread_body = sub {
 #    $_->join foreach @threads;
 
 #}
+
+my @threads = map {
+    threads->create($thread_body,$_);
+} (1 .. $client_count);
+$_->join foreach @threads;
+
 
 #------------------------------------------------------------------------------
 # Translation subs
@@ -597,10 +605,12 @@ sub translate_text_with_placeholders {
 
     # Apply to every segment in the traced output the union of all tags
     # that covered tokens in the corresponding source segment
+    print STDERR "reinserting place holders\n";
     my $output_text = &_reinsert_placeholders
         ($traced_text, @tags_over_token);
 
     # Try to remove spaces inserted by the tokenizer
+    print STDERR  "detokenizing\n";
     $output_text = $detokenizer->do_line ($output_text);
 
     return $output_text;
@@ -756,11 +766,13 @@ sub _translate_text_moses {
     
     $param{systemid} = $sysid;
     
+    #print STDERR "Translating $text\n";
     my $result = $moses->call('translate',\%param)->result;
     if (!$result) {
         die "Failed to communicate with server";
     }
     my $traced_text = $result->[0]->{text};
+    #print STDERR "Result $traced_text\n";
 
 
     #my $traced_text = $moses->do_line ($text);
