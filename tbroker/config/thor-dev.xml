@@ -4,6 +4,7 @@
 
     <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
     <model-dir>/disk4/webtrans-models</model-dir>
+    <recase-model-dir>/disk4/translation-server/models/recasing</recase-model-dir>
     <moses-dir>/disk3/bhaddow/moses</moses-dir>
     <moses>${moses-dir}/moses-cmd/src/moses</moses>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
@@ -22,6 +23,15 @@
             <model>${model-dir}/fr-en.matrix07b/moses.ini.1</model>
         </moses-pipe>
     </moses-pipes>
+
+    <moses-servers>
+        <moses-server>
+            <name>fr-en-nc</name>
+            <host>localhost</host>
+            <port>8080</port>
+        </moses-server>
+    </moses-servers>
+
 
     <tokenisers>
         <command>${support-tools-dir}/tokenizer.perl</command>
@@ -44,7 +54,7 @@
         <moses>${moses}</moses>
         <recaser>
             <name>en-recaser</name>
-            <model>${model-dir}/recasing/matrix07b/model.1/moses.ini.1</model>
+            <model>${recase-model-dir}/matrix07b/model.1/moses.ini.1</model>
         </recaser>
     </recasers>
 
@@ -78,6 +88,14 @@
         <tokinput>true</tokinput>
         <lcinput>true</lcinput>
         <tool>fr-en-moses</tool>
+    </toolchain>
+    <toolchain>
+        <name>fr-en-nc</name>
+        <description>French-English (NewsCommentary)</description>
+        <source>fr</source>
+        <parallel>true</parallel>
+        <target>en</target>
+        <tool>fr-en-nc</tool>
     </toolchain>
 
 </config>
