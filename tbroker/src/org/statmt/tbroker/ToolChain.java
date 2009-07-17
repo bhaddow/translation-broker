@@ -103,7 +103,7 @@ public class ToolChain  {
             Thread[] threads = new Thread[jobs.length];
             for (int i = 0; i < jobs.length; ++i) {
                 final TranslationJob job = jobs[i];
-                threads[i] = new Thread() {
+                threads[i] = new Thread("ToolChain-" + getName() + "-" + i) {
                     public void run() {
                         processJob(job);
                     }

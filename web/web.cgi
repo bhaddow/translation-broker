@@ -59,8 +59,7 @@ my %systems;
 foreach my $system (@$systemlist) {
 # Just want the raw systems
     my $tokinput = $system->{tokinput};
-    my $lcinput = $system->{lcinput};
-    next unless $tokinput && $lcinput;
+    next unless $tokinput;
     my $sysid = $system->{name};
     my $description = $system->{description};
     my $source_lang = $system->{source};
@@ -68,12 +67,6 @@ foreach my $system (@$systemlist) {
     $systems{$sysid} = [$description,$source_lang,$target_lang];
 }
 
-#my %systems = (
-#    "fr-en-raw" => ["French-English (Europarl)","fr","en"],
-#    "de-en-raw" => ["German-English (Europarl)","de","en"],
-#    "es-en-raw" => ["Spanish-English (Europarl)","es","en"],
-#    "en-de-raw" => ["English-German (Europarl)","en","de"]
-#);
 
 
 #------------------------------------------------------------------------------

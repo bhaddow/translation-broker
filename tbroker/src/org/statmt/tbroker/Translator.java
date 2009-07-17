@@ -201,6 +201,9 @@ public class Translator  implements XmlRpcHandler{
 	        Object[] result = new Object[resultJobs.length];
 	        for (int i = 0; i < result.length; ++i) {
 	            result[i] = resultJobs[i].getResult();
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("Sending response #" + i + ": " + result[i]);
+                }
 	        }
 	        return result;
         } else if (name.equals("list")) {

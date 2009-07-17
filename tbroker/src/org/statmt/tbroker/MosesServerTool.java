@@ -30,6 +30,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 public class MosesServerTool extends TranslationTool {
     
     private static final Logger _logger = Logger.getLogger(MosesServerTool.class);
+    private static final String PIPE = "APIPENOTFACTOR";
     
     private URL _url;
 
@@ -49,9 +50,14 @@ public class MosesServerTool extends TranslationTool {
             XmlRpcClient client = new XmlRpcClient();
             client.setConfig(config);
             Map<String,String> params = new HashMap<String,String>();
-            params.put("text",job.getText());
+            String text = job.getText();
+            //Moses can't handle pipes!!!
+            text = text.replaceAll("\\|",PIPE);
+            params.put("text",text);
             Map result = (Map)client.execute("translate", new Object[]{params});
-            job.setText(result.get("text").toString());
+            text = result.get("text").toString();
+            text.replaceAll(PIPE,"|");
+            job.setText(text);
         }  catch (XmlRpcException e) {
              //TODO: Handle this better
              throw new RuntimeException(e);
