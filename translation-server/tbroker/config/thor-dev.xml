@@ -95,7 +95,25 @@
         <source>fr</source>
         <parallel>true</parallel>
         <target>en</target>
+        <split>true</split>
+        <tool>fr-tok</tool>
+        <tool>lower</tool>
         <tool>fr-en-nc</tool>
+        <tool>en-recaser</tool>
+        <tool>en-detok</tool>
     </toolchain>
+    <toolchain>
+        <name>fr-en-nc-bare</name>
+        <description>French-English (NewsCommentary)</description>
+        <source>fr</source>
+        <split>true</split>
+        <parallel>true</parallel>
+        <target>en</target>
+        <tokinput>true</tokinput>
+        <tool>lower</tool>
+        <tool>fr-en-nc</tool>
+        <tool>en-recaser</tool>
+    </toolchain>
+
 
 </config>

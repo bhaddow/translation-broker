@@ -164,46 +164,56 @@
         <name>fr-en-nc-bare</name>
         <description>French-English (NewsCommentary)</description>
         <source>fr</source>
+        <split>true</split>
         <parallel>true</parallel>
         <target>en</target>
         <tokinput>true</tokinput>
-        <lcinput>true</lcinput>
+        <tool>lower</tool>
         <tool>fr-en-nc</tool>
+        <tool>en-recaser</tool>
     </toolchain>
     <toolchain>
         <name>fr-en-bare</name>
         <description>French->English (Europarl)</description>
+        <split>true</split>
         <source>fr</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <lcinput>true</lcinput>
+        <tool>lower</tool>
         <tool>fr-en-moses</tool>
+        <tool>en-recaser</tool>
     </toolchain>
     <toolchain>
         <name>de-en-bare</name>
         <description>German->English (Europarl)</description>
+        <split>true</split>
         <source>de</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <lcinput>true</lcinput>
+        <tool>lower</tool>
         <tool>de-en-moses</tool>
+        <tool>en-recaser</tool>
     </toolchain>
     <toolchain>
         <name>es-en-bare</name>
         <description>Spanish->English (Europarl)</description>
+        <split>true</split>
         <source>es</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <lcinput>true</lcinput>
+        <tool>lower</tool>
         <tool>es-en-moses</tool>
+        <tool>en-recaser</tool>
     </toolchain>
     <toolchain>
         <name>en-de-bare</name>
         <description>English->German (Europarl)</description>
+        <split>true</split>
         <source>en</source>
         <target>de</target>
         <tokinput>true</tokinput>
-        <lcinput>true</lcinput>
+        <tool>lower</tool>
         <tool>en-de-moses</tool>
+        <tool>de-recaser</tool>
     </toolchain>
 </config>

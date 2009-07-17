@@ -41,7 +41,8 @@ use HTML::Parser;
 use LWP::UserAgent;
 use URI;
 use URI::Escape;
-use XMLRPC::Lite +trace => 'debug';
+#use XMLRPC::Lite +trace => 'debug';
+use XMLRPC::Lite;
 
 use Subprocess;
 
@@ -491,90 +492,6 @@ for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
 }
 
 
-# This sub will be run in parallel by the threads
-#my $thread_body = sub {
-#    my ($moses_i) = @_;
-
-    # each thread uses it's own tokenizer and detokenizer subprocess
-    # (FIXME -- isn't this hugely inefficient?)
-#    my $tokenizer   = new Subprocess (@TOKENIZER_CMD);
-#    my $detokenizer = new Subprocess (@DETOKENIZER_CMD);
-#    $tokenizer->start;
-#    $detokenizer->start;
-
-    # each thread also connects to its own Moses server
-#    my $moses = XMLRPC::Lite->
-#        proxy("http://localhost:$port/xmlrpc");
-
-#    for (;;) {
-
-        # Snatch the next unassigned job from the queue
-#        my $job_i;
-#        { lock $next_job_i; $job_i = $next_job_i++; }
-#        last if ($job_i > $#input);
-
-        # If it's a text job, translate it, otherwise just don't do anything
-#        $output[$job_i] = &translate_text_with_placeholders
-#            ($input[$job_i], $moses, $tokenizer, $detokenizer)
-#            if (!defined $output[$job_i]);
-
-        # Print out any sequential block of done jobs
-#        lock $num_printed;
-#        while ($num_printed < @input && defined $output[$num_printed]) {
-#            my $print;
-
-#            if (ref $segments[$num_printed]) {
-
-                # replace placeholders by the original tags
-#                my @buf_tag_index = @{$segments[$num_printed]};
-#                shift @buf_tag_index;
-#                $print = &replace_placeholders_by_tags
-#                    ($output[$num_printed], @buf_tag_index);
-
-                # wrap in code to popup the original text onmouseover
-#                if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
-#                    $print = &add_original_text_popup
-#                        ($input[$num_printed], $print);
-#                } else {
-#                    $print =~ s/\"/&\#34;/g;
-#                }
-
-#            } else {
-                # HTML segments are just printed as-is
-#                $print = $segments[$num_printed];
-#            }
-
-#            print encode ('UTF-8', $print);
-#            $num_printed++;
-#        }
-#    }
-#};
-
-#if (@MOSES_ADDRESSES == 1) {
-
-    # If there's only one instance of Moses, there's no point in forking a
-    # single thread and waiting for it to complete, so we just run the thread
-    # code directly in the main thread
-#    $thread_body->(0);
-
-#} else {
-
-    # Start all threads and wait for them all to finish
-#    my @threads = map {
-#        threads->create ($thread_body, $_);
-#    } (0 .. $#MOSES_ADDRESSES);
-#    $_->join foreach @threads;
-
-#}
-
-#my @threads = map {
-#    threads->create($thread_body,$_);
-#} (1 .. $client_count);
-#$_->join foreach @threads;
-
-#$thread_body->(0);
-
-
 #------------------------------------------------------------------------------
 # Translation subs
 
@@ -603,31 +520,13 @@ sub translate_text_with_placeholders {
     my @tags_over_token = &_extract_placeholders (\@tokens);
     @tokens = @tokens[1 .. $#tokens-1];
 
-    # translate sentence by sentence
-    my $token_base_i = 0;
-    while (@tokens > 0) {
-
-        # take a string of tokens up to the next sentence-ending token
-        my (@s_tokens, $split_token);
-        while (@tokens > 0) {
-            if ($tokens[0] =~ $RE_EOS_TOKEN) {
-                push (@s_tokens, shift @tokens);
-                last;
-            } elsif ($tokens[0] =~ $RE_SPLIT_TOKEN) {
-                $split_token = shift @tokens;
-                last;
-            } else {
-                push (@s_tokens, shift @tokens);
-            }
-        }
+    if (@tokens) {
 
         # Join together tokens into a plain text string. This is now ready to
         # be shipped to Moses: all tags and placeholders have been removed,
         # and it's a single sentence. We also lowercase as needed, and make
         # a note of whether we did.
-        my $s_input_text = join (' ', @s_tokens);
-        my $was_ucfirst =
-            ($s_input_text =~ s/^(\p{IsUpper})(?=\p{IsLower})/lc $1;/e);
+        my $s_input_text = join (' ', @tokens);
         my $was_allcaps =
             ($s_input_text =~ s/^([\p{IsUpper}\P{IsAlpha}]+)$/lc $1;/e);
 
@@ -636,27 +535,24 @@ sub translate_text_with_placeholders {
         my $s_traced_text = &_translate_text_moses ($s_input_text, $moses);
 
         # Early post-translation formatting fixes
-        $s_traced_text .= " $split_token" if $split_token;
-        $s_traced_text = ucfirst $s_traced_text if $was_ucfirst;
+        #$s_traced_text .= " $split_token" if $split_token;
         $s_traced_text = uc      $s_traced_text if $was_allcaps;
 
         # Update trace numbers to fit in the Grand Scheme of Things
         $s_traced_text =~ s{\s*\|(\d+)-(\d+)\|}{
-            ' |' . ($1+$token_base_i) . '-' . ($2+$token_base_i) . '| ';
+            ' |' . ($1) . '-' . ($2) . '| ';
         }ge;
-        $token_base_i += @s_tokens + ($split_token ? 1 : 0);
+        #$token_base_i += @s_tokens + ($split_token ? 1 : 0);
 
         $traced_text .= $s_traced_text . ' ';
     }
 
     # Apply to every segment in the traced output the union of all tags
     # that covered tokens in the corresponding source segment
-    print STDERR "reinserting place holders\n";
     my $output_text = &_reinsert_placeholders
         ($traced_text, @tags_over_token);
 
     # Try to remove spaces inserted by the tokenizer
-    print STDERR  "detokenizing\n";
     $output_text = $detokenizer->do_line ($output_text);
 
     return $output_text;
@@ -812,13 +708,14 @@ sub _translate_text_moses {
     
     $param{systemid} = $sysid;
     
-    #print STDERR "Translating $text\n";
     my $result = $moses->call('translate',\%param)->result;
     if (!$result) {
         die "Failed to communicate with server";
     }
-    my $traced_text = $result->[0]->{text};
-    #print STDERR "Result $traced_text\n";
+    my $traced_text = "";
+    foreach my $r (@$result) {
+        $traced_text = $traced_text . " " . $r->{text};
+    }
 
 
     #my $traced_text = $moses->do_line ($text);
