@@ -30,7 +30,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 public class MosesServerTool extends TranslationTool {
     
     private static final Logger _logger = Logger.getLogger(MosesServerTool.class);
-    private static final String PIPE = "APIPENOTFACTOR";
+    public  static final String PIPE = "APIPENOTFACTOR";
     
     private URL _url;
 

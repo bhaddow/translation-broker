@@ -59,7 +59,9 @@ public class Translator  implements XmlRpcHandler{
 	            stack = h.getInt("stack", stack);
 	            String cmd[] = new String[]{exe, "-f", model, "-s", stack+"", "-v", verbosity+""};
 	            boolean debug = (verbosity > 0);
-	            tools.put(name,new PipedTool(name,cmd,debug,initCompleteMsg, jobCompleteMsg));
+	            PipedTool tool = new PipedTool(name,cmd,debug,initCompleteMsg, jobCompleteMsg);
+                tool.setSubstitutePipes(true);
+	            tools.put(name,tool);
 	        }
         }
         
