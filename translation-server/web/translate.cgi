@@ -41,7 +41,7 @@ use HTML::Parser;
 use LWP::UserAgent;
 use URI;
 use URI::Escape;
-use XMLRPC::Lite;
+use XMLRPC::Lite +trace => 'debug';
 
 use Subprocess;
 
@@ -63,7 +63,7 @@ use Subprocess;
 # forwarded to other machines. There wouldn't be much point in running 16
 # instances of Moses on the same machine.
 
-my $client_count = 4;
+#my $client_count = 4;
 #my @MOSES_ADDRESSES = map "localhost:90$_",
 #    qw/01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16/;
 # We call 'soft tags' HTML tags whose presence is tolerated inside
@@ -440,71 +440,115 @@ undef $parser;
 # These are the variables that are shared between threads and used for
 # synchronisation.
 
-my @input  :shared = map { ref $_ ? $_->[0] : undef } @segments;
-my @output :shared = map { ref $_ ? undef : $_ } @segments;
-my $next_job_i :shared = 0;
-my $num_printed :shared = 0;
+#my @input  :shared = map { ref $_ ? $_->[0] : undef } @segments;
+#my @output :shared = map { ref $_ ? undef : $_ } @segments;
+#my $next_job_i :shared = 0;
+#my $num_printed :shared = 0;
+
+#
+# Iterate through the segments, translating as appropriate
+#
+my $tokenizer   = new Subprocess (@TOKENIZER_CMD);
+my $detokenizer = new Subprocess (@DETOKENIZER_CMD);
+$tokenizer->start;
+$detokenizer->start;
+
+my @input  = map { ref $_ ? $_->[0] : undef } @segments;
+my @output = map { ref $_ ? undef : $_ } @segments;
+
+my $moses = XMLRPC::Lite->
+    proxy("http://localhost:$port/xmlrpc");
+
+for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
+
+    my $print;
+     if (!defined $output[$job_i]) {
+        # If it's a text job, translate it
+        $output[$job_i] = &translate_text_with_placeholders
+            ($input[$job_i], $moses, $tokenizer, $detokenizer);
+
+        # replace placeholders by the original tags
+        my @buf_tag_index = @{$segments[$job_i]};
+        shift @buf_tag_index;
+        $print = &replace_placeholders_by_tags
+            ($output[$job_i], @buf_tag_index);
+
+        # wrap in code to popup the original text onmouseover
+        if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
+            $print = &add_original_text_popup
+                ($input[$job_i], $print);
+        } else {
+            $print =~ s/\"/&\#34;/g;
+        }
+
+    } else {
+        # HTML segments are just printed as-is
+        $print = $segments[$job_i];
+    }
+
+    print encode ('UTF-8', $print);
+
+}
 
 
 # This sub will be run in parallel by the threads
-my $thread_body = sub {
-    my ($moses_i) = @_;
+#my $thread_body = sub {
+#    my ($moses_i) = @_;
 
     # each thread uses it's own tokenizer and detokenizer subprocess
     # (FIXME -- isn't this hugely inefficient?)
-    my $tokenizer   = new Subprocess (@TOKENIZER_CMD);
-    my $detokenizer = new Subprocess (@DETOKENIZER_CMD);
-    $tokenizer->start;
-    $detokenizer->start;
+#    my $tokenizer   = new Subprocess (@TOKENIZER_CMD);
+#    my $detokenizer = new Subprocess (@DETOKENIZER_CMD);
+#    $tokenizer->start;
+#    $detokenizer->start;
 
     # each thread also connects to its own Moses server
-    my $moses = XMLRPC::Lite->
-        proxy("http://localhost:$port/xmlrpc");
+#    my $moses = XMLRPC::Lite->
+#        proxy("http://localhost:$port/xmlrpc");
 
-    for (;;) {
+#    for (;;) {
 
         # Snatch the next unassigned job from the queue
-        my $job_i;
-        { lock $next_job_i; $job_i = $next_job_i++; }
-        last if ($job_i > $#input);
+#        my $job_i;
+#        { lock $next_job_i; $job_i = $next_job_i++; }
+#        last if ($job_i > $#input);
 
         # If it's a text job, translate it, otherwise just don't do anything
-        $output[$job_i] = &translate_text_with_placeholders
-            ($input[$job_i], $moses, $tokenizer, $detokenizer)
-            if (!defined $output[$job_i]);
+#        $output[$job_i] = &translate_text_with_placeholders
+#            ($input[$job_i], $moses, $tokenizer, $detokenizer)
+#            if (!defined $output[$job_i]);
 
         # Print out any sequential block of done jobs
-        lock $num_printed;
-        while ($num_printed < @input && defined $output[$num_printed]) {
-            print STDERR "Num printed: $num_printed\n";
-            my $print;
+#        lock $num_printed;
+#        while ($num_printed < @input && defined $output[$num_printed]) {
+#            my $print;
 
-            if (ref $segments[$num_printed]) {
+#            if (ref $segments[$num_printed]) {
 
                 # replace placeholders by the original tags
-                my @buf_tag_index = @{$segments[$num_printed]};
-                shift @buf_tag_index;
-                $print = &replace_placeholders_by_tags
-                    ($output[$num_printed], @buf_tag_index);
+#                my @buf_tag_index = @{$segments[$num_printed]};
+#                shift @buf_tag_index;
+#                $print = &replace_placeholders_by_tags
+#                    ($output[$num_printed], @buf_tag_index);
 
                 # wrap in code to popup the original text onmouseover
-                if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
-                    $print = &add_original_text_popup
-                        ($input[$num_printed], $print);
-                } else {
-                    $print =~ s/\"/&\#34;/g;
-                }
+#                if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
+#                    $print = &add_original_text_popup
+#                        ($input[$num_printed], $print);
+#                } else {
+#                    $print =~ s/\"/&\#34;/g;
+#                }
 
-            } else {
+#            } else {
                 # HTML segments are just printed as-is
-                $print = $segments[$num_printed];
-            }
+#                $print = $segments[$num_printed];
+#            }
 
-            print encode ('UTF-8', $print);
-            $num_printed++;
-        }
-    }
-};
+#            print encode ('UTF-8', $print);
+#            $num_printed++;
+#        }
+#    }
+#};
 
 #if (@MOSES_ADDRESSES == 1) {
 
@@ -523,10 +567,12 @@ my $thread_body = sub {
 
 #}
 
-my @threads = map {
-    threads->create($thread_body,$_);
-} (1 .. $client_count);
-$_->join foreach @threads;
+#my @threads = map {
+#    threads->create($thread_body,$_);
+#} (1 .. $client_count);
+#$_->join foreach @threads;
+
+#$thread_body->(0);
 
 
 #------------------------------------------------------------------------------
@@ -799,7 +845,7 @@ sub make_link_absolute {
 
     # make it point back to us if it's a link
     if ($tag_name eq 'a') {
-        $attr_hash->{$attr_name} = 'index.cgi?url=' .
+        $attr_hash->{$attr_name} = 'web.cgi?url=' .
             uri_escape ($attr_hash->{$attr_name}) .
             "&sysid=$sysid";
         $attr_hash->{target} = '_top';
