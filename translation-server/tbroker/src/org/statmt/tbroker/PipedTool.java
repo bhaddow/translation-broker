@@ -41,6 +41,7 @@ public class PipedTool extends TranslationTool {
     private boolean _catchDebug = false;
     private String _initFinishedMessage = ""; //marks end of initialisation
     private String _finishedMessage = "";  //marks end of job
+    private boolean _substitutePipes; //workaround for moses factor issue
    
     public PipedTool(String toolName, String[] progargs) throws IOException {
         this(toolName,progargs,false,"","");
@@ -74,14 +75,25 @@ public class PipedTool extends TranslationTool {
             }
         }
     }
+
+    public void setSubstitutePipes(boolean substitutePipes) {
+        _substitutePipes = substitutePipes;
+    }
     
 
     @Override
     public synchronized void  transform(TranslationJob job) {
-        _processInput.println(job.getText());
+        String text = job.getText();
+        if (_substitutePipes) {
+            text = text.replaceAll("\\|", MosesServerTool.PIPE);
+        }
+        _processInput.println(text);
         _processInput.flush();
         try {
         	String outputText = _output.takeFirst();
+            if (_substitutePipes) {
+                outputText = outputText.replaceAll(MosesServerTool.PIPE,"|");
+            }
         	job.setText(outputText);
         	
         	if (_catchDebug) {

@@ -19,6 +19,11 @@ if ($ARGV[0] eq "prod") {
     $port = 7894;
     $dev = "";
     $delete = "";
+} elsif ($ARGV[0] eq "ec") {
+    $html_dir = "/disk4/html/demo/ec";
+    $port = 7895;
+    $dev = "ec";
+    $delete = "--delete";
 } else {
     $html_dir = "/disk4/html/demo/dev";
     $port = 7893;

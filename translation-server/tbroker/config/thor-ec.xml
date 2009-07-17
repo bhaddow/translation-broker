@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<config>
+    <port>7895</port>
+
+    <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
+    <model-dir>/disk4/webtrans-models/</model-dir>
+    <recase-model-dir>/disk4/webtrans-models/recasing/acquis/</recase-model-dir>
+    <moses-dir>/disk3/bhaddow/moses</moses-dir>
+    <moses>${moses-dir}/moses-cmd/src/moses</moses>
+    <splitter>${support-tools-dir}/split-sentences.perl</splitter>
+
+    <!-- Translation tools -->
+     <moses-pipes>
+        <command>${moses}</command>
+        <!-- discard all initial debug messages until this one -->
+ <!--       <init-end-msg>The global weight vector</init-end-msg> -->
+        <init-end-msg>Created input-output object</init-end-msg>
+        <!-- this message signifies the end of a job -->
+        <end-msg>Finished translating</end-msg>
+        <stack>100</stack>
+        <verbosity>1</verbosity>
+        <moses-pipe>
+            <name>fr-en-acquis</name>
+            <model>${model-dir}/acquis/moses.weight-reused.ini.9</model>
+        </moses-pipe>
+        <moses-pipe>
+            <name>it-en-acquis</name>
+            <model>${model-dir}/acquis/moses.weight-reused.ini.11</model>
+        </moses-pipe>
+     </moses-pipes>
+
+    <moses-servers>
+        <moses-server>
+            <name>fr-en-acquis-server</name>
+            <host>localhost</host>
+            <port>9080</port>
+        </moses-server>
+        <moses-server>
+            <name>it-en-acquis-server</name>
+            <host>localhost</host>
+            <port>9081</port>
+        </moses-server>
+    </moses-servers> 
+
+
+    <tokenisers>
+        <command>${support-tools-dir}/tokenizer.perl</command>
+        <tokeniser>
+            <name>fr-tok</name>
+            <language>fr</language>
+        </tokeniser>
+        <tokeniser>
+            <name>it-tok</name>
+            <language>it</language>
+        </tokeniser>
+    </tokenisers>
+
+    <lowercasers>
+        <command>${support-tools-dir}/lowercase.perl</command>
+        <lowercaser>
+            <name>lower</name>
+        </lowercaser>
+    </lowercasers>
+        
+
+    <recasers>
+        <command>${support-tools-dir}/recase.perl</command>
+        <moses>${moses}</moses>
+        <recaser>
+            <name>en-recaser-1</name>
+            <model>${recase-model-dir}/model.1/moses.ini.1</model>
+        </recaser>
+        <recaser>
+            <name>en-recaser-2</name>
+            <model>${recase-model-dir}/model.1/moses.ini.1</model>
+        </recaser>
+    </recasers>
+
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>en-detok</name>
+            <language>en</language>
+        </detokeniser>
+    </detokenisers>
+
+
+    <!-- Translation tool chains -->
+    <toolchain>
+        <name>fr-en</name>
+        <description>French->English (Acquis)</description>
+        <source>fr</source>
+        <target>en</target>
+        <split>true</split>
+        <tool>fr-tok</tool>
+        <tool>lower</tool>
+        <tool>fr-en-acquis</tool>
+<!--         <tool>en-recaser-1</tool> -->
+       <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>it-en</name>
+        <description>Italian->English (Acquis)</description>
+        <source>it</source>
+        <target>en</target>
+        <split>true</split>
+        <tool>it-tok</tool>
+        <tool>lower</tool>
+        <tool>it-en-acquis</tool>
+<!--         <tool>en-recaser-2</tool> -->
+        <tool>en-detok</tool> -->
+    </toolchain>
+    <toolchain>
+        <name>fr-en-web</name>
+        <description>French->English (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>fr</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>false</parallel>
+        <tool>lower</tool>
+        <tool>fr-en-acquis</tool>
+<!--        <tool>en-recaser-1</tool> -->
+    </toolchain>
+    <toolchain>
+        <name>it-en-web</name>
+        <description>Italian->English (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>it</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>false</parallel>
+        <tool>lower</tool>
+        <tool>it-en-acquis</tool>
+<!--        <tool>en-recaser-2</tool> -->
+    </toolchain>
+</config>
