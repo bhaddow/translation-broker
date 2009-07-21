@@ -45,6 +45,7 @@ public class Main {
         
         ServletWebServer webServer = new ServletWebServer(servlet, port);
         _logger.info("server starting on port " + port);
+        webServer.getXmlRpcServer().setMaxThreads(10);
         webServer.start();
     }
 
