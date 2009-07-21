@@ -129,7 +129,7 @@
         <source>fr</source>
         <target>en</target>
         <split>true</split>
-        <parallel>false</parallel>
+        <parallel>true</parallel>
         <tool>lower</tool>
         <tool>fr-en-acquis-server</tool>
 <!--        <tool>en-recaser-1</tool> -->
