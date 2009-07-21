@@ -123,6 +123,18 @@
 <!--        <tool>en-recaser-1</tool> -->
     </toolchain>
     <toolchain>
+        <name>fr-en-web-server</name>
+        <description>French->English (Acquis) Server</description>
+        <tokinput>true</tokinput>
+        <source>fr</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>false</parallel>
+        <tool>lower</tool>
+        <tool>fr-en-acquis-server</tool>
+<!--        <tool>en-recaser-1</tool> -->
+    </toolchain>
+    <toolchain>
         <name>it-en-web</name>
         <description>Italian->English (Acquis)</description>
         <tokinput>true</tokinput>

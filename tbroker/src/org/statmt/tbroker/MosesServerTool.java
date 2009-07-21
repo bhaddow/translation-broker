@@ -56,7 +56,7 @@ public class MosesServerTool extends TranslationTool {
             params.put("text",text);
             Map result = (Map)client.execute("translate", new Object[]{params});
             text = result.get("text").toString();
-            text.replaceAll(PIPE,"|");
+            text = text.replaceAll(PIPE,"|");
             job.setText(text);
         }  catch (XmlRpcException e) {
              //TODO: Handle this better

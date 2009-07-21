@@ -10,7 +10,8 @@ mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
 logdir=/disk4/translation-server/logs.ec
 
 # fr-en it-en
-configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis/moses.weight-reused.ini.11"
+#configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis/moses.weight-reused.ini.11"
+configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9"
 
 start() {
     echo "Starting moses servers"
