@@ -44,6 +44,7 @@ public class MosesServerTool extends TranslationTool {
 
     @Override
     public void transform(TranslationJob job) {
+        long startTime = System.currentTimeMillis() ;
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
             config.setServerURL(_url);
@@ -62,6 +63,8 @@ public class MosesServerTool extends TranslationTool {
              //TODO: Handle this better
              throw new RuntimeException(e);
         }
+        long totalTime = System.currentTimeMillis() - startTime;
+        job.setTiming(getName(), totalTime);
     }
 
 }

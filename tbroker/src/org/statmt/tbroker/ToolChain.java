@@ -132,6 +132,9 @@ public class ToolChain  {
                 _logger.debug(tool.getName() +"< " + job.getText());
             
         }
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("Job times (ms): " + job.getTimings());
+        }
     }
 
 }
