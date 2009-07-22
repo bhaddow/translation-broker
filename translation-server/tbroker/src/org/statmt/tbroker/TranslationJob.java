@@ -18,9 +18,14 @@ public class TranslationJob {
 	public static final String FIELD_SYSID = "systemid";
 	public static final String FIELD_DEBUG = "debug";
 	
+	public static final String TIME_ELAPSED = "totaltime";
+	
+	
 	private String _text;
 	private String _systemId;
 	private List<String> _debug;
+	private Map<String,Long> _timings = new HashMap<String, Long>();;
+	private long _startTime = System.currentTimeMillis();
 
 	/**
 	 * Does the demarshalling
@@ -59,6 +64,16 @@ public class TranslationJob {
 	
 	public void setText(String text) {
 		_text = text;
+	}
+	
+	public Map<String,Long> getTimings() {
+	    long elapsed = System.currentTimeMillis() - _startTime;
+	    _timings.put(TIME_ELAPSED, elapsed);
+	    return _timings;
+	}
+	
+	public void setTiming(String key, long time) {
+	    _timings.put(key,time);
 	}
 	
 	public boolean isDebugOn() {

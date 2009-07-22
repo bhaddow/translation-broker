@@ -48,10 +48,11 @@ public class TestClient {
         }
         
         //do some translation
-        String source = "das ist ein haus\ndas haus ist klein ";
+        //String source = "das ist ein haus\ndas haus ist klein ";
+        String source = "Je ne sais pas. ";
         //source.add("The source string . ");
         Map<String, String> params = new HashMap<String, String>();
-        params.put("systemid", "de-en-server");
+        params.put("systemid", "fr-en");
         params.put("text",source);
         params.put("debug","yes");
         //Object[] params = new Object[]{"fr-en", source};

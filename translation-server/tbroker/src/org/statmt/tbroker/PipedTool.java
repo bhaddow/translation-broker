@@ -83,10 +83,12 @@ public class PipedTool extends TranslationTool {
 
     @Override
     public synchronized void  transform(TranslationJob job) {
+        long startTime = System.currentTimeMillis() ;
         String text = job.getText();
         if (_substitutePipes) {
             text = text.replaceAll("\\|", MosesServerTool.PIPE);
         }
+        
         _processInput.println(text);
         _processInput.flush();
         try {
@@ -95,7 +97,6 @@ public class PipedTool extends TranslationTool {
                 outputText = outputText.replaceAll(MosesServerTool.PIPE,"|");
             }
         	job.setText(outputText);
-        	
         	if (_catchDebug) {
         	    while(true) {
         	        String errorText = _error.poll(60,TimeUnit.SECONDS);
@@ -113,6 +114,8 @@ public class PipedTool extends TranslationTool {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        long totalTime = System.currentTimeMillis() - startTime;
+        job.setTiming(getName(), totalTime);
     }
     
     class OutputReader extends Thread {
