@@ -130,6 +130,34 @@ public class Translator  implements XmlRpcHandler{
 	            tools.put(name,new PipedTool(name,cmd));
 	        }
         }
+
+        //truecasers
+        if (!config.configurationsAt("truecasers").isEmpty()) {
+            SubnodeConfiguration subconf = config.configurationAt("truecasers");
+            String exe = subconf.getString("command");
+            List tconfs = subconf.configurationsAt("truecaser");
+	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String model = h.getString("model");
+	            String cmd[] = new String[]{exe,"--model", model};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
+        }
+
+        //detruecasers
+        if (!config.configurationsAt("detruecasers").isEmpty()) {
+            SubnodeConfiguration subconf = config.configurationAt("detruecasers");
+            String exe = subconf.getString("command");
+            List tconfs = subconf.configurationsAt("detruecaser");
+	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String cmd[] = new String[]{exe};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
+        }
+        
         
         
         //create tool chains
