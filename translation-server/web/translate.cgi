@@ -72,7 +72,7 @@ use Subprocess;
 # used to chop up documents into independent sentences. These few, however, are
 # allowed within sentences.
 
-my %SOFT_TAGS = map {$_ => 1} qw/a b i u em font blink tt acronym/;
+my %SOFT_TAGS = map {$_ => 1} qw/strong a b i u em font blink tt acronym/;
 
 
 # We call 'verbatim tags' HTML tags whose entire data is to be left untouched
@@ -185,27 +185,37 @@ my @segments;
 
 $ENV{PATH} = '';
 
+my ($host,$port,$cgi,$url,$sysid,$INPUT_LANG,$OUTPUT_LANG);
 
-my $host = "localhost";
-my $port = "__PORT__";
+if (@ARGV && $ARGV[0] eq "debug") {
+    binmode STDOUT, ':utf8';
+    binmode STDERR, ':utf8';
+    $host = "thor";
+    $port = "7893";
+    $url = "http://eur-lex.europa.eu/JOHtml.do?uri=OJ%3AL%3A2009%3A185%3ASOM%3AFR%3AHTML";
+    $sysid = "fr-en-web";
+    $INPUT_LANG = "fr";
+    $OUTPUT_LANG = "en";
+} else {
 
-#------------------------------------------------------------------------------
-# Fetch the source page
+    $host = "localhost";
+    $port = "__PORT__";
 
-# get value of URL param, make sure it's absolute
-my $cgi = new CGI;
-my $url = $cgi->param ('url');
+    # get value of URL param, make sure it's absolute
+    $cgi = new CGI;
+    $url = $cgi->param ('url');
+    $sysid = $cgi->param('sysid');
+
+    # The tokenizer tries to adapt its rules depending on the language it's dealing
+    # with, so we indicate that here.
+    $INPUT_LANG  = $cgi->param('source_language');
+    $OUTPUT_LANG = $cgi->param('target_language');
+}
+
+
 die "No URL?" unless $url;
-$url = "http://$url" unless ($url =~ m!^[a-z]+://!);
-my $sysid = $cgi->param('sysid');
 die "No sysid?" unless $sysid;
-
-# The tokenizer tries to adapt its rules depending on the language it's dealing
-# with, so we indicate that here.
-
-my $INPUT_LANG  = $cgi->param('source_language');
-my $OUTPUT_LANG = $cgi->param('target_language');
-
+$url = "http://$url" unless ($url =~ m!^[a-z]+://!);
 
 #my $url = "http://www.lemonde.fr/economie/article/2009/02/23/le-nombre-de-foyers-assujettis-a-l-isf-en-hausse-de-7-2_1159045_3234.html";
 #my $sysid = "fr-en-raw";
@@ -465,14 +475,17 @@ for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
     my $print;
      if (!defined $output[$job_i]) {
         # If it's a text job, translate it
+#        print STDERR "TRANSLATING: " . $input[$job_i] . "\n";
         $output[$job_i] = &translate_text_with_placeholders
             ($input[$job_i], $moses, $tokenizer, $detokenizer);
 
         # replace placeholders by the original tags
+#        print STDERR "TRANSLATED: " . $output[$job_i] . "\n";
         my @buf_tag_index = @{$segments[$job_i]};
         shift @buf_tag_index;
         $print = &replace_placeholders_by_tags
             ($output[$job_i], @buf_tag_index);
+#        print STDERR "OUTPUT: " . $print . "\n";
 
         # wrap in code to popup the original text onmouseover
         if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
@@ -484,6 +497,7 @@ for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
 
     } else {
         # HTML segments are just printed as-is
+#        print STDERR "HTML: " . $segments[$job_i] . "\n";
         $print = $segments[$job_i];
     }
 
@@ -532,7 +546,9 @@ sub translate_text_with_placeholders {
 
         # Translate the plain text sentence
         # my $s_traced_text = &_translate_text_pig_latin ($s_input_text);
+#        print STDERR "TOMOSES: " . $s_input_text . "\n";
         my $s_traced_text = &_translate_text_moses ($s_input_text, $moses);
+#        print STDERR "FROMMOSES: " . $s_traced_text . "\n";
 
         # Early post-translation formatting fixes
         #$s_traced_text .= " $split_token" if $split_token;
@@ -551,6 +567,7 @@ sub translate_text_with_placeholders {
     # that covered tokens in the corresponding source segment
     my $output_text = &_reinsert_placeholders
         ($traced_text, @tags_over_token);
+#    print STDERR "OUTPUT: " . $output_text . "\n";
 
     # Try to remove spaces inserted by the tokenizer
     $output_text = $detokenizer->do_line ($output_text);
