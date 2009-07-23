@@ -12,23 +12,30 @@
     <!-- Translation tools -->
     <moses-pipes>
         <command>${moses}</command>
-        <!-- discard all initial debug messages until this one -->
         <init-end-msg>The global weight vector</init-end-msg>
-        <!-- this message signifies the end of a job -->
         <end-msg>Finished translating</end-msg>
         <stack>100</stack>
         <verbosity>2</verbosity>
-        <moses-pipe>
+<!--        <moses-pipe>
             <name>fr-en-moses</name>
             <model>${model-dir}/fr-en.matrix07b/moses.ini.1</model>
+        </moses-pipe> -->
+        <moses-pipe>
+            <name>fr-en-acquis</name>
+            <model>${model-dir}/acquis/moses.weight-reused.ini.9</model>
         </moses-pipe>
-    </moses-pipes>
+    </moses-pipes> 
 
     <moses-servers>
         <moses-server>
             <name>fr-en-nc</name>
             <host>localhost</host>
             <port>8080</port>
+        </moses-server>
+        <moses-server>
+            <name>fr-en-acquis-server</name>
+            <host>localhost</host>
+            <port>1234</port>
         </moses-server>
     </moses-servers>
 
@@ -66,29 +73,24 @@
         </detokeniser>
     </detokenisers>
 
+    <truecasers>
+        <command>${support-tools-dir}/truecase.perl</command>
+        <truecaser>
+            <name>fr-true</name>
+            <model>${model-dir}/acquis-truecased/truecaser/truecase-model.9.fr</model>
+        </truecaser>
+    </truecasers>
+
+    <detruecasers>
+        <command>${support-tools-dir}/detruecase.perl</command>
+        <detruecaser>
+            <name>en-detrue</name>
+            <model></model>
+        </detruecaser>
+    </detruecasers>
+
 
     <!-- Translation tool chains -->
-    <toolchain>
-        <name>fr-en</name>
-        <description>French->English (Europarl)</description>
-        <source>fr</source>
-        <target>en</target>
-        <split>true</split>
-        <tool>fr-tok</tool>
-        <tool>lower</tool>
-        <tool>fr-en-moses</tool>
-        <tool>en-recaser</tool>
-        <tool>en-detok</tool>
-    </toolchain>
-    <toolchain>
-        <name>fr-en-bare</name>
-        <description>French->English (Europarl)</description>
-        <source>fr</source>
-        <target>en</target>
-        <tokinput>true</tokinput>
-        <lcinput>true</lcinput>
-        <tool>fr-en-moses</tool>
-    </toolchain>
     <toolchain>
         <name>fr-en-nc</name>
         <description>French-English (NewsCommentary)</description>
@@ -102,7 +104,7 @@
         <tool>en-recaser</tool>
         <tool>en-detok</tool>
     </toolchain>
-    <toolchain>
+<!--    <toolchain>
         <name>fr-en-nc-bare</name>
         <description>French-English (NewsCommentary)</description>
         <source>fr</source>
@@ -113,6 +115,30 @@
         <tool>lower</tool>
         <tool>fr-en-nc</tool>
         <tool>en-recaser</tool>
+    </toolchain> -->
+    <toolchain>
+        <name>fr-en-web</name>
+        <description>French->English (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>fr</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>false</parallel>
+        <tool>lower</tool>
+        <tool>fr-en-acquis</tool>
+<!--        <tool>en-recaser-1</tool> -->
+    </toolchain>
+    <toolchain>
+        <name>fr-en-web-server</name>
+        <description>French->English (Acquis) Server</description>
+        <tokinput>true</tokinput>
+        <source>fr</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>fr-true</tool>
+        <tool>fr-en-acquis-server</tool>
+        <tool>en-detrue</tool>
     </toolchain>
 
 
