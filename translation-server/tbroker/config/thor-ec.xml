@@ -3,31 +3,8 @@
     <port>7895</port>
 
     <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
-    <model-dir>/disk4/webtrans-models/</model-dir>
-    <recase-model-dir>/disk4/webtrans-models/recasing/acquis/</recase-model-dir>
-    <moses-dir>/disk3/bhaddow/moses</moses-dir>
-    <moses>${moses-dir}/moses-cmd/src/moses</moses>
+    <model-dir>/disk4/webtrans-models/acquis-truecased</model-dir>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
-
-    <!-- Translation tools -->
-     <moses-pipes>
-        <command>${moses}</command>
-        <!-- discard all initial debug messages until this one -->
- <!--       <init-end-msg>The global weight vector</init-end-msg> -->
-        <init-end-msg>Created input-output object</init-end-msg>
-        <!-- this message signifies the end of a job -->
-        <end-msg>Finished translating</end-msg>
-        <stack>100</stack>
-        <verbosity>1</verbosity>
-        <moses-pipe>
-            <name>fr-en-acquis</name>
-            <model>${model-dir}/acquis/moses.weight-reused.ini.9</model>
-        </moses-pipe>
-        <moses-pipe>
-            <name>it-en-acquis</name>
-            <model>${model-dir}/acquis/moses.weight-reused.ini.11</model>
-        </moses-pipe>
-     </moses-pipes>
 
     <moses-servers>
         <moses-server>
@@ -39,6 +16,26 @@
             <name>it-en-acquis-server</name>
             <host>localhost</host>
             <port>9081</port>
+        </moses-server>
+        <moses-server>
+            <name>nl-el-acquis-server</name>
+            <host>localhost</host>
+            <port>9082</port>
+        </moses-server>
+        <moses-server>
+            <name>de-fr-acquis-server</name>
+            <host>localhost</host>
+            <port>9083</port>
+        </moses-server>
+        <moses-server>
+            <name>en-lt-acquis-server</name>
+            <host>localhost</host>
+            <port>9084</port>
+        </moses-server>
+        <moses-server>
+            <name>hu-ro-acquis-server</name>
+            <host>localhost</host>
+            <port>9085</port>
         </moses-server>
     </moses-servers> 
 
@@ -53,28 +50,23 @@
             <name>it-tok</name>
             <language>it</language>
         </tokeniser>
+        <tokeniser>
+            <name>nl-tok</name>
+            <language>nl</language>
+        </tokeniser>
+        <tokeniser>
+            <name>de-tok</name>
+            <language>de</language>
+        </tokeniser>
+        <tokeniser>
+            <name>en-tok</name>
+            <language>en</language>
+        </tokeniser>
+        <tokeniser>
+            <name>hu-tok</name>
+            <language>hu</language>
+        </tokeniser>
     </tokenisers>
-
-    <lowercasers>
-        <command>${support-tools-dir}/lowercase.perl</command>
-        <lowercaser>
-            <name>lower</name>
-        </lowercaser>
-    </lowercasers>
-        
-
-    <recasers>
-        <command>${support-tools-dir}/recase.perl</command>
-        <moses>${moses}</moses>
-        <recaser>
-            <name>en-recaser-1</name>
-            <model>${recase-model-dir}/model.1/moses.ini.1</model>
-        </recaser>
-        <recaser>
-            <name>en-recaser-2</name>
-            <model>${recase-model-dir}/model.1/moses.ini.1</model>
-        </recaser>
-    </recasers>
 
     <detokenisers>
         <command>${support-tools-dir}/detokenizer.perl</command>
@@ -82,10 +74,62 @@
             <name>en-detok</name>
             <language>en</language>
         </detokeniser>
+        <detokeniser>
+            <name>el-detok</name>
+            <language>el</language>
+        </detokeniser>
+        <detokeniser>
+            <name>fr-detok</name>
+            <language>fr</language>
+        </detokeniser>
+        <detokeniser>
+            <name>lt-detok</name>
+            <language>lt</language>
+        </detokeniser>
+        <detokeniser>
+            <name>ro-detok</name>
+            <language>ro</language>
+        </detokeniser>
     </detokenisers>
 
+    <truecasers>
+        <command>${support-tools-dir}/truecase.perl</command>
+        <truecaser>
+            <name>fr-true</name>
+            <model>${model-dir}/truecaser/truecase-model.9.fr</model>
+        </truecaser>
+        <truecaser>
+            <name>it-true</name>
+            <model>${model-dir}/truecaser/truecase-model.11.it</model>
+        </truecaser>
+        <truecaser>
+            <name>nl-true</name>
+            <model>${model-dir}/truecaser/truecase-model.120.nl</model>
+        </truecaser>
+        <truecaser>
+            <name>de-true</name>
+            <model>${model-dir}/truecaser/truecase-model.192.de</model>
+        </truecaser>
+        <truecaser>
+            <name>en-true</name>
+            <model>${model-dir}/truecaser/truecase-model.253.en</model>
+        </truecaser>
+        <truecaser>
+            <name>hu-true</name>
+            <model>${model-dir}/truecaser/truecase-model.389.hu</model>
+        </truecaser>
+    </truecasers>
 
-    <!-- Translation tool chains -->
+    <detruecasers>
+        <command>${support-tools-dir}/detruecase.perl</command>
+        <detruecaser>
+            <name>detrue</name>
+            <model></model>
+        </detruecaser>
+    </detruecasers>
+
+
+<!-- demo translation tool chains -->
     <toolchain>
         <name>fr-en</name>
         <description>French->English (Acquis)</description>
@@ -93,9 +137,9 @@
         <target>en</target>
         <split>true</split>
         <tool>fr-tok</tool>
-        <tool>lower</tool>
-        <tool>fr-en-acquis</tool>
-<!--         <tool>en-recaser-1</tool> -->
+        <tool>fr-true</tool>
+        <tool>fr-en-acquis-server</tool>
+       <tool>detrue</tool>
        <tool>en-detok</tool>
     </toolchain>
     <toolchain>
@@ -105,11 +149,62 @@
         <target>en</target>
         <split>true</split>
         <tool>it-tok</tool>
-        <tool>lower</tool>
-        <tool>it-en-acquis</tool>
-<!--         <tool>en-recaser-2</tool> -->
-        <tool>en-detok</tool> -->
+        <tool>it-true</tool>
+        <tool>it-en-acquis-server</tool>
+        <tool>detrue</tool>
+        <tool>en-detok</tool>
     </toolchain>
+    <toolchain>
+        <name>nl-el</name>
+        <description>Dutch->Greek (Acquis)</description>
+        <source>nl</source>
+        <target>el</target>
+        <split>true</split>
+        <tool>nl-tok</tool>
+        <tool>nl-true</tool>
+        <tool>nl-el-acquis-server</tool>
+       <tool>detrue</tool>
+       <tool>el-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>de-fr</name>
+        <description>German->French (Acquis)</description>
+        <source>de</source>
+        <target>fr</target>
+        <split>true</split>
+        <tool>de-tok</tool>
+        <tool>de-true</tool>
+        <tool>de-fr-acquis-server</tool>
+       <tool>detrue</tool>
+       <tool>fr-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>en-lt</name>
+        <description>English->Latvian (Acquis)</description>
+        <source>en</source>
+        <target>lt</target>
+        <split>true</split>
+        <tool>en-tok</tool>
+        <tool>en-true</tool>
+        <tool>en-lt-acquis-server</tool>
+       <tool>detrue</tool>
+       <tool>lt-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>hu-ro</name>
+        <description>Hungarian->Romanian (Acquis)</description>
+        <source>hu</source>
+        <target>ro</target>
+        <split>true</split>
+        <tool>hu-tok</tool>
+        <tool>hu-true</tool>
+        <tool>hu-ro-acquis-server</tool>
+       <tool>detrue</tool>
+       <tool>ro-detok</tool>
+    </toolchain>
+
+<!-- web translation tool chains --> 
+
     <toolchain>
         <name>fr-en-web</name>
         <description>French->English (Acquis)</description>
@@ -117,22 +212,10 @@
         <source>fr</source>
         <target>en</target>
         <split>true</split>
-        <parallel>false</parallel>
-        <tool>lower</tool>
-        <tool>fr-en-acquis</tool>
-<!--        <tool>en-recaser-1</tool> -->
-    </toolchain>
-    <toolchain>
-        <name>fr-en-web-server</name>
-        <description>French->English (Acquis) Server</description>
-        <tokinput>true</tokinput>
-        <source>fr</source>
-        <target>en</target>
-        <split>true</split>
         <parallel>true</parallel>
-        <tool>lower</tool>
+        <tool>fr-true</tool>
         <tool>fr-en-acquis-server</tool>
-<!--        <tool>en-recaser-1</tool> -->
+        <tool>detrue</tool>
     </toolchain>
     <toolchain>
         <name>it-en-web</name>
@@ -141,9 +224,57 @@
         <source>it</source>
         <target>en</target>
         <split>true</split>
-        <parallel>false</parallel>
-        <tool>lower</tool>
-        <tool>it-en-acquis</tool>
-<!--        <tool>en-recaser-2</tool> -->
+        <parallel>true</parallel>
+        <tool>it-true</tool>
+        <tool>it-en-acquis-server</tool>
+        <tool>detrue</tool>
+    </toolchain>
+    <toolchain>
+        <name>nl-el-web</name>
+        <description>Dutch->Greek (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>nl</source>
+        <target>el</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>nl-true</tool>
+        <tool>nl-el-acquis-server</tool>
+        <tool>detrue</tool>
+    </toolchain>
+    <toolchain>
+        <name>de-fr-web</name>
+        <description>German->French (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>de</source>
+        <target>fr</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>de-true</tool>
+        <tool>de-fr-acquis-server</tool>
+        <tool>detrue</tool>
+    </toolchain>
+    <toolchain>
+        <name>en-lt-web</name>
+        <description>English->Latvian (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>en</source>
+        <target>lt</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-true</tool>
+        <tool>en-lt-acquis-server</tool>
+        <tool>detrue</tool>
+    </toolchain>
+    <toolchain>
+        <name>hu-ro-web</name>
+        <description>Hungarian->Romanian (Acquis)</description>
+        <tokinput>true</tokinput>
+        <source>hu</source>
+        <target>ro</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>hu-true</tool>
+        <tool>hu-ro-acquis-server</tool>
+        <tool>detrue</tool>
     </toolchain>
 </config>
