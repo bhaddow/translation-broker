@@ -11,7 +11,8 @@ logdir=/disk4/translation-server/logs.ec
 
 # fr-en it-en
 #configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis/moses.weight-reused.ini.11"
-configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9"
+# fr-en it-en nl-el de-fr en-lt hu-ro
+configs="/disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.11 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.120 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.192 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.253 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.389"
 
 start() {
     echo "Starting moses servers"
