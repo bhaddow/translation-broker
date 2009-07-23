@@ -48,13 +48,14 @@ public class TestClient {
         }
         
         //do some translation
-        //String source = "das ist ein haus\ndas haus ist klein ";
-        String source = "Je ne sais pas. ";
+        String source = "das ist ein haus\ndas haus ist klein ";
+        //String source = "Je ne sais pas. ";
         //source.add("The source string . ");
         Map<String, String> params = new HashMap<String, String>();
-        params.put("systemid", "fr-en");
+        params.put("systemid", "de-en-server");
         params.put("text",source);
         params.put("debug","yes");
+        params.put("align", "yes");
         //Object[] params = new Object[]{"fr-en", source};
         System.out.println(params);
         Object[] results = (Object[])client.execute("translate", new Object[]{params});
@@ -66,6 +67,13 @@ public class TestClient {
                 System.out.println("debug:");
                 for (Object d: debug) {
                     System.out.println(d);
+                }
+            }
+            Object[] align= (Object[])result.get("align");
+            if (align != null) {
+                System.out.println("align:");
+                for (Object a: align) {
+                    System.out.println(a);
                 }
             }
         }

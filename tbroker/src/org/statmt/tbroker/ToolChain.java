@@ -96,7 +96,7 @@ public class ToolChain  {
         	String[] outputText  = _splitter.split(inputJob.getText());
         	jobs = new TranslationJob[outputText.length];
             for (int i = 0; i < jobs.length; ++i) {
-               jobs[i] = new TranslationJob(inputJob.getSystemId(), outputText[i],inputJob.isDebugOn());
+                jobs[i] = new TranslationJob(inputJob, outputText[i]);
             }
         }
         if (_parallel) {
