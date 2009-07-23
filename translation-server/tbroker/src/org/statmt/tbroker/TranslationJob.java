@@ -17,12 +17,14 @@ public class TranslationJob {
 	public static final String FIELD_TEXT = "text";
 	public static final String FIELD_SYSID = "systemid";
 	public static final String FIELD_DEBUG = "debug";
+	public static final String FIELD_ALIGN = "align";
 	
 	public static final String TIME_ELAPSED = "totaltime";
 	
 	
 	private String _text;
 	private String _systemId;
+	private List<Map> _alignments;
 	private List<String> _debug;
 	private Map<String,Long> _timings = new HashMap<String, Long>();;
 	private long _startTime = System.currentTimeMillis();
@@ -43,15 +45,21 @@ public class TranslationJob {
 		if (params.get(FIELD_DEBUG) != null) {
 		    _debug = new ArrayList<String>();
 		}
+		if (params.get(FIELD_ALIGN) != null) {
+		    _alignments = new ArrayList<Map>();
+		}
 		
 	}
 	
-	public TranslationJob(String systemId, String text, boolean debug) {
+	public TranslationJob(TranslationJob job, String text) {
 	    _text = text;
-	    _systemId = systemId;
-	    if (debug) {
-	        _debug = new ArrayList<String>();
-	    }
+	    _systemId = job._systemId;
+	     if (job._debug != null) {
+	         _debug = new ArrayList<String>(job._debug);
+	     }
+	     if (job._alignments != null) {
+	         _alignments = new ArrayList<Map>(job._alignments);
+	     }
 	}
 	
 	public String getSystemId() {
@@ -64,6 +72,10 @@ public class TranslationJob {
 	
 	public void setText(String text) {
 		_text = text;
+	}
+	
+	public List<Map> getAlignments() { 
+	    return _alignments;
 	}
 	
 	public Map<String,Long> getTimings() {
@@ -91,6 +103,9 @@ public class TranslationJob {
 		result.put(FIELD_TEXT, _text);
 		if (_debug != null) {
 		    result.put(FIELD_DEBUG, _debug);
+		}
+		if (_alignments != null) {
+		    result.put(FIELD_ALIGN, _alignments);
 		}
 		return result;
 	}

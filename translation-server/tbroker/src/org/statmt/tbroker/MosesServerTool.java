@@ -14,7 +14,9 @@ package org.statmt.tbroker;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -33,7 +35,7 @@ public class MosesServerTool extends TranslationTool {
     public  static final String PIPE = "APIPENOTFACTOR";
     
     private URL _url;
-
+    
     public MosesServerTool(String name, HierarchicalConfiguration config) throws MalformedURLException {
         super(name);
         String host = config.getString("host");
@@ -54,11 +56,25 @@ public class MosesServerTool extends TranslationTool {
             String text = job.getText();
             //Moses can't handle pipes!!!
             text = text.replaceAll("\\|",PIPE);
-            params.put("text",text);
+            params.put(TranslationJob.FIELD_TEXT,text);
+            List<Map> alignments = job.getAlignments();
+            if (alignments != null) {
+                params.put(TranslationJob.FIELD_ALIGN, "true");
+            }
             Map result = (Map)client.execute("translate", new Object[]{params});
-            text = result.get("text").toString();
+            text = result.get(TranslationJob.FIELD_TEXT).toString();
             text = text.replaceAll(PIPE,"|");
             job.setText(text);
+            if (alignments != null) {
+                Object[] returnedAlignments = (Object[])result.get(TranslationJob.FIELD_ALIGN);
+                if (returnedAlignments == null) {
+                    _logger.warn("Alignments expected but missing");
+                } else {
+                    for (Object a : returnedAlignments) {
+                        alignments.add((Map)a);
+                    }
+                }
+            }
         }  catch (XmlRpcException e) {
              //TODO: Handle this better
              throw new RuntimeException(e);
