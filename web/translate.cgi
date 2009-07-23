@@ -185,7 +185,7 @@ my @segments;
 
 $ENV{PATH} = '';
 
-my ($host,$port,$cgi,$url,$sysid,$INPUT_LANG,$OUTPUT_LANG);
+my ($host,$port,$cgi,$url,$sysid,$INPUT_LANG,$OUTPUT_LANG,$debug);
 
 if (@ARGV && $ARGV[0] eq "debug") {
     binmode STDOUT, ':utf8';
@@ -193,9 +193,10 @@ if (@ARGV && $ARGV[0] eq "debug") {
     $host = "thor";
     $port = "7893";
     $url = "http://eur-lex.europa.eu/JOHtml.do?uri=OJ%3AL%3A2009%3A185%3ASOM%3AFR%3AHTML";
-    $sysid = "fr-en-web";
+    $sysid = "fr-en-web-server";
     $INPUT_LANG = "fr";
     $OUTPUT_LANG = "en";
+    $debug = 1;
 } else {
 
     $host = "localhost";
@@ -210,6 +211,11 @@ if (@ARGV && $ARGV[0] eq "debug") {
     # with, so we indicate that here.
     $INPUT_LANG  = $cgi->param('source_language');
     $OUTPUT_LANG = $cgi->param('target_language');
+    $debug = 0;
+}
+
+sub log {
+    print STDERR @_ if $debug;
 }
 
 
@@ -404,6 +410,10 @@ sub text_h {
         $text =~ s/\@import\s+\"([^\n\"]+)\"/
             '@import "' . URI->new_abs($1, $base_url)->as_string . '"';
         /ge;
+        # and this
+        $text =~ s/\@import\s+url\((.*?)\)/
+            '@import url(' . URI->new_abs($1, $base_url)->as_string . ')';
+        /ge;
 
         push (@segments, $text);
 
@@ -475,17 +485,17 @@ for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
     my $print;
      if (!defined $output[$job_i]) {
         # If it's a text job, translate it
-#        print STDERR "TRANSLATING: " . $input[$job_i] . "\n";
+        &log("TRANSLATING: " . $input[$job_i] . "\n");
         $output[$job_i] = &translate_text_with_placeholders
             ($input[$job_i], $moses, $tokenizer, $detokenizer);
 
         # replace placeholders by the original tags
-#        print STDERR "TRANSLATED: " . $output[$job_i] . "\n";
+        &log("TRANSLATED: " . $output[$job_i] . "\n");
         my @buf_tag_index = @{$segments[$job_i]};
         shift @buf_tag_index;
         $print = &replace_placeholders_by_tags
             ($output[$job_i], @buf_tag_index);
-#        print STDERR "OUTPUT: " . $print . "\n";
+        &log("OUTPUT: " . $print . "\n");
 
         # wrap in code to popup the original text onmouseover
         if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
@@ -497,7 +507,7 @@ for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
 
     } else {
         # HTML segments are just printed as-is
-#        print STDERR "HTML: " . $segments[$job_i] . "\n";
+        &log("HTML: " . $segments[$job_i] . "\n");
         $print = $segments[$job_i];
     }
 
@@ -546,9 +556,9 @@ sub translate_text_with_placeholders {
 
         # Translate the plain text sentence
         # my $s_traced_text = &_translate_text_pig_latin ($s_input_text);
-#        print STDERR "TOMOSES: " . $s_input_text . "\n";
+        &log("TOMOSES: " . $s_input_text . "\n");
         my $s_traced_text = &_translate_text_moses ($s_input_text, $moses);
-#        print STDERR "FROMMOSES: " . $s_traced_text . "\n";
+        &log("FROMMOSES: " . $s_traced_text . "\n");
 
         # Early post-translation formatting fixes
         #$s_traced_text .= " $split_token" if $split_token;
@@ -567,7 +577,7 @@ sub translate_text_with_placeholders {
     # that covered tokens in the corresponding source segment
     my $output_text = &_reinsert_placeholders
         ($traced_text, @tags_over_token);
-#    print STDERR "OUTPUT: " . $output_text . "\n";
+    &log("OUTPUT: " . $output_text . "\n");
 
     # Try to remove spaces inserted by the tokenizer
     $output_text = $detokenizer->do_line ($output_text);
@@ -652,7 +662,7 @@ sub _reinsert_placeholders {
         } ($from .. $to);
 
         $output_text .= " MOSESCLOSETAG$_ "
-            foreach (grep !$segment_tags{$_}, keys %cur_open_tags);
+            foreach (grep !$segment_tags{$_}, reverse keys %cur_open_tags);
         $output_text .= " MOSESOPENTAG$_ "
             foreach (grep !$cur_open_tags{$_}, keys %segment_tags);
         %cur_open_tags = %segment_tags;
@@ -722,6 +732,7 @@ sub _translate_text_moses {
     # /usr/lib/perl5/vendor_perl/5.10.0/HTTP/Message.pm were necessary
     # to get rid of 'Message content not bytes' errors
     $param{text} = SOAP::Data->type(string => Encode::encode_utf8($text));
+    $param{align} = "yes";
     
     $param{systemid} = $sysid;
     
@@ -731,7 +742,35 @@ sub _translate_text_moses {
     }
     my $traced_text = "";
     foreach my $r (@$result) {
-        $traced_text = $traced_text . " " . $r->{text};
+        my $returned_text = $r->{text};
+        my $returned_aligns = $r->{align};
+        my @tokens = split /\s+/, $returned_text;
+        if ($returned_aligns) {
+            $returned_text = "";
+            my $i = 0;
+            my $curr_align = shift (@$returned_aligns);
+            my $next_align = shift (@$returned_aligns);
+            foreach my $token (@tokens) {
+               if ($next_align && $next_align->{'tgt-start'} == $i) {
+                   $returned_text = $returned_text . " |" .
+                       $curr_align->{'src-start'} . "-" .
+                       $curr_align->{'src-end'} . "| ";
+                   $curr_align = $next_align;
+                   $next_align = shift @$returned_aligns; 
+               }
+               $returned_text = $returned_text . $token . " ";
+               ++$i;
+            }
+            if ($curr_align) {
+               $returned_text = $returned_text . " |" .
+                   $curr_align->{'src-start'} . "-" .
+                   $curr_align->{'src-end'} . "| ";
+            }
+        } else {
+            $returned_text = $returned_text . " |0-$#tokens|";
+            &log("ALIGN MISSING: " );
+        }
+        $traced_text = $traced_text . " " . $returned_text;
     }
 
 
