@@ -228,8 +228,8 @@ public class Translator  implements XmlRpcHandler{
                 throw new XmlRpcException("Incorrect number of parameters");
             }
 	        Map params = (Map)request.getParameter(0);
-	        TranslationJob job = new TranslationJob(params);
-	        TranslationJob[] resultJobs = translate(job);
+	        TranslationJob[] jobs = TranslationJob.create(params);
+	        TranslationJob[] resultJobs = translate(jobs);
 	        Object[] result = new Object[resultJobs.length];
 	        for (int i = 0; i < result.length; ++i) {
 	            result[i] = resultJobs[i].getResult();
@@ -251,14 +251,17 @@ public class Translator  implements XmlRpcHandler{
      * @param sources
      * @return
      */
-    private TranslationJob[]  translate(TranslationJob job) throws XmlRpcException  {
-        _logger.debug("received source sentence: '" + job.getText() + "'");
-        ToolChain tool = _toolChains.get(job.getSystemId());
+    private TranslationJob[]  translate(TranslationJob[] jobs) throws XmlRpcException  {
+        if (jobs.length == 0) {
+            _logger.warn("Empty text received");
+            return jobs;
+        }
+        ToolChain tool = _toolChains.get(jobs[0].getSystemId());
         if (tool == null) {
-        	throw new XmlRpcException("Unknown system id: " + job.getSystemId());
+        	throw new XmlRpcException("Unknown system id: " + jobs[0].getSystemId());
         }
         try {
-            return tool.process(job);
+            return tool.process(jobs);
         } catch (IOException e) {
             throw new XmlRpcException("Problem processing job",e);
         }

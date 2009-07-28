@@ -89,16 +89,20 @@ public class ToolChain  {
 
 
 
-    public TranslationJob[] process(TranslationJob inputJob) throws IOException{
+    public TranslationJob[] process(TranslationJob[] inputJobs) throws IOException{
         _logger.debug("Toolchain " + getName() + " processing request");
-        TranslationJob[] jobs = new TranslationJob[]{inputJob};
+        TranslationJob[] jobs = inputJobs;
         if (_splitter != null) {
-        	String[] outputText  = _splitter.split(inputJob.getText());
-        	jobs = new TranslationJob[outputText.length];
-            for (int i = 0; i < jobs.length; ++i) {
-                jobs[i] = new TranslationJob(inputJob, outputText[i]);
+            List<TranslationJob> jobsList = new ArrayList<TranslationJob>();
+            for (TranslationJob inputJob: inputJobs) {
+            	String[] outputText  = _splitter.split(inputJob.getText());
+                for (int i = 0; i < outputText.length; ++i) {
+                    jobsList.add(new TranslationJob(inputJob, outputText[i]));
+                }
             }
+            jobs = jobsList.toArray(new TranslationJob[]{});
         }
+        _logger.debug("Total jobs to process: " + jobs.length);
         if (_parallel) {
             Thread[] threads = new Thread[jobs.length];
             for (int i = 0; i < jobs.length; ++i) {
