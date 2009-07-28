@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 
 /**
@@ -28,27 +29,50 @@ public class TranslationJob {
 	private List<String> _debug;
 	private Map<String,Long> _timings = new HashMap<String, Long>();;
 	private long _startTime = System.currentTimeMillis();
+	
+	private static final Logger _logger = Logger.getLogger(TranslationJob.class);
 
 	/**
 	 * Does the demarshalling
 	 * @param params
 	 */
-	public TranslationJob(Map params) throws XmlRpcException{
-		_text = (String)params.get(FIELD_TEXT);
-		if (_text == null) {
-			throw new XmlRpcException("Missing text");
-		}
-		_systemId = (String)params.get(FIELD_SYSID);
-		if (_systemId == null) {
-			throw new XmlRpcException("Missing system id");
-		}
-		if (params.get(FIELD_DEBUG) != null) {
-		    _debug = new ArrayList<String>();
-		}
-		if (params.get(FIELD_ALIGN) != null) {
-		    _alignments = new ArrayList<Map>();
-		}
-		
+	public static TranslationJob[] create(Map params) throws XmlRpcException{
+	    Object textObject = params.get(FIELD_TEXT);
+	    String[] texts;
+	    if (textObject instanceof String) {
+	        texts = new String[]{(String)textObject};
+	    } else if (textObject instanceof Object[]) {
+	        Object[] textObjects  = (Object[])textObject;
+	        texts = new String[textObjects.length];
+	        for (int i = 0; i < texts.length; ++i) {
+	            texts[i] = (String)textObjects[i];
+	        }
+	    } else {
+	        throw new XmlRpcException("Text field is of incorrect type: " + (textObject == null ? "null" : textObject.getClass()));
+	    }
+	    TranslationJob[] jobs = new TranslationJob[texts.length];
+	    String systemId = (String)params.get(FIELD_SYSID);
+	    boolean debug = (params.get(FIELD_DEBUG) != null);
+	    boolean align = (params.get(FIELD_ALIGN) != null);
+	    if (systemId == null) {
+            throw new XmlRpcException("Missing system id");
+        }
+	    for (int i = 0; i < jobs.length; ++i) {
+    	    jobs[i] = new TranslationJob();
+    	    _logger.debug("Creating job with text: " + texts[i]);
+    		jobs[i]._text = texts[i];
+    		if (jobs[i]._text == null) {
+    			throw new XmlRpcException("Missing text");
+    		}
+    		jobs[i]._systemId = systemId;
+    		if (debug) {
+    		    jobs[i]._debug = new ArrayList<String>();
+    		}
+    		if (align) {
+    		    jobs[i]._alignments = new ArrayList<Map>();
+    		}
+	    }
+		return jobs;
 	}
 	
 	public TranslationJob(TranslationJob job, String text) {
@@ -61,6 +85,8 @@ public class TranslationJob {
 	         _alignments = new ArrayList<Map>(job._alignments);
 	     }
 	}
+	
+	private TranslationJob() {}
 	
 	public String getSystemId() {
 		return _systemId;
