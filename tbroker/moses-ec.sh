@@ -23,7 +23,9 @@ start() {
         exit 1
     fi
     for config in $configs; do
-        nohup $mosesserver $mosesargs  -f $config --server-port $port >& $logdir/mosesserver.$port.log &
+        log=$logdir/mosesserver.$port
+        echo "Starting at `date`" >> $log.err
+        nohup $mosesserver $mosesargs  -f $config --server-port $port >>$log.out 2>> $log.err &
         echo "$!" >> $pidfile
         port=`expr $port + 1`
     done
