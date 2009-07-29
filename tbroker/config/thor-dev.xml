@@ -33,9 +33,14 @@
             <port>8080</port>
         </moses-server>
         <moses-server>
-            <name>fr-en-acquis-server</name>
+            <name>it-en-acquis-server</name>
             <host>localhost</host>
             <port>1234</port>
+        </moses-server>
+        <moses-server>
+            <name>fr-en-acquis-server</name>
+            <host>localhost</host>
+            <port>9080</port>
         </moses-server>
     </moses-servers>
 
@@ -78,6 +83,10 @@
         <truecaser>
             <name>fr-true</name>
             <model>${model-dir}/acquis-truecased/truecaser/truecase-model.9.fr</model>
+        </truecaser>
+        <truecaser>
+            <name>it-true</name>
+            <model>${model-dir}/acquis-truecased/truecaser/truecase-model.11.it</model>
         </truecaser>
     </truecasers>
 
@@ -140,6 +149,20 @@
         <tool>fr-en-acquis-server</tool>
         <tool>en-detrue</tool>
     </toolchain>
+    <toolchain>
+        <name>it-en-web-server</name>
+        <description>Italian->English (Acquis) Server</description>
+        <tokinput>true</tokinput>
+        <source>it</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>it-true</tool>
+        <tool>it-en-acquis-server</tool>
+        <tool>en-detrue</tool>
+    </toolchain>
+
+
 
 
 </config>
