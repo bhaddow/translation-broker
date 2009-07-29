@@ -16,6 +16,8 @@ mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 # fr-en it-en nl-el de-fr en-lt hu-ro
 configs="/disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.11 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.120 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.192 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.253 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.389"
 
+ulimit -c unlimited
+
 start() {
     echo "Starting moses servers"
     if [ -f $pidfile ]; then
