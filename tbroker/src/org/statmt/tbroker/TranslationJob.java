@@ -19,10 +19,11 @@ public class TranslationJob {
 	public static final String FIELD_SYSID = "systemid";
 	public static final String FIELD_DEBUG = "debug";
 	public static final String FIELD_ALIGN = "align";
+	public static final String FIELD_SOURCEID = "sourceid";
 	
 	public static final String TIME_ELAPSED = "totaltime";
 	
-	
+	private int _sourceId; //position in source
 	private String _text;
 	private String _systemId;
 	private List<Map> _alignments;
@@ -71,6 +72,7 @@ public class TranslationJob {
     		if (align) {
     		    jobs[i]._alignments = new ArrayList<Map>();
     		}
+    		jobs[i]._sourceId = i;
 	    }
 		return jobs;
 	}
@@ -84,6 +86,7 @@ public class TranslationJob {
 	     if (job._alignments != null) {
 	         _alignments = new ArrayList<Map>(job._alignments);
 	     }
+	     _sourceId = job._sourceId;
 	}
 	
 	private TranslationJob() {}
@@ -127,6 +130,7 @@ public class TranslationJob {
 	public Map getResult() {
 		Map result = new HashMap();
 		result.put(FIELD_TEXT, _text);
+		result.put(FIELD_SOURCEID, _sourceId);
 		if (_debug != null) {
 		    result.put(FIELD_DEBUG, _debug);
 		}
