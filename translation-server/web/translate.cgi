@@ -121,6 +121,9 @@ my $RE_EOS_TOKEN = qr/^(?:\.+|[\?!:;])$/;
 
 my $RE_SPLIT_TOKEN = qr!^[\|\-]+$!;
 
+# Size of the batches to send to the server
+my $BATCH_SIZE = 8;
+
 #------------------------------------------------------------------------------
 # global vars
 
@@ -194,6 +197,7 @@ if (@ARGV && $ARGV[0] eq "debug") {
     $port = "7893";
     $url = "http://eur-lex.europa.eu/JOHtml.do?uri=OJ%3AL%3A2009%3A185%3ASOM%3AFR%3AHTML";
     $sysid = "fr-en-web-server";
+#    $sysid = "de-fr-web";
     $INPUT_LANG = "fr";
     $OUTPUT_LANG = "en";
     $debug = 1;
@@ -480,40 +484,70 @@ my @output = map { ref $_ ? undef : $_ } @segments;
 my $moses = XMLRPC::Lite->
     proxy("http://localhost:$port/xmlrpc");
 
-for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
 
-    my $print;
-     if (!defined $output[$job_i]) {
-        # If it's a text job, translate it
-        &log("TRANSLATING: " . $input[$job_i] . "\n");
-        $output[$job_i] = &translate_text_with_placeholders
-            ($input[$job_i], $moses, $tokenizer, $detokenizer);
+# How to do batching?
+# Step through the input array. Have an inner loop which fills up 
+# a list of job ids to be translated. Once this reaches batch size, 
+# the translation subroutine is called, and all text is printed out.
+#
 
-        # replace placeholders by the original tags
-        &log("TRANSLATED: " . $output[$job_i] . "\n");
-        my @buf_tag_index = @{$segments[$job_i]};
-        shift @buf_tag_index;
-        $print = &replace_placeholders_by_tags
-            ($output[$job_i], @buf_tag_index);
-        &log("OUTPUT: " . $print . "\n");
+my $job_i = 0;
+while ($job_i <= $#input) {
 
-        # wrap in code to popup the original text onmouseover
-        if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') {
-            $print = &add_original_text_popup
-                ($input[$job_i], $print);
-        } else {
-            $print =~ s/\"/&\#34;/g;
+    my @translations;
+    
+    my $start_i = $job_i;
+    # Collect translation batch
+    while ($#translations <= $BATCH_SIZE && $job_i <= $#input) {
+        if (!defined $output[$job_i]) {
+            push @translations, $input[$job_i];
         }
+
+        ++$job_i;
+    }
+
+    # do the translation
+    &translate_text_with_placeholders
+        (\@translations, $moses, $tokenizer, $detokenizer);
+
+    # replace tags etc.
+    my $end_i = $job_i;     
+    for ($job_i = $start_i; $job_i < $end_i; ++$job_i) {
+        my $print;
+        if (!defined $output[$job_i]) {
+            # If it's a text job, should be a translation
+            &log("TRANSLATING: " . $input[$job_i] . "\n");
+            $output[$job_i] = shift @translations;
+
+            # replace placeholders by the original tags
+            &log("TRANSLATED: " . $output[$job_i] . "\n");
+            my @buf_tag_index = @{$segments[$job_i]};
+            shift @buf_tag_index;
+            $print = &replace_placeholders_by_tags
+                ($output[$job_i], @buf_tag_index);
+            &log("OUTPUT: " . $print . "\n");
+
+            # wrap in code to popup the original text onmouseover
+            if (!defined($buf_tag_index[0]) || $buf_tag_index[0] ne '__NOPOPUP__') 
+            {
+                $print = &add_original_text_popup
+                    ($input[$job_i], $print);
+            } else {
+                $print =~ s/\"/&\#34;/g;
+            }
 
     } else {
         # HTML segments are just printed as-is
-        &log("HTML: " . $segments[$job_i] . "\n");
+        #&log("HTML: " . $segments[$job_i] . "\n");
         $print = $segments[$job_i];
     }
 
     print encode ('UTF-8', $print);
 
+
+    }
 }
+
 
 
 #------------------------------------------------------------------------------
@@ -530,59 +564,48 @@ for (my $job_i  = 0; $job_i <= $#input; ++$job_i) {
 # at the correct place in the translation.
 
 sub translate_text_with_placeholders {
-    my ($input_text, $moses, $tokenizer, $detokenizer) = @_;
-    my $traced_text = '';
+    my ($input_texts, $moses, $tokenizer, $detokenizer) = @_;
 
     # Start by tokenizing the text, with placeholders still in it. The
     # placeholders are designed to be interpreted as individual tokens by the
     # tokenizer.
-    my @tokens = split /\s+/, $tokenizer->do_line ($input_text);
-
-    # remove placeholders, and for each remaining token, make a list of the
-    # tags that cover it
-    @tokens = ('START', @tokens, 'END');
-    my @tags_over_token = &_extract_placeholders (\@tokens);
-    @tokens = @tokens[1 .. $#tokens-1];
-
-    if (@tokens) {
-
-        # Join together tokens into a plain text string. This is now ready to
-        # be shipped to Moses: all tags and placeholders have been removed,
-        # and it's a single sentence. We also lowercase as needed, and make
-        # a note of whether we did.
+    my @traced_texts;
+    my @tags_over_token;
+    foreach my $input_text (@$input_texts) {
+        my @tokens = split /\s+/, $tokenizer->do_line ($input_text);
+        next unless @tokens;
+        # remove placeholders, and for each remaining token, make a list of the
+        # tags that cover it
+        @tokens = ('START', @tokens, 'END');
+        my @tags_over_token_sentence = &_extract_placeholders (\@tokens);
+        push @tags_over_token, \@tags_over_token_sentence;
+        @tokens = @tokens[1 .. $#tokens-1];
         my $s_input_text = join (' ', @tokens);
-        my $was_allcaps =
-            ($s_input_text =~ s/^([\p{IsUpper}\P{IsAlpha}]+)$/lc $1;/e);
-
-        # Translate the plain text sentence
-        # my $s_traced_text = &_translate_text_pig_latin ($s_input_text);
-        &log("TOMOSES: " . $s_input_text . "\n");
-        my $s_traced_text = &_translate_text_moses ($s_input_text, $moses);
-        &log("FROMMOSES: " . $s_traced_text . "\n");
-
-        # Early post-translation formatting fixes
-        #$s_traced_text .= " $split_token" if $split_token;
-        $s_traced_text = uc      $s_traced_text if $was_allcaps;
-
-        # Update trace numbers to fit in the Grand Scheme of Things
-        $s_traced_text =~ s{\s*\|(\d+)-(\d+)\|}{
-            ' |' . ($1) . '-' . ($2) . '| ';
-        }ge;
-        #$token_base_i += @s_tokens + ($split_token ? 1 : 0);
-
-        $traced_text .= $s_traced_text . ' ';
+        push @traced_texts, $s_input_text;
     }
 
-    # Apply to every segment in the traced output the union of all tags
-    # that covered tokens in the corresponding source segment
-    my $output_text = &_reinsert_placeholders
-        ($traced_text, @tags_over_token);
-    &log("OUTPUT: " . $output_text . "\n");
+    # Get moses to translate
+    &_translate_text_moses(\@traced_texts, $moses);
 
-    # Try to remove spaces inserted by the tokenizer
-    $output_text = $detokenizer->do_line ($output_text);
+    # Reinsert placeholders
+    for (my $i = 0; $i <= $#traced_texts; ++$i) {
+        # Update trace numbers to fit in the Grand Scheme of Things
+        &log("FROMMOSES: " . $traced_texts[$i] . "\n");
+        $traced_texts[$i] =~ s{\s*\|(\d+)-(\d+)\|}{
+            ' |' . ($1) . '-' . ($2) . '| ';
+        }ge;
 
-    return $output_text;
+        $traced_texts[$i] .= ' ';
+
+        # Apply to every segment in the traced output the union of all tags
+        # that covered tokens in the corresponding source segment
+        $input_texts->[$i] = &_reinsert_placeholders
+            ($traced_texts[$i], @{$tags_over_token[$i]});
+
+        # Try to remove spaces inserted by the tokenizer
+        $input_texts->[$i] = $detokenizer->do_line($input_texts->[$i]);
+
+    }
 }
 
 
@@ -655,7 +678,6 @@ sub _reinsert_placeholders {
 
     while ($traced_text =~ s/^(.+?)\s*\|(\d+)-+(\d+)\|\s*//) {
         my ($segment, $from, $to) = ($1, $2+1, $3+1);
-
         # list all tags that cover the source segment
         my %segment_tags = map {$_ => 1} map {
             @{$tags_over_token[$_]};
@@ -731,7 +753,12 @@ sub _translate_text_moses {
     # help it by doing the encoding. Also hacks to 
     # /usr/lib/perl5/vendor_perl/5.10.0/HTTP/Message.pm were necessary
     # to get rid of 'Message content not bytes' errors
-    $param{text} = SOAP::Data->type(string => Encode::encode_utf8($text));
+    my @text_enc;
+    foreach my $line (@$text) {
+        &log("TOTRANSLATE: $line\n");
+        push @text_enc, SOAP::Data->type(string => Encode::encode_utf8($line));
+    }
+    $param{text} = \@text_enc;
     $param{align} = "yes";
     
     $param{systemid} = $sysid;
@@ -740,11 +767,18 @@ sub _translate_text_moses {
     if (!$result) {
         die "Failed to communicate with server";
     }
-    my $traced_text = "";
+
+    # Clear the text so that results can be inserted
+    for (my $i = 0; $i <= $#{$text}; ++$i) {
+        $text->[$i] = "";
+    }
+
     foreach my $r (@$result) {
         my $returned_text = $r->{text};
         my $returned_aligns = $r->{align};
+        my $sourceid = $r->{sourceid};
         my @tokens = split /\s+/, $returned_text;
+        # Insert alignments
         if ($returned_aligns) {
             $returned_text = "";
             my $i = 0;
@@ -767,23 +801,24 @@ sub _translate_text_moses {
                    $curr_align->{'src-end'} . "| ";
             }
         } else {
-            $returned_text = $returned_text . " |0-$#tokens|";
+            $returned_text = $returned_text . " |0-1|";
             &log("ALIGN MISSING: " );
         }
-        $traced_text = $traced_text . " " . $returned_text;
+        unless ($returned_text) {
+
+            # insert a fake trace if for some reason moses didn't return one
+            # (which most likely indicates something is quite wrong)
+            $returned_text = "FAILED" . " |0-1|";
+        }
+        &log("FROMTRANSLATE: ($sourceid) $returned_text\n");
+        $text->[$sourceid] .=  $returned_text . " ";
+        #$traced_text = $traced_text . " " . $returned_text;
     }
 
 
     #my $traced_text = $moses->do_line ($text);
-    unless ($traced_text) {
-        my @tokens = split /\s+/, $text;
+#    }
 
-        # insert a fake trace if for some reason moses didn't return one
-        # (which most likely indicates something is quite wrong)
-        $traced_text = "FAILED" . " |0-$#tokens|";
-    }
-
-    return $traced_text;
 }
 
 #------------------------------------------------------------------------------
