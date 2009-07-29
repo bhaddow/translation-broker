@@ -8,6 +8,8 @@ pidfile=/disk4/translation-server/pids.ec
 port=9080
 mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
 logdir=/disk4/translation-server/logs.ec
+mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
+#mosesargs=
 
 # fr-en it-en
 #configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis/moses.weight-reused.ini.11"
@@ -21,7 +23,7 @@ start() {
         exit 1
     fi
     for config in $configs; do
-        nohup $mosesserver -f $config --server-port $port >& $logdir/mosesserver.$port.log &
+        nohup $mosesserver $mosesargs  -f $config --server-port $port >& $logdir/mosesserver.$port.log &
         echo "$!" >> $pidfile
         port=`expr $port + 1`
     done
