@@ -127,7 +127,9 @@ public class Translator  implements XmlRpcHandler{
 	            String name = h.getString("name");
 	            String model = h.getString("model");
 	            String cmd[] = new String[]{exe,"--moses", moses, "--model", model};
-	            tools.put(name,new PipedTool(name,cmd));
+                PipedTool tool = new PipedTool(name,cmd);
+                tool.setSubstitutePipes(true);
+	            tools.put(name,tool);
 	        }
         }
 
