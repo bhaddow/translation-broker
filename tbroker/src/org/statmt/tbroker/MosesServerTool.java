@@ -76,7 +76,7 @@ public class MosesServerTool extends TranslationTool {
                 }
             }
         }  catch (XmlRpcException e) {
-             //TODO: Handle this better
+             _logger.error("Moses server translation failed", e);
              throw new RuntimeException(e);
         }
         long totalTime = System.currentTimeMillis() - startTime;

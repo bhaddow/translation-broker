@@ -6,8 +6,10 @@
 
 pidfile=/disk4/translation-server/pids
 port=8080
-configs="/disk4/translation-server/models/fr-en-news-commentary/moses.ini"
+model_dir=/disk4/translation-server/models
+configs="$model_dir/europarl/de-en/moses.ini.2 $model_dir/europarl/en-de/moses.ini.2 $model_dir/europarl/es-en/moses.ini.4 $model_dir/europarl/fr-en/moses.ini.2"
 mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
+mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 logdir=/disk4/translation-server/logs
 
 
@@ -19,7 +21,7 @@ start() {
     fi
     for config in $configs; do
         log=$logdir/mosesserver.$port
-            nohup $mosesserver -f $config --server-port $port >>$log.out 2>> $log.err  &
+            nohup $mosesserver $mosesargs -f $config --server-port $port >>$log.out 2>> $log.err  &
         echo "$!" >> $pidfile
         port=`expr $port + 1`
     done
