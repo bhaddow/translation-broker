@@ -10,27 +10,27 @@
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
-    <moses-pipes>
+<!--    <moses-pipes>
         <command>${moses}</command>
         <init-end-msg>The global weight vector</init-end-msg>
         <end-msg>Finished translating</end-msg>
         <stack>100</stack>
         <verbosity>2</verbosity>
-<!--        <moses-pipe>
+        <moses-pipe>
             <name>fr-en-moses</name>
             <model>${model-dir}/fr-en.matrix07b/moses.ini.1</model>
-        </moses-pipe> -->
+        </moses-pipe>
         <moses-pipe>
             <name>fr-en-acquis</name>
             <model>${model-dir}/acquis/moses.weight-reused.ini.9</model>
         </moses-pipe>
-    </moses-pipes> 
+    </moses-pipes>  -->
 
     <moses-servers>
         <moses-server>
-            <name>fr-en-nc</name>
+            <name>fr-en</name>
             <host>localhost</host>
-            <port>8080</port>
+            <port>8083</port>
         </moses-server>
         <moses-server>
             <name>it-en-acquis-server</name>
@@ -101,15 +101,15 @@
 
     <!-- Translation tool chains -->
     <toolchain>
-        <name>fr-en-nc</name>
-        <description>French-English (NewsCommentary)</description>
+        <name>fr-en</name>
+        <description>French-English (Europarl)</description>
         <source>fr</source>
         <parallel>true</parallel>
         <target>en</target>
         <split>true</split>
         <tool>fr-tok</tool>
         <tool>lower</tool>
-        <tool>fr-en-nc</tool>
+        <tool>fr-en</tool>
         <tool>en-recaser</tool>
         <tool>en-detok</tool>
     </toolchain>
@@ -125,7 +125,7 @@
         <tool>fr-en-nc</tool>
         <tool>en-recaser</tool>
     </toolchain> -->
-    <toolchain>
+<!--    <toolchain>
         <name>fr-en-web</name>
         <description>French->English (Acquis)</description>
         <tokinput>true</tokinput>
@@ -135,8 +135,8 @@
         <parallel>false</parallel>
         <tool>lower</tool>
         <tool>fr-en-acquis</tool>
-<!--        <tool>en-recaser-1</tool> -->
-    </toolchain>
+       <tool>en-recaser-1</tool>
+    </toolchain> -->
     <toolchain>
         <name>fr-en-web-server</name>
         <description>French->English (Acquis) Server</description>
