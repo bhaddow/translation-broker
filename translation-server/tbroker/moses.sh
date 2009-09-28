@@ -12,6 +12,7 @@ mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
 mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 logdir=/disk4/translation-server/logs
 
+ulimit -c unlimited
 
 start() {
     echo "Starting moses servers"
