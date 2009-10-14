@@ -33,6 +33,7 @@ public class MosesServerTool extends TranslationTool {
     
     private static final Logger _logger = Logger.getLogger(MosesServerTool.class);
     public  static final String PIPE = "APIPENOTFACTOR";
+    public static final int MAX_LENGTH = 2000; //max sentence length in chars
     
     private URL _url;
     
@@ -56,6 +57,10 @@ public class MosesServerTool extends TranslationTool {
             String text = job.getText();
             //Moses can't handle pipes!!!
             text = text.replaceAll("\\|",PIPE);
+            if (text.length() > MAX_LENGTH) {
+                _logger.warn("Line length " + text.length() + " exceeds limit. Truncating");
+                text = text.substring(0,MAX_LENGTH);
+            }
             params.put(TranslationJob.FIELD_TEXT,text);
             List<Map> alignments = job.getAlignments();
             if (alignments != null) {
