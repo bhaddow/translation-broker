@@ -6,7 +6,7 @@
     <model-dir>/disk4/webtrans-models</model-dir>
     <moses-dir>/disk3/bhaddow/moses</moses-dir>
     <recase-model-dir>/disk4/translation-server/models/recasing</recase-model-dir>
-    <moses>${moses-dir}/moses-cmd/src/moses</moses>
+    <moses>${moses-dir}/moses-cmd/src/moses.2560</moses>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
