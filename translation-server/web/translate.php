@@ -9,14 +9,14 @@ $key_status = "responseStatus";
 $key_details = "responseDetails";
 
 # read input params
-if (isset($_POST['langpair'])) {
-    $langpair = $_POST['langpair'];
+if (isset($_REQUEST['langpair'])) {
+    $langpair = $_REQUEST['langpair'];
 } else {
     error("No language pair");
 }
 
-if (isset($_POST['q'])) {
-    $input = $_POST['q'];
+if (isset($_REQUEST['q'])) {
+    $input = $_REQUEST['q'];
 } else {
     error("No input text");
 }
