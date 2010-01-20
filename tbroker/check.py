@@ -23,7 +23,8 @@ systems = [\
     (url_ec, "nl-el", "Richtlijn 2009/45/EG van het Europees Parlement en de Raad van 6 mei 2009 inzake veiligheidsvoorschriften en -normen voor passagiersschepen (Herschikking)"),
     (url_ec, "de-fr", "Bekanntmachung des bevorstehenden Außerkrafttretens bestimmter Antidumpingmaßnahmen"),
     (url_ec, "en-lt", "Acts adopted under the EC Treaty/Euratom Treaty whose publication is not obligatory"),
-    (url_ec, "hu-ro", "A LexAlert értesítési szolgáltatás jelenleg kidolgozás alatt áll, az interneten keresztül történő regisztrációra még nincs lehetőség.")]
+    (url_ec, "hu-ro", "A LexAlert értesítési szolgáltatás jelenleg kidolgozás alatt áll, az interneten keresztül történő regisztrációra még nincs lehetőség."),
+    (url_ec, "es-en", "Decisión del Consejo, de 27 de julio de 2009, relativa a la conclusión del procedimiento de consulta con la República de Guinea en virtud del artículo 96 del Acuerdo de Cotonú")]
 
 spaces = re.compile(r"\s+")
 

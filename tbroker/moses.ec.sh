@@ -13,8 +13,8 @@ mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 
 # fr-en it-en
 #configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis/moses.weight-reused.ini.11"
-# fr-en it-en nl-el de-fr en-lt hu-ro
-configs="/disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.11 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.120 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.192 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.253 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.389"
+# fr-en it-en nl-el de-fr en-lt hu-ro es-en
+configs="/disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.11 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.120 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.192 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.253 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.389 /disk4/webtrans-models/acquis-truecased/moses.weight-reused.ini.6"
 
 ulimit -c unlimited
 
