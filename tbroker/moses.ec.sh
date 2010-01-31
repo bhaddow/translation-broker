@@ -10,6 +10,7 @@ mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
 logdir=/disk4/translation-server/logs.ec
 mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 #mosesargs=
+export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
 
 # fr-en it-en
 #configs="/disk4/webtrans-models/acquis/moses.weight-reused.ini.9 /disk4/webtrans-models/acquis/moses.weight-reused.ini.11"

@@ -11,6 +11,7 @@ configs="$model_dir/europarl/de-en/moses.ini.2 $model_dir/europarl/en-de/moses.i
 mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
 mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 logdir=/disk4/translation-server/logs
+export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
 
 ulimit -c unlimited
 

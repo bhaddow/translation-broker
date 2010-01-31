@@ -33,7 +33,7 @@ public class MosesServerTool extends TranslationTool {
     
     private static final Logger _logger = Logger.getLogger(MosesServerTool.class);
     public  static final String PIPE = "APIPENOTFACTOR";
-    public static final int MAX_LENGTH = 1200; //max sentence length in chars
+    public static final int MAX_LENGTH = 600; //max sentence length in chars
     
     private URL _url;
     
