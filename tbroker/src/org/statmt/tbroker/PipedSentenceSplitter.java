@@ -65,6 +65,8 @@ public class PipedSentenceSplitter extends SentenceSplitter {
             _logger.debug(" Read " + output.size() + " lines from splitter");
         }
         
+        processOut.close();
+        processErr.close();
         return output.toArray(new String[]{});
     }
 
