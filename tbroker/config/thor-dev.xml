@@ -3,44 +3,21 @@
     <port>7893</port>
 
     <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
-    <model-dir>/disk4/webtrans-models</model-dir>
-    <recase-model-dir>/disk4/translation-server/models/recasing</recase-model-dir>
-    <moses-dir>/disk3/bhaddow/moses</moses-dir>
-    <moses>${moses-dir}/moses-cmd/src/moses</moses>
+    <model-dir>/disk6/webtrans-models</model-dir>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
-
-    <!-- Translation tools -->
-<!--    <moses-pipes>
-        <command>${moses}</command>
-        <init-end-msg>The global weight vector</init-end-msg>
-        <end-msg>Finished translating</end-msg>
-        <stack>100</stack>
-        <verbosity>2</verbosity>
-        <moses-pipe>
-            <name>fr-en-moses</name>
-            <model>${model-dir}/fr-en.matrix07b/moses.ini.1</model>
-        </moses-pipe>
-        <moses-pipe>
-            <name>fr-en-acquis</name>
-            <model>${model-dir}/acquis/moses.weight-reused.ini.9</model>
-        </moses-pipe>
-    </moses-pipes>  -->
 
     <moses-servers>
         <moses-server>
-            <name>fr-en</name>
+            <name>fr-en-moses</name>
             <host>localhost</host>
-            <port>8083</port>
+            <port>7080</port>
+            <system>fr</system>
         </moses-server>
         <moses-server>
-            <name>it-en-acquis-server</name>
+            <name>de-en-moses</name>
             <host>localhost</host>
-            <port>1234</port>
-        </moses-server>
-        <moses-server>
-            <name>fr-en-acquis-server</name>
-            <host>localhost</host>
-            <port>9080</port>
+            <port>7080</port>
+            <system>de</system>
         </moses-server>
     </moses-servers>
 
@@ -48,27 +25,14 @@
     <tokenisers>
         <command>${support-tools-dir}/tokenizer.perl</command>
         <tokeniser>
+            <name>de-tok</name>
+            <language>de</language>
+        </tokeniser>
+        <tokeniser>
             <name>fr-tok</name>
             <language>fr</language>
         </tokeniser>
     </tokenisers>
-
-    <lowercasers>
-        <command>${support-tools-dir}/lowercase.perl</command>
-        <lowercaser>
-            <name>lower</name>
-        </lowercaser>
-    </lowercasers>
-        
-
-    <recasers>
-        <command>${support-tools-dir}/recase.perl</command>
-        <moses>${moses}</moses>
-        <recaser>
-            <name>en-recaser</name>
-            <model>${recase-model-dir}/matrix07b/model.1/moses.ini.1</model>
-        </recaser>
-    </recasers>
 
     <detokenisers>
         <command>${support-tools-dir}/detokenizer.perl</command>
@@ -82,11 +46,11 @@
         <command>${support-tools-dir}/truecase.perl</command>
         <truecaser>
             <name>fr-true</name>
-            <model>${model-dir}/acquis-truecased/truecaser/truecase-model.9.fr</model>
+            <model>${model-dir}/wmt10-fr-en/truecase-model.1.fr</model>
         </truecaser>
         <truecaser>
-            <name>it-true</name>
-            <model>${model-dir}/acquis-truecased/truecaser/truecase-model.11.it</model>
+            <name>de-true</name>
+            <model>${model-dir}/wmt10-de-en/truecase-model.1.de</model>
         </truecaser>
     </truecasers>
 
@@ -102,67 +66,30 @@
     <!-- Translation tool chains -->
     <toolchain>
         <name>fr-en</name>
-        <description>French-English (Europarl)</description>
+        <description>French->English</description>
+        <tokinput>false</tokinput>
         <source>fr</source>
-        <parallel>true</parallel>
         <target>en</target>
         <split>true</split>
+        <parallel>true</parallel>
         <tool>fr-tok</tool>
-        <tool>lower</tool>
-        <tool>fr-en</tool>
-        <tool>en-recaser</tool>
+        <tool>fr-true</tool>
+        <tool>fr-en-moses</tool>
+        <tool>en-detrue</tool>
         <tool>en-detok</tool>
     </toolchain>
-<!--    <toolchain>
-        <name>fr-en-nc-bare</name>
-        <description>French-English (NewsCommentary)</description>
-        <source>fr</source>
-        <split>true</split>
-        <parallel>true</parallel>
-        <target>en</target>
-        <tokinput>true</tokinput>
-        <tool>lower</tool>
-        <tool>fr-en-nc</tool>
-        <tool>en-recaser</tool>
-    </toolchain> -->
-<!--    <toolchain>
-        <name>fr-en-web</name>
-        <description>French->English (Acquis)</description>
-        <tokinput>true</tokinput>
-        <source>fr</source>
-        <target>en</target>
-        <split>true</split>
-        <parallel>false</parallel>
-        <tool>lower</tool>
-        <tool>fr-en-acquis</tool>
-       <tool>en-recaser-1</tool>
-    </toolchain> -->
     <toolchain>
-        <name>fr-en-web-server</name>
-        <description>French->English (Acquis) Server</description>
-        <tokinput>true</tokinput>
-        <source>fr</source>
+        <name>de-en</name>
+        <description>German->English</description>
+        <tokinput>false</tokinput>
+        <source>de</source>
         <target>en</target>
         <split>true</split>
         <parallel>true</parallel>
-        <tool>fr-true</tool>
-        <tool>fr-en-acquis-server</tool>
+        <tool>de-tok</tool>
+        <tool>de-true</tool>
+        <tool>de-en-moses</tool>
         <tool>en-detrue</tool>
+        <tool>en-detok</tool>
     </toolchain>
-    <toolchain>
-        <name>it-en-web-server</name>
-        <description>Italian->English (Acquis) Server</description>
-        <tokinput>true</tokinput>
-        <source>it</source>
-        <target>en</target>
-        <split>true</split>
-        <parallel>true</parallel>
-        <tool>it-true</tool>
-        <tool>it-en-acquis-server</tool>
-        <tool>en-detrue</tool>
-    </toolchain>
-
-
-
-
 </config>

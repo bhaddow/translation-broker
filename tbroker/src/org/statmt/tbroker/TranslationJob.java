@@ -19,6 +19,7 @@ public class TranslationJob {
 	public static final String FIELD_SYSID = "systemid";
 	public static final String FIELD_DEBUG = "debug";
 	public static final String FIELD_ALIGN = "align";
+	public static final String FIELD_SYSTEM = "system";
 	public static final String FIELD_SOURCEID = "sourceid";
 	
 	public static final String TIME_ELAPSED = "totaltime";

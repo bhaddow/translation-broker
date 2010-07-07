@@ -36,13 +36,16 @@ public class MosesServerTool extends TranslationTool {
     public static final int MAX_LENGTH = 600; //max sentence length in chars
     
     private URL _url;
+    private String _systemId;
     
     public MosesServerTool(String name, HierarchicalConfiguration config) throws MalformedURLException {
         super(name);
         String host = config.getString("host");
         int port = config.getInteger("port",8080);
         _url = new URL("http://" +host + ":" + port + "/RPC2");
-        _logger.info("Created moses server tool with URL; " + _url);
+        _systemId = config.getString("system","default");
+        _logger.info("Created moses server tool with URL; " + _url +
+            " and system id " + _systemId);
     }
 
     @Override
@@ -62,6 +65,7 @@ public class MosesServerTool extends TranslationTool {
                 text = text.substring(0,MAX_LENGTH);
             }
             params.put(TranslationJob.FIELD_TEXT,text);
+            params.put(TranslationJob.FIELD_SYSTEM,_systemId);
             List<Map> alignments = job.getAlignments();
             if (alignments != null) {
                 params.put(TranslationJob.FIELD_ALIGN, "true");
