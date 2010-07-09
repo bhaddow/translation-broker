@@ -3,33 +3,40 @@
     <port>7894</port>
 
     <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
-    <model-dir>/disk4/webtrans-models</model-dir>
-    <moses-dir>/disk3/bhaddow/moses</moses-dir>
-    <recase-model-dir>/disk4/translation-server/models/recasing</recase-model-dir>
-    <moses>${moses-dir}/moses-cmd/src/moses.2560</moses>
+    <model-dir>/disk6/webtrans-models</model-dir>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
     <moses-servers>
         <moses-server>
+            <name>fr-en-moses</name>
+            <host>localhost</host>
+            <port>8080</port>
+            <system>fr</system>
+        </moses-server>
+        <moses-server>
             <name>de-en-moses</name>
             <host>localhost</host>
             <port>8080</port>
+            <system>de</system>
+        </moses-server>
+        <moses-server>
+            <name>es-en-moses</name>
+            <host>localhost</host>
+            <port>8080</port>
+            <system>es</system>
+        </moses-server>
+        <moses-server>
+            <name>cz-en-moses</name>
+            <host>localhost</host>
+            <port>8080</port>
+            <system>cz</system>
         </moses-server>
         <moses-server>
             <name>en-de-moses</name>
             <host>localhost</host>
             <port>8081</port>
-        </moses-server>
-        <moses-server>
-            <name>es-en-moses</name>
-            <host>localhost</host>
-            <port>8082</port>
-        </moses-server>
-        <moses-server>
-            <name>fr-en-moses</name>
-            <host>localhost</host>
-            <port>8083</port>
+            <system>en</system>
         </moses-server>
     </moses-servers>
 
@@ -51,28 +58,11 @@
             <name>es-tok</name>
             <language>es</language>
         </tokeniser>
+        <tokeniser>
+            <name>cz-tok</name>
+            <language>cz</language>
+        </tokeniser>
     </tokenisers>
-
-    <lowercasers>
-        <command>${support-tools-dir}/lowercase.perl</command>
-        <lowercaser>
-            <name>lower</name>
-        </lowercaser>
-    </lowercasers>
-        
-
-    <recasers>
-        <command>${support-tools-dir}/recase.perl</command>
-        <moses>${moses}</moses>
-        <recaser>
-            <name>de-recaser</name>
-            <model>${recase-model-dir}/matrix07b/model.4/moses.ini.4</model>
-        </recaser>
-        <recaser>
-            <name>en-recaser</name>
-            <model>${recase-model-dir}/matrix07b/model.1/moses.ini.1</model>
-        </recaser>
-    </recasers>
 
     <detokenisers>
         <command>${support-tools-dir}/detokenizer.perl</command>
@@ -87,105 +77,165 @@
     </detokenisers>
 
 
+    <truecasers>
+        <command>${support-tools-dir}/truecase.perl</command>
+        <truecaser>
+            <name>fr-true</name>
+            <model>${model-dir}/wmt10-fr-en/truecase-model.1.fr</model>
+        </truecaser>
+        <truecaser>
+            <name>de-true</name>
+            <model>${model-dir}/wmt10-de-en/truecase-model.1.de</model>
+        </truecaser>
+        <truecaser>
+            <name>cz-true</name>
+            <model>${model-dir}/wmt10-cz-en/truecase-model.1.cz</model>
+        </truecaser>
+        <truecaser>
+            <name>es-true</name>
+            <model>${model-dir}/wmt10-es-en/truecase-model.1.es</model>
+        </truecaser>
+        <truecaser>
+            <name>en-true</name>
+            <model>${model-dir}/wmt10-de-en/truecase-model.1.en</model>
+        </truecaser>
+    </truecasers>
+
+    <detruecasers>
+        <command>${support-tools-dir}/detruecase.perl</command>
+        <detruecaser>
+            <name>en-detrue</name>
+        </detruecaser>
+        <detruecaser>
+            <name>de-detrue</name>
+        </detruecaser>
+    </detruecasers>
+
+
     <!-- Translation tool chains -->
     <toolchain>
         <name>fr-en</name>
-        <description>French->English (Europarl)</description>
+        <description>French->English</description>
         <source>fr</source>
         <target>en</target>
         <split>true</split>
         <parallel>true</parallel>
         <tool>fr-tok</tool>
-        <tool>lower</tool>
+        <tool>fr-true</tool>
         <tool>fr-en-moses</tool>
-        <tool>en-recaser</tool>
+        <tool>en-detrue</tool>
         <tool>en-detok</tool>
     </toolchain>
     <toolchain>
         <name>de-en</name>
-        <description>German->English (Europarl)</description>
+        <description>German->English</description>
         <source>de</source>
         <target>en</target>
         <split>true</split>
         <parallel>true</parallel>
         <tool>de-tok</tool>
-        <tool>lower</tool>
+        <tool>de-true</tool>
         <tool>de-en-moses</tool>
-        <tool>en-recaser</tool>
+        <tool>en-detrue</tool>
         <tool>en-detok</tool>
     </toolchain>
     <toolchain>
         <name>es-en</name>
-        <description>Spanish->English (Europarl)</description>
+        <description>Spanish->English</description>
         <source>es</source>
         <target>en</target>
         <split>true</split>
         <parallel>true</parallel>
         <tool>es-tok</tool>
-        <tool>lower</tool>
+        <tool>es-true</tool>
         <tool>es-en-moses</tool>
-        <tool>en-recaser</tool>
+        <tool>en-detrue</tool>
+        <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>cz-en</name>
+        <description>Czech->English</description>
+        <source>cz</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>cz-tok</tool>
+        <tool>cz-true</tool>
+        <tool>cz-en-moses</tool>
+        <tool>en-detrue</tool>
         <tool>en-detok</tool>
     </toolchain>
     <toolchain>
         <name>en-de</name>
-        <description>English->German (Europarl)</description>
+        <description>English->German</description>
         <source>en</source>
         <target>de</target>
         <parallel>true</parallel>
         <split>true</split>
         <tool>en-tok</tool>
-        <tool>lower</tool>
+        <tool>en-true</tool>
         <tool>en-de-moses</tool>
-        <tool>de-recaser</tool>
+        <tool>de-detrue</tool>
         <tool>de-detok</tool>
     </toolchain>
     <toolchain>
         <name>fr-en-bare</name>
-        <description>French->English (Europarl)</description>
+        <description>French->English</description>
         <split>true</split>
         <parallel>true</parallel>
         <source>fr</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <tool>lower</tool>
+        <tool>fr-true</tool>
         <tool>fr-en-moses</tool>
-        <tool>en-recaser</tool>
+        <tool>en-detrue</tool>
     </toolchain>
     <toolchain>
         <name>de-en-bare</name>
-        <description>German->English (Europarl)</description>
+        <description>German->English</description>
         <split>true</split>
         <parallel>true</parallel>
         <source>de</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <tool>lower</tool>
+        <tool>de-true</tool>
         <tool>de-en-moses</tool>
-        <tool>en-recaser</tool>
+        <tool>en-detrue</tool>
     </toolchain>
     <toolchain>
         <name>es-en-bare</name>
-        <description>Spanish->English (Europarl)</description>
+        <description>Spanish->English</description>
         <split>true</split>
         <parallel>true</parallel>
         <source>es</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <tool>lower</tool>
+        <tool>es-true</tool>
         <tool>es-en-moses</tool>
-        <tool>en-recaser</tool>
+        <tool>en-detrue</tool>
+    </toolchain>
+    <toolchain>
+        <name>cz-en-bare</name>
+        <description>Czech->English</description>
+        <split>true</split>
+        <parallel>true</parallel>
+        <source>cz</source>
+        <target>en</target>
+        <tokinput>true</tokinput>
+        <tool>cz-true</tool>
+        <tool>cz-en-moses</tool>
+        <tool>en-detrue</tool>
     </toolchain>
     <toolchain>
         <name>en-de-bare</name>
-        <description>English->German (Europarl)</description>
+        <description>English->German</description>
         <split>true</split>
         <parallel>true</parallel>
         <source>en</source>
         <target>de</target>
         <tokinput>true</tokinput>
-        <tool>lower</tool>
+        <tool>en-true</tool>
         <tool>en-de-moses</tool>
-        <tool>de-recaser</tool>
+        <tool>de-detrue</tool>
     </toolchain>
 </config>
