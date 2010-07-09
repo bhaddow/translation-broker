@@ -24,7 +24,7 @@ restart_server() {
     $1 start
 }
 
-if  !  check 808 4 ; then
+if  !  check 808 2 ; then
     echo "Moses prod server missing"
     restart_server $tserver_dir/moses.sh prod
 #else 

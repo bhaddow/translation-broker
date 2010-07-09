@@ -6,9 +6,9 @@
 
 pidfile=/disk4/translation-server/pids
 port=8080
-model_dir=/disk4/translation-server/models
-configs="$model_dir/europarl/de-en/moses.ini.2 $model_dir/europarl/en-de/moses.ini.2 $model_dir/europarl/es-en/moses.ini.4 $model_dir/europarl/fr-en/moses.ini.2"
-mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
+model_dir=/disk4/translation-server/tbroker/models
+configs="$model_dir/moses-en.ini $model_dir/moses-de.ini"
+mosesserver=/disk3/bhaddow/moses-mm/server/mosesserver.3343
 mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 logdir=/disk4/translation-server/logs
 export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
