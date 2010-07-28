@@ -6,7 +6,7 @@
 
 pidfile=/disk4/translation-server/pids
 port=8080
-model_dir=/disk4/translation-server/tbroker/models
+model_dir=/disk4/translation-server/models
 configs="$model_dir/moses-en.ini $model_dir/moses-de.ini"
 mosesserver=/disk3/bhaddow/moses-mm/server/mosesserver.3343
 mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
@@ -37,7 +37,7 @@ stop() {
         exit 1
     fi
     for pid in `cat $pidfile`; do
-        kill $pid
+        kill -9 $pid
     done
     rm $pidfile
 }
