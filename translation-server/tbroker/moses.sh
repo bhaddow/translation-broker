@@ -6,10 +6,10 @@
 
 pidfile=/disk4/translation-server/pids
 port=8080
-model_dir=/disk4/translation-server/models
-configs="$model_dir/moses-en.ini $model_dir/moses-de.ini"
-mosesserver=/disk3/bhaddow/moses-mm/server/mosesserver.3343
-mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
+model_dir=/disk3/bhaddow/experiments/demo/binarised
+configs="$model_dir/moses.ini.en $model_dir/moses.ini.de"
+mosesserver=/disk3/bhaddow/experiments/demo/dist/1796c3b/bin/mosesserver
+mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500 -persistent-cache-size 250000"
 logdir=/disk4/translation-server/logs
 export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
 

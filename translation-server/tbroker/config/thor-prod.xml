@@ -3,7 +3,7 @@
     <port>7894</port>
 
     <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
-    <model-dir>/disk6/webtrans-models</model-dir>
+    <true-model-dir>/disk3/bhaddow/experiments/demo/true</true-model-dir>
     <splitter>${support-tools-dir}/split-sentences.perl</splitter>
 
     <!-- Translation tools -->
@@ -27,10 +27,10 @@
             <system>es</system>
         </moses-server>
         <moses-server>
-            <name>cz-en-moses</name>
+            <name>cs-en-moses</name>
             <host>localhost</host>
             <port>8080</port>
-            <system>cz</system>
+            <system>cs</system>
         </moses-server>
         <moses-server>
             <name>en-de-moses</name>
@@ -59,8 +59,8 @@
             <language>es</language>
         </tokeniser>
         <tokeniser>
-            <name>cz-tok</name>
-            <language>cz</language>
+            <name>cs-tok</name>
+            <language>cs</language>
         </tokeniser>
     </tokenisers>
 
@@ -81,23 +81,23 @@
         <command>${support-tools-dir}/truecase.perl</command>
         <truecaser>
             <name>fr-true</name>
-            <model>${model-dir}/wmt10-fr-en/truecase-model.1.fr</model>
+            <model>${true-model-dir}/truecase-model.fr</model>
         </truecaser>
         <truecaser>
             <name>de-true</name>
-            <model>${model-dir}/wmt10-de-en/truecase-model.1.de</model>
+            <model>${true-model-dir}/truecase-model.de</model>
         </truecaser>
         <truecaser>
-            <name>cz-true</name>
-            <model>${model-dir}/wmt10-cz-en/truecase-model.1.cz</model>
+            <name>cs-true</name>
+            <model>${true-model-dir}/truecase-model.cs</model>
         </truecaser>
         <truecaser>
             <name>es-true</name>
-            <model>${model-dir}/wmt10-es-en/truecase-model.1.es</model>
+            <model>${true-model-dir}/truecase-model.es</model>
         </truecaser>
         <truecaser>
             <name>en-true</name>
-            <model>${model-dir}/wmt10-de-en/truecase-model.1.en</model>
+            <model>${true-model-dir}/truecase-model.en</model>
         </truecaser>
     </truecasers>
 
@@ -153,15 +153,15 @@
         <tool>en-detok</tool>
     </toolchain>
     <toolchain>
-        <name>cz-en</name>
+        <name>cs-en</name>
         <description>Czech->English</description>
-        <source>cz</source>
+        <source>cs</source>
         <target>en</target>
         <split>true</split>
         <parallel>true</parallel>
-        <tool>cz-tok</tool>
-        <tool>cz-true</tool>
-        <tool>cz-en-moses</tool>
+        <tool>cs-tok</tool>
+        <tool>cs-true</tool>
+        <tool>cs-en-moses</tool>
         <tool>en-detrue</tool>
         <tool>en-detok</tool>
     </toolchain>
@@ -215,15 +215,15 @@
         <tool>en-detrue</tool>
     </toolchain>
     <toolchain>
-        <name>cz-en-bare</name>
+        <name>cs-en-bare</name>
         <description>Czech->English</description>
         <split>true</split>
         <parallel>true</parallel>
-        <source>cz</source>
+        <source>cs</source>
         <target>en</target>
         <tokinput>true</tokinput>
-        <tool>cz-true</tool>
-        <tool>cz-en-moses</tool>
+        <tool>cs-true</tool>
+        <tool>cs-en-moses</tool>
         <tool>en-detrue</tool>
     </toolchain>
     <toolchain>
