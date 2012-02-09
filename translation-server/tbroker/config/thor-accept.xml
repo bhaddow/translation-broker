@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<config>
+    <port>7896</port>
+
+    <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
+    <true-model-dir>/disk3/bhaddow/experiments/demo/true</true-model-dir>
+    <splitter>${support-tools-dir}/split-sentences.perl</splitter>
+
+    <!-- Translation tools -->
+    <moses-servers>
+        <moses-server>
+            <name>sb-en-fr</name>
+            <host>localhost</host>
+            <port>8180</port>
+            <system>fr</system>
+        </moses-server>
+    </moses-servers>
+
+    <tokenisers>
+        <command>${support-tools-dir}/tokenizer.perl</command>
+        <tokeniser>
+            <name>en-tok</name>
+            <language>en</language>
+        </tokeniser>
+    </tokenisers>
+
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>de-detok</name>
+            <language>de</language>
+        </detokeniser>
+        <detokeniser>
+            <name>fr-detok</name>
+            <language>fr</language>
+        </detokeniser>
+    </detokenisers>
+
+
+    <truecasers>
+        <command>${support-tools-dir}/truecase.perl</command>
+            <name>en-true</name>
+            <model>${true-model-dir}/truecase-model.en</model>
+        </truecaser>
+    </truecasers>
+
+    <detruecasers>
+        <command>${support-tools-dir}/detruecase.perl</command>
+        <detruecaser>
+            <name>fr-detrue</name>
+        </detruecaser>
+        <detruecaser>
+            <name>de-detrue</name>
+        </detruecaser>
+    </detruecasers>
+
+
+    <!-- Translation tool chains -->
+    <toolchain>
+        <name>sb-en-fr</name>
+        <description>English->French (Symantec baseline)</description>
+        <source>en</source>
+        <target>fr</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-tok</tool>
+        <tool>en-true</tool>
+        <tool>sb-en-fr</tool>
+        <tool>fr-detrue</tool>
+        <tool>fr-detok</tool>
+    </toolchain>
+</config>
