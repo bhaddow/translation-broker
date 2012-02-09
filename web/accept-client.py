@@ -8,13 +8,12 @@
 import urllib
 
 def main():
-    urls = [" http://ajax.googleapis.com/ajax/services/language/translate",  "http://demo.statmt.org/ec/translate.php"]
+    urls = ["http://accept.statmt.org/demo/translate.php"]
     for url in urls:
         print url
-        source = "es"
+        source = "fr"
         target = "en"
-        #input_text = "Je ne sais pas."
-        input_text = "C’est une vache de couleur froment vif, plus claire sous le ventre et autour des yeux et du mufle, avec des muqueuses rose clair."
+        input_text = "I clearly stated in my earlier post this is what the tech guy did - and I reported his exact steps ."
         params = urllib.urlencode({'v' : '1.0', 'ie' : 'UTF8', \
             'langpair' : '%s|%s' % (source,target), 'q' : input_text})
         f = urllib.urlopen(url,params)

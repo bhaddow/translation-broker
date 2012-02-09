@@ -13,6 +13,7 @@ my $html_dir;
 my $port;
 my $dev;
 my $delete;
+my $web = 1;
 
 if ($ARGV[0] eq "prod") {
     $html_dir = "/disk4/html/demo";
@@ -24,6 +25,12 @@ if ($ARGV[0] eq "prod") {
     $port = 7895;
     $dev = "ec";
     $delete = "--delete";
+} elsif ($ARGV[0] eq "accept") {
+    $html_dir = "/disk4/html/accept/demo";
+    $port = 7896;
+    $dev = "accept";
+    $delete = "--delete";
+    $web = 0;
 } else {
     $html_dir = "/disk4/html/demo/dev";
     $port = 7893;
@@ -42,3 +49,7 @@ foreach my $file ("$html_dir/index.php", "$html_dir/web.cgi", "$html_dir/transla
        system("perl -pi -e   's/__DEV__/$dev/g' $file");
    }  
 
+if (! $web) {
+    system("perl -pi -e 's/.*web.cgi.*//g' $html_dir/index.php");
+    system("rm $html_dir/web.cgi");
+}
