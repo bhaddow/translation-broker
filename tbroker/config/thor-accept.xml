@@ -12,7 +12,13 @@
             <name>sb-en-fr</name>
             <host>localhost</host>
             <port>8180</port>
-            <system>fr</system>
+            <system>default</system>
+        </moses-server>
+        <moses-server>
+            <name>sb-en-de</name>
+            <host>localhost</host>
+            <port>8181</port>
+            <system>default</system>
         </moses-server>
     </moses-servers>
 
@@ -39,6 +45,7 @@
 
     <truecasers>
         <command>${support-tools-dir}/truecase.perl</command>
+        <truecaser>
             <name>en-true</name>
             <model>${true-model-dir}/truecase-model.en</model>
         </truecaser>
@@ -68,5 +75,18 @@
         <tool>sb-en-fr</tool>
         <tool>fr-detrue</tool>
         <tool>fr-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>sb-en-de</name>
+        <description>English->German (Symantec baseline)</description>
+        <source>en</source>
+        <target>de</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-tok</tool>
+        <tool>en-true</tool>
+        <tool>sb-en-de</tool>
+        <tool>de-detrue</tool>
+        <tool>de-detok</tool>
     </toolchain>
 </config>
