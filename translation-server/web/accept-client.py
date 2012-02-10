@@ -5,6 +5,7 @@
 # Translates using the google api style interface
 #
 
+import json
 import urllib
 
 def main():
@@ -17,8 +18,8 @@ def main():
         params = urllib.urlencode({'v' : '1.0', 'ie' : 'UTF8', \
             'langpair' : '%s|%s' % (source,target), 'q' : input_text})
         f = urllib.urlopen(url,params)
-        for line in f:
-            print line[:-1]
+        response = json.loads(f.readline())
+        print response['responseData']['translatedText']
 
 
 
