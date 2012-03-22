@@ -116,6 +116,20 @@ public class Translator  implements XmlRpcHandler{
 	        }
         }
         
+        //desegmenters
+        if (!config.configurationsAt("desegmenters").isEmpty()) {
+        	SubnodeConfiguration subconf = config.configurationAt("desegmenters");
+	        String exe = subconf.getString("command");
+	        List lconfs = subconf.configurationsAt("desegmenter");
+	        for (Iterator i = lconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String cmd[] = new String[]{exe};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
+        }
+        
+ 
         //recasers
         if (!config.configurationsAt("recasers").isEmpty()) {
         	SubnodeConfiguration subconf = config.configurationAt("recasers");

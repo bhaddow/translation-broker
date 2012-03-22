@@ -16,10 +16,15 @@ def main():
         target = "fr"
         input_text = "I clearly stated in my earlier post this is what the tech guy did - and I reported his exact steps ."
         params = urllib.urlencode({'v' : '1.0', 'ie' : 'UTF8', \
-            'langpair' : '%s|%s' % (source,target), 'q' : input_text})
+            'langpair' : '%s|%s' % (source,target),\
+            'system' : 'sb', 'q' : input_text})
         f = urllib.urlopen(url,params)
-        response = json.loads(f.readline())
-        print response['responseData']['translatedText']
+        line = f.readline()
+        response = json.loads(line)
+        if not response['responseData']:
+            print "Error: ", response['responseDetails']
+        else: 
+            print response['responseData']['translatedText']
 
 
 
