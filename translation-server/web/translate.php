@@ -15,6 +15,12 @@ if (isset($_REQUEST['langpair'])) {
     error("No language pair");
 }
 
+if (isset($_REQUEST['system'])) {
+    $system = $_REQUEST['system'];
+} else {
+    error("No system - should be sb or tb");
+}
+
 if (isset($_REQUEST['q'])) {
     $input = $_REQUEST['q'];
 } else {
@@ -30,7 +36,8 @@ if ($response->faultCode()) {
    error("Unable to communicate with translation server");
 }
 
-$sysid = Null;
+$sysid = $system . "-" . substr($langpair, 0,2) . "-" . substr($langpair,3,2);
+$found = 0;
 
 # Find a system for this language pair
 for ($i = 0; $i < $response->value()->arraySize(); ++$i) {
@@ -41,14 +48,15 @@ for ($i = 0; $i < $response->value()->arraySize(); ++$i) {
     $tokinput = $system->structMem("tokinput")->scalarVal();
     $lcinput = $system->structMem("lcinput")->scalarVal();
     if (!$tokinput && !$lcinput) {
-        if ($langpair == "$source|$target") {
-            $sysid = $name;
+        if ($sysid == "$name") {
+            $found = 1;
+            break;
         }
     }
 }
 
-if (!$sysid) {
-    error("invalid translation language pair");
+if (!$found) {
+    error("invalid translation language pair or system");
 }
 
 $output = "";
