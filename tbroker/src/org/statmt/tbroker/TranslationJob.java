@@ -19,6 +19,7 @@ public class TranslationJob {
 	public static final String FIELD_SYSID = "systemid";
 	public static final String FIELD_DEBUG = "debug";
 	public static final String FIELD_ALIGN = "align";
+	public static final String FIELD_TOPT = "topt";
 	public static final String FIELD_SYSTEM = "system";
 	public static final String FIELD_SOURCEID = "sourceid";
 	
@@ -28,6 +29,7 @@ public class TranslationJob {
 	private String _text;
 	private String _systemId;
 	private List<Map> _alignments;
+  private List<Map> _topts;
 	private List<String> _debug;
 	private Map<String,Long> _timings = new HashMap<String, Long>();;
 	private long _startTime = System.currentTimeMillis();
@@ -56,6 +58,7 @@ public class TranslationJob {
 	    String systemId = (String)params.get(FIELD_SYSID);
 	    boolean debug = (params.get(FIELD_DEBUG) != null);
 	    boolean align = (params.get(FIELD_ALIGN) != null);
+      boolean topt = (params.get(FIELD_TOPT) != null);
 	    if (systemId == null) {
             throw new XmlRpcException("Missing system id");
         }
@@ -73,6 +76,9 @@ public class TranslationJob {
     		if (align) {
     		    jobs[i]._alignments = new ArrayList<Map>();
     		}
+        if (topt) {
+            jobs[i]._topts = new ArrayList<Map>();
+        }
     		jobs[i]._sourceId = i;
 	    }
 		return jobs;
@@ -87,6 +93,9 @@ public class TranslationJob {
 	     if (job._alignments != null) {
 	         _alignments = new ArrayList<Map>(job._alignments);
 	     }
+       if (job._topts != null) {
+           _topts = new ArrayList<Map>(job._topts);
+       }
 	     _sourceId = job._sourceId;
 	}
 	
@@ -107,6 +116,10 @@ public class TranslationJob {
 	public List<Map> getAlignments() { 
 	    return _alignments;
 	}
+
+  public List<Map> getTopts() {
+      return _topts;
+  }
 	
 	public Map<String,Long> getTimings() {
 	    long elapsed = System.currentTimeMillis() - _startTime;
@@ -138,6 +151,9 @@ public class TranslationJob {
 		if (_alignments != null) {
 		    result.put(FIELD_ALIGN, _alignments);
 		}
+    if (_topts != null) {
+        result.put(FIELD_TOPT, _topts);
+    }
 		return result;
 	}
 }

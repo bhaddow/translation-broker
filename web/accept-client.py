@@ -14,7 +14,7 @@ def main():
         print url
         source = "en"
         target = "fr"
-        input_text = "I clearly stated in my earlier post this is what the tech guy did - and I reported his exact steps ."
+        input_text = "I clearly stated in my earlier post this is what the tech guy did - and I reported his exact steps. I clearly stated in my earlier post this is what the tech guy did - and I reported his exact steps ."
         params = urllib.urlencode({'v' : '1.0', 'ie' : 'UTF8', \
             'langpair' : '%s|%s' % (source,target),\
             'system' : 'sb', 'q' : input_text})
