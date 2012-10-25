@@ -18,7 +18,7 @@ function debug($msg) {
 error_reporting(E_ALL);
 
 
-function translate ($input, $system_id, $port, $debug) {
+function translate ($input, $system_id, $port, $debug, $topt) {
     #print "$input<br>\n";
     #$encoded = new xmlrpcval($input,"string");
     #print $encoded->scalarVal(); print "<br>\n";
@@ -32,6 +32,11 @@ function translate ($input, $system_id, $port, $debug) {
     if ($debug) {
         $param->addStruct(
             array("debug" => new xmlrpcval("yes", "string")));
+    }
+    if ($topt) {
+      $param->addStruct(
+        array("topt" => new xmlrpcval("yes", "string")));
+
     }
     $request->addParam($param);
     #print "<pre>"; print $request->serialize(); print "</pre>>\n";
@@ -49,6 +54,22 @@ function translate ($input, $system_id, $port, $debug) {
             for ($j = 0; $j < $debugMsgs->arraySize(); ++$j) {
                 $result[$i]["debug"][$j] = $debugMsgs->arrayMem($j)->scalarVal();
             }
+        }
+        if ($topt) {
+          $result[$i]["topt"] = array();
+          $returned_topts = $field->structMem("topt");
+          for ($j = 0; $j < $returned_topts->arraySize(); ++$j) {
+            $result[$i]["topt"][$j] = array();
+            $returned_topt = $returned_topts->arrayMem($j);
+            $result[$i]["topt"][$j]['phrase'] =
+                $returned_topt->structMem("phrase")->scalarVal();
+            $result[$i]["topt"][$j]['start'] =
+                $returned_topt->structMem("start")->scalarVal();
+            $result[$i]["topt"][$j]['end'] =
+                $returned_topt->structMem("end")->scalarVal();
+            $result[$i]["topt"][$j]['score'] =
+                $returned_topt->structMem("fscore")->scalarVal();
+          }
         }
     }
 #    if ($debug) {

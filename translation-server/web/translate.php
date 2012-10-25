@@ -27,6 +27,10 @@ if (isset($_REQUEST['q'])) {
     error("No input text");
 }
 
+$topt = False;
+if (isset($_REQUEST['topt'])) {
+  $topt = True;
+}
 
 # Get the list of systems
 $client = new xmlrpc_client("/xmlrpc", "localhost", $port);
@@ -60,7 +64,7 @@ if (!$found) {
 }
 
 $output = "";
-$translation_result = translate($input,$sysid,$port,false);
+$translation_result = translate($input,$sysid,$port,false, $topt);
 foreach (array_keys($translation_result) as $i) {
     $translation = $translation_result[$i]["translation"];
     if ($output) {
@@ -71,10 +75,14 @@ foreach (array_keys($translation_result) as $i) {
 
 
 $response = array();
-$response['responseData'] = array();
-$response['responseData']['translatedText'] = $output; 
-$response['responseStatus'] = 200;
-$response['responseDetails'] = Null;
+$response[$key_data] = array();
+$response[$key_data]['translatedText'] = $output; 
+$response[$key_status] = 200;
+$response[$key_details] = Null;
+if ($topt) {
+  # Only read toptions for first sentence!
+  $response[$key_data]['topt'] = $translation_result[0]["topt"];
+}
 
 $encoded = json_encode($response);
 die($encoded);

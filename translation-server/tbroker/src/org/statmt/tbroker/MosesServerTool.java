@@ -70,6 +70,10 @@ public class MosesServerTool extends TranslationTool {
             if (alignments != null) {
                 params.put(TranslationJob.FIELD_ALIGN, "true");
             }
+            List<Map> topts = job.getTopts();
+            if (topts != null) {
+                params.put(TranslationJob.FIELD_TOPT, "true");
+            }
             Map result = (Map)client.execute("translate", new Object[]{params});
             text = result.get(TranslationJob.FIELD_TEXT).toString();
             text = text.replaceAll(PIPE,"|");
@@ -83,6 +87,17 @@ public class MosesServerTool extends TranslationTool {
                         alignments.add((Map)a);
                     }
                 }
+            }
+            if (topts != null) {
+              Object[] returnedTopts = (Object[])result.get(TranslationJob.FIELD_TOPT);
+              if (returnedTopts == null) {
+                  _logger.warn("Tranlation options expected but missing");
+              } else {
+                  for (Object t: returnedTopts) {
+                      topts.add((Map)t);
+                  }
+              }
+
             }
         }  catch (XmlRpcException e) {
              _logger.error("Moses server translation failed", e);
