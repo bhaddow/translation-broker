@@ -24,8 +24,12 @@ systems = [\
     (url_accept, "sb-en-de", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
     (url_accept, "sb-en-ja", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
     (url_accept, "sb-fr-en", "Mais si tu as téléchargé le fichier je ne sais pas pourquoi tu as cette demande."),
+#    (url_accept, "sb-fr-en-1009-13", "Mais si tu as téléchargé le fichier je ne sais pas pourquoi tu as cette demande."),
     (url_accept, "tb-en-fr", "Careful: there is no real winner in this activity: the aim is not to find out which option had really been chosen by MSF at that time."),
-    (url_accept,"tb-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations.")]
+    (url_accept,"tb-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations."),
+    (url_accept, "tb13-en-fr", "Careful: there is no real winner in this activity: the aim is not to find out which option had really been chosen by MSF at that time."),
+    (url_accept,"tb13-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations.")
+    ]
 #    (url_ec, "fr-en", "Règlement (CE) no 753/2009 du Conseil du 27 juillet 2009 portant modification du règlement (CE) no 43/2009 en ce qui concerne les possibilités de pêche et les conditions associées applicables à certains stocks halieutiques"),\
 #    (url_ec, "it-en", "Decisione EUMM Georgia/1/2009 del Comitato politico e di sicurezza, del 31 luglio 2009, relativa alla proroga del mandato del capo della missione di vigilanza dell'Unione europea in Georgia (EUMM Georgia)"),
  #   (url_ec, "nl-el", "Richtlijn 2009/45/EG van het Europees Parlement en de Raad van 6 mei 2009 inzake veiligheidsvoorschriften en -normen voor passagiersschepen (Herschikking)"),

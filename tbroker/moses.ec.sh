@@ -6,7 +6,7 @@
 
 pidfile=/disk4/translation-server/pids.ec
 port=9080
-mosesserver=/disk3/bhaddow/moses-server/server/mosesserver
+mosesserver=/disk3/bhaddow/moses/dist/1796c3b/bin/mosesserver
 logdir=/disk4/translation-server/logs.ec
 mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
 #mosesargs=

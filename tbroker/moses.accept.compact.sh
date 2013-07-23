@@ -4,13 +4,13 @@
 # Starts/stops the moses servers
 #
 
-pidfile=/disk4/translation-server/pids
-port=8080
-model_dir=/disk3/bhaddow/experiments/demo/binarised
-configs="$model_dir/moses.ini.en $model_dir/moses.ini.de"
-mosesserver=/disk3/bhaddow/moses/dist/1796c3b/bin/mosesserver
-mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500 -persistent-cache-size 250000"
-logdir=/disk4/translation-server/logs
+pidfile=/disk4/translation-server/pids.accept.compact
+port=8190
+model_dir=/disk4/html/accept/models
+configs="$model_dir/symantec-1009-13/moses.ini"
+mosesserver=/disk3/bhaddow/moses/dist/c9687e3/bin/mosesserver
+mosesargs="-mbr -persistent-cache-size 250000"
+logdir=/disk4/translation-server/logs.accept
 export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
 
 ulimit -c unlimited
@@ -22,7 +22,7 @@ start() {
         exit 1
     fi
     for config in $configs; do
-        log=$logdir/mosesserver.$port
+        log=$logdir/mosesserver.compact.$port
             nohup $mosesserver $mosesargs -f $config --server-port $port >>$log.out 2>> $log.err  &
         echo "$!" >> $pidfile
         port=`expr $port + 1`

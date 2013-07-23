@@ -7,8 +7,8 @@
 pidfile=/disk4/translation-server/pids.accept
 port=8180
 model_dir=/disk4/html/accept/models
-configs="$model_dir/symantec-baseline.en-fr/binarised/moses.ini $model_dir/symantec-baseline.en-de/binarised/moses.ini $model_dir/symantec-baseline.en-ja/binarised/moses.ini $model_dir/symantec-baseline.fr-en/binarised/moses.ini $model_dir/twb-baseline.en-fr/binarised/moses.ini $model_dir/twb-baseline.fr-en/binarised/moses.ini"
-mosesserver=/disk3/bhaddow/experiments/demo/dist/1796c3b/bin/mosesserver
+configs="$model_dir/symantec-baseline.en-fr/binarised/moses.ini $model_dir/symantec-baseline.en-de/binarised/moses.ini $model_dir/symantec-baseline.en-ja/binarised/moses.ini $model_dir/symantec-baseline.fr-en/binarised/moses.ini $model_dir/twb-baseline.en-fr/binarised/moses.ini $model_dir/twb-baseline.fr-en/binarised/moses.ini $model_dir/twb-baseline-2013.en-fr/binarised/moses.ini $model_dir/twb-baseline-2013.fr-en/binarised/moses.ini"
+mosesserver=/disk3/bhaddow/moses/dist/1796c3b/bin/mosesserver
 mosesargs="-mbr -persistent-cache-size 250000"
 logdir=/disk4/translation-server/logs.accept
 export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
