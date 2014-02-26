@@ -75,6 +75,33 @@ public class Translator  implements XmlRpcHandler{
             }
         }
          
+        //Process input and remember state in job object
+        if (!config.configurationsAt("stripctm").isEmpty()) {
+	        SubnodeConfiguration subconf = config.configurationAt("stripctm");
+	        String exe = subconf.getString("command");
+	        List tconfs = subconf.configurationsAt("stripctm");
+	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String language = h.getString("language");
+	            String cmd[] = new String[]{exe, "-l",language};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
+        }
+        //Process output and restore state from job object
+        if (!config.configurationsAt("restorectm").isEmpty()) {
+	        SubnodeConfiguration subconf = config.configurationAt("tokenisers");
+	        String exe = subconf.getString("command");
+	        List tconfs = subconf.configurationsAt("tokeniser");
+	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
+	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
+	            String name = h.getString("name");
+	            String language = h.getString("language");
+	            String cmd[] = new String[]{exe, "-l",language};
+	            tools.put(name,new PipedTool(name,cmd));
+	        }
+        }
+
         //tokenisers
         if (!config.configurationsAt("tokenisers").isEmpty()) {
 	        SubnodeConfiguration subconf = config.configurationAt("tokenisers");
@@ -197,7 +224,11 @@ public class Translator  implements XmlRpcHandler{
                     throw new RuntimeException("No sentence splitter specified");
                 }
                 _logger.debug("Sentence splitter command: " + splitterCommand);
-                sentenceSplitter = new PipedSentenceSplitter(splitterCommand,sourceLanguage);
+		if (splitterCommand.equals("ctm")){
+                  sentenceSplitter = new NewCTMSentenceSplitter();
+		} else {
+                  sentenceSplitter = new PipedSentenceSplitter(splitterCommand,sourceLanguage);
+		}
             }
             ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,sentenceSplitter,lowercasedInput,tokenisedInput);
             toolChain.setParallel(parallel);
