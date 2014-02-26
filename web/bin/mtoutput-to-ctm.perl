@@ -28,31 +28,32 @@ my $translated_file = $ARGV[1];
 binmode(STDOUT,"utf8");
 
 
-
-
-my $ctm_data;
+my $text;
+my $ctm_data = [];
 my $count = 0;
 open (CTM, "$ctm_file") or die ("Failed opening $ctm_file");
 binmode(CTM,"utf8");
 while(<CTM>){
-	if (/^;;/) {
-	  #ignore comment line
-	} 
-	elsif (/^\s*$/) {
-	  #ignore empty lines
-	}
-	elsif (/^#/) {
-		#time to process this block, we've hit a new line
-		print &preprocess($text,$ctm_data,$count) if ($text);
-		$count++;
-		$text = "";
-	}
-	else {
-		#append the text
-		$text .= $_;
-	}
+  if (/^;;/) {
+    #ignore comment line
+  } 
+  elsif (/^\s*$/) {
+    #ignore empty lines
+  }
+  elsif (/^#/) {
+    #time to process this block, we've hit a new line
+    if ($text) {
+      &preprocess($text,$ctm_data,$count);
+      $count++;
+      $text = "";
+    }
+  }
+  else {
+    #append the text
+    $text .= $_;
+  }
 }
-print &preprocess($text,$ctm_data,$count) if ($text);
+&preprocess($text,$ctm_data,$count) if ($text);
 $count=0;
 close(CTM);
 
@@ -70,44 +71,60 @@ while(<TRANS>){
     my $phrase->{'word'} = $1;
     $phrase->{'start-pos'} = $2;
     $phrase->{'end-pos'} = $3;
-    push(@$trans_data,$phrase);
+    push(@{$trans_data->[$count]},$phrase);
   }
+  $count++;
 
 }
 close(TRANS);
 
-foreach my $phrase (@trans_data){
-  my $start_word;
-  my $start_time = 0;
-  if (defined $ctm_data[$phrase->{'start-pos'}]){
-    $start_word = $ctm_data[$phrase->{'start-pos'}];
-    $start_time = $start_word->{'start-time'};
+$count=0;
+foreach my $sent (@{$trans_data}){
+  my $ctm_sent;
+  if (defined  $ctm_data->[$count]) {
+    $ctm_sent = $ctm_data->[$count];
   } else {
-    print "Missing start position $phrase->{'start-pos'}\n";
-  }
-  my $duration=0;
-  for (my $i=$phrase->{'start-pos'}; $i <= $phrase->{'end-pos'}; $i++){
-    if (defined $ctm_data[$i]) {
-      $duration += $ctm_data[$i]->{'duration'};
+    print "Missing ctm sentence $count\n";
+    $count++;
+    next;
+  } 
+  foreach my $phrase (@$sent){
+    my $start_word;
+    my $start_time = 0;
+    if (defined $ctm_sent->[$phrase->{'start-pos'}]){
+      $start_word = $ctm_sent->[$phrase->{'start-pos'}];
+      $start_time = $start_word->{'start-time'};
     } else {
-      print "Missing position $i\n";
+      print "Missing start position $phrase->{'start-pos'}\n";
+    }
+    my $duration=0;
+    for (my $i=$phrase->{'start-pos'}; $i <= $phrase->{'end-pos'}; $i++){
+      if (defined $ctm_sent->[$i]) {
+        $duration += $ctm_sent->[$i]->{'duration'};
+      } else {
+        print "Missing position $i\n";
+      }
+    }
+    if (defined $start_word) {
+      my $out = $phrase->{word};
+      $out =~ s/\&apos;/'/;
+      $out =~ s/' /'/;
+      $out =~ s/@\-@/\-/;
+      $out =~ s/ \- /\-/;
+      print STDOUT "$start_word->{name} $start_word->{somefield} $start_time $duration $out\n";
     }
   }
-  if (defined $start_word) {
-    my $out = $phrase->{word};
-    $out =~ s/\&apos;/'/;
-    $out =~ s/' /'/;
-    $out =~ s/@\-@/\-/;
-    $out =~ s/ \- /\-/;
-    print STDOUT "$start_word->{name} $start_word->{somefield} $start_time $duration $out\n";
-  }
+  $count++;
+  print "#end of sentence\n";
 }
 
 sub preprocess {
-  my ($text,$ctm_line) = @_;
+  my ($text,$ctm_line,$count) = @_;
   my @lines = split ("\n",$text);
   foreach my $line (@lines) {
-    my $line = $_;
+    if ($line =~ /^#/) {
+      next;
+    }
     $line =~ s/\r//g;
     $line =~ s/\s+/ /g;
     my @el = split(" ",$line);
@@ -116,8 +133,9 @@ sub preprocess {
     $word->{'duration'} = $el[3];
     $word->{'name'} = $el[0];
     $word->{'somefield'} = $el[1];
-    push(@$ctm_line, $word);
+    $word->{'source word'} = $el[4];
+    $word->{'probability'} = $el[5];
+    push(@{$ctm_line->[$count]}, $word);
   }
-  return $ctm_line;
 }
 
