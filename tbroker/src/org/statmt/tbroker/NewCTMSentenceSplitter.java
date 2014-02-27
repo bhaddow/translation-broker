@@ -15,9 +15,9 @@ package org.statmt.tbroker;
  * Split sentences at CTM newlines ie. a line which starts with a #
  * @author abirch
  */
-public class NewlineSentenceSplitter extends SentenceSplitter {
+public class NewCTMSentenceSplitter extends SentenceSplitter {
 
-    public NewlineSentenceSplitter() {
+    public NewCTMSentenceSplitter() {
         super(null);
     }
 

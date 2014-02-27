@@ -27,6 +27,7 @@ public class TranslationJob {
 	
 	private int _sourceId; //position in source
 	private String _text;
+	private String _state;
 	private String _systemId;
 	private List<Map> _alignments;
   private List<Map> _topts;
@@ -111,6 +112,13 @@ public class TranslationJob {
 	
 	public void setText(String text) {
 		_text = text;
+	}
+	public String getState() {
+		return _state;
+	}
+	
+	public void setState(String text) {
+		_state = text;
 	}
 	
 	public List<Map> getAlignments() { 
