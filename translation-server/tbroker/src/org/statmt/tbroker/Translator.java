@@ -83,22 +83,20 @@ public class Translator  implements XmlRpcHandler{
 	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
 	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
 	            String name = h.getString("name");
-	            String language = h.getString("language");
-	            String cmd[] = new String[]{exe, "-l",language};
-	            tools.put(name,new PipedTool(name,cmd));
+	            String cmd[] = new String[]{exe};
+	            tools.put(name,new PipedToolState(name,cmd,"save"));
 	        }
         }
         //Process output and restore state from job object
         if (!config.configurationsAt("restorectm").isEmpty()) {
-	        SubnodeConfiguration subconf = config.configurationAt("tokenisers");
+	        SubnodeConfiguration subconf = config.configurationAt("restorectm");
 	        String exe = subconf.getString("command");
-	        List tconfs = subconf.configurationsAt("tokeniser");
+	        List tconfs = subconf.configurationsAt("restorectm");
 	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
 	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
 	            String name = h.getString("name");
-	            String language = h.getString("language");
-	            String cmd[] = new String[]{exe, "-l",language};
-	            tools.put(name,new PipedTool(name,cmd));
+	            String cmd[] = new String[]{exe};
+	            tools.put(name,new PipedToolState(name,cmd,"restore"));
 	        }
         }
 

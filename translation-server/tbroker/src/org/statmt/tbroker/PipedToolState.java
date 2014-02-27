@@ -5,81 +5,52 @@
  *
  *  First Published: 2009
  *
- *  $Author$
- *  $Date$
- *  $Revision$
- *  $URL$
+ *  $Author: bhaddow $
+ *  $Date: 2009-07-22 15:30:29 +0100 (Wed, 22 Jul 2009) $
+ *  $Revision: 116 $
+ *  $URL: http://abmayne@svn.statmt.org/repository/code/translation-server/tbroker/src/org/statmt/tbroker/PipedTool.java $
  *  ========================================================================*/
 package org.statmt.tbroker;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
 /**
  * A command line tool which uses pipes for read/write.
- * @author bhaddow
+ * This tool either saves the input in a file, and saves the filename in the job or
+ *   it appends the filename from the job as the first line of the stdin for the script.
+ *   This was originally for restoring the ctm timing information from the original
+ *   input stream, to the translated output
+ * @author abirch
+ * based on PipedTool by bhaddow
  */
-public class PipedTool extends TranslationTool {
+public class PipedToolState extends PipedTool {
     
-    protected static final Logger _logger = Logger.getLogger(TranslationTool.class);
-    protected PrintWriter _processInput;
-    protected OutputReader _outputReader;
+    private String _stateFlag;
+    public  static final String stateDir = "/tmp/";
    
-    protected BlockingDeque<String> _output;
-    protected BlockingDeque<String> _error; //for stderr
-    
-    protected boolean _catchDebug = false;
-    protected String _initFinishedMessage = ""; //marks end of initialisation
-    protected String _finishedMessage = "";  //marks end of job
-    protected boolean _substitutePipes; //workaround for moses factor issue
-   
-    public PipedTool(String toolName, String[] progargs) throws IOException {
-        this(toolName,progargs,false,"","");
+    public PipedToolState(String toolName, String[] progargs, String stateFlag) throws IOException {
+        this(toolName,progargs,false,"","",stateFlag);
     }
     
-    public PipedTool(String toolName, String[] progargs, boolean catchDebug, String initFinishedMessage, String finishedMessage) throws IOException {
-        super(toolName);
-        _catchDebug = catchDebug;
-        _initFinishedMessage = initFinishedMessage;
-        _finishedMessage = finishedMessage;
-        _output = new LinkedBlockingDeque<String>();
-        if (_catchDebug) {
-            _error = new LinkedBlockingDeque<String>();
-        }
-        _logger.info("Creating tool " + toolName + " with args " + Arrays.toString(progargs));
-        Process process = Runtime.getRuntime().exec(progargs);
-        _outputReader = new OutputReader(process.getInputStream());
-        _outputReader.start();
-        new ErrorReader(process.getErrorStream()).start();
-        _processInput = new PrintWriter(new OutputStreamWriter(process.getOutputStream(),"utf8"));
-        if (_catchDebug && !_initFinishedMessage.isEmpty()) {
-            //wait for the initialisation message
-            String errorText = null;
-            try {
-                while (!(errorText = _error.takeFirst()).startsWith(_initFinishedMessage)) {
-                    _logger.debug(toolName + " init:  " + errorText);
-                }
-                _logger.info("Completed initialisation of " + toolName);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public PipedToolState(String toolName, String[] progargs, boolean catchDebug, String initFinishedMessage, String finishedMessage,String stateFlag) throws IOException {
+        super(toolName,progargs,catchDebug,initFinishedMessage,finishedMessage);
+        _stateFlag = stateFlag;
     }
-
-    public void setSubstitutePipes(boolean substitutePipes) {
-        _substitutePipes = substitutePipes;
-    }
-    
 
     @Override
     public synchronized void  transform(TranslationJob job) {
@@ -88,34 +59,70 @@ public class PipedTool extends TranslationTool {
         if (_substitutePipes) {
             text = text.replaceAll("\\|", MosesServerTool.PIPE);
         }
+        System.out.println("text");
+        if (_stateFlag.equals("restore")) {
+            text = job.getState() + "\n" + text;
+        }
+	else {
+	    if (_stateFlag.equals("save")){
+                job.setState(writeStateToFile(text));
+	    }
+	}
         
         _processInput.println(text);
         _processInput.flush();
         try {
-        	String outputText = _output.takeFirst();
+            String outputText = _output.takeFirst();
             if (_substitutePipes) {
                 outputText = outputText.replaceAll(MosesServerTool.PIPE,"|");
             }
-        	job.setText(outputText);
-        	if (_catchDebug) {
-        	    while(true) {
-        	        String errorText = _error.poll(60,TimeUnit.SECONDS);
-        	        if (errorText == null) {
-        	            _logger.info("Timed out waiting for debug message");
-        	            break;
-        	        }
-        	        job.addDebug(errorText);
-        	        if (errorText.startsWith(_finishedMessage)) {
-        	            break;
-        	        }
-        	    }
-            	
-        	}
+            job.setText(outputText);
+            if (_catchDebug) {
+                while(true) {
+                    String errorText = _error.poll(60,TimeUnit.SECONDS);
+                    if (errorText == null) {
+                        _logger.info("Timed out waiting for debug message");
+                        break;
+                    }
+                    job.addDebug(errorText);
+                    if (errorText.startsWith(_finishedMessage)) {
+                        break;
+                    }
+                }
+                
+            }
+            if (_stateFlag.equals("restore")) {
+	        deleteFile(job.getState());
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         long totalTime = System.currentTimeMillis() - startTime;
         job.setTiming(getName(), totalTime);
+    }
+
+    private String writeStateToFile (String inputText) {
+        String fileName = stateDir + UUID.randomUUID().toString() + ".tmp";
+	BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(
+		          new FileOutputStream(fileName), "utf-8"));
+	    writer.write("inputText");
+	    writer.close(); 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+            // report
+	}
+	return fileName;
+    }
+    private void deleteFile (String fileName) {
+        File file = new File(fileName);
+        try {
+ 	    file.delete();
+        } catch (SecurityException x) {
+	    // File permission problems are caught here.
+	    System.err.println(x);
+        }
     }
     
     class OutputReader extends Thread {
