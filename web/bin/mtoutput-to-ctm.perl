@@ -1,7 +1,14 @@
 #!/usr/bin/perl -w
 # Written by Alexandra Birch 2/2014
 #
-# First argument is a ctm file with timing information which contains the 
+# We need access to the MT output and to the ctm file. 
+# We save the original ctm file and store the file name in the jobarray
+# When calling this script, we prepend the ctm file name in the file,
+# and then pipe it as input to this script.
+# So here we extract the ctm file name from the first line of the mt output.
+#
+# 
+# ctm file with timing information which contains the 
 # words from the original source sentence:
 #;;Comments in beginning
 ## talkid767_15_50 15.50
@@ -14,7 +21,7 @@
 #talkid767 1 16.95 0.34      about 1.000000
 ## talkid767_17_98 17.98
 #
-# Second argument is the file name of a file which is the output of 
+# Piped input is the file of a file which is the output of 
 # the MOSES decoder which has been run with the -t option
 # So the output looks like this with the phrasal alignments to source in | |:
 # a |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|
@@ -22,16 +29,18 @@
 
 use strict;
 
-my $ctm_file = $ARGV[0];
-my $translated_file = $ARGV[1];
+#my $ctm_file = $ARGV[0];
+#my $translated_file = $ARGV[1];
 
+binmode(STDIN,"utf8");
 binmode(STDOUT,"utf8");
 
+my $ctm_file = <STDIN>; #first line of input file must contain ctm file name
 
 my $text;
 my $ctm_data = [];
 my $count = 0;
-open (CTM, "$ctm_file") or die ("Failed opening $ctm_file");
+open (CTM, "$ctm_file") or die ("Failed opening $ctm_file $!");
 binmode(CTM,"utf8");
 while(<CTM>){
   if (/^;;/) {
@@ -60,9 +69,9 @@ close(CTM);
 my $trans_data;
 
 #Bonjour |0-0| , même |1-2| avec plus |3-4| de |6-6| nuages |5-5|
-open (TRANS, "$translated_file") or die ("Failed opening $translated_file");
-binmode(TRANS,"utf8");
-while(<TRANS>){
+#open (TRANS, "$translated_file") or die ("Failed opening $translated_file");
+#binmode(TRANS,"utf8");
+while(<STDIN>){
   chomp;
   my $line = $_;
   $line =~ s/\s+/ /g;
@@ -76,7 +85,7 @@ while(<TRANS>){
   $count++;
 
 }
-close(TRANS);
+#close(TRANS);
 
 $count=0;
 foreach my $sent (@{$trans_data}){
