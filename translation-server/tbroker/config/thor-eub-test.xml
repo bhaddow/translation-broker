@@ -2,8 +2,9 @@
 <config>
     <port>7897</port>
 
-    <support-tools-dir>/home/eubridge/software/translation-server/web/bin/</support-tools-dir>
-    <true-model-dir>/home/eubridge/experiments/2014-04-demo/enasr-fr/</true-model-dir>
+    <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
+    <model-dir>/disk3/bhaddow/experiments/demo/true</model-dir>
+
     <splitter>${support-tools-dir}/split-sentences-ctm.perl</splitter>
 
     <!-- Translation tools -->
@@ -24,13 +25,6 @@
         -->
     </moses-servers>
 
-    <detokenisers>
-        <command>${support-tools-dir}/detokenizer.perl</command>
-        <detokeniser>
-            <name>fr-detok</name>
-            <language>fr</language>
-        </detokeniser>
-    </detokenisers>
 
     <stripctms>
         <command>${support-tools-dir}/ctm-to-txt.perl</command>
@@ -51,6 +45,13 @@
             <name>fr-detrue</name>
         </detruecaser>
     </detruecasers>
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>fr-detok</name>
+            <language>fr</language>
+        </detokeniser>
+    </detokenisers>
 
 
     <!-- Translation tool chains -->
@@ -75,10 +76,10 @@
         <target>fr</target>
         <split>true</split>
         <parallel>true</parallel>
-        <tool>en-tok</tool>
-        <tool>en-true</tool>
-        <tool>tb-en-fr</tool>
+        <tool>en-dectm</tool>
+        <tool>eub-en-fr</tool>
         <tool>fr-detrue</tool>
         <tool>fr-detok</tool>
+	<tool>fr-ctm</tool>
     </toolchain>
 </config>
