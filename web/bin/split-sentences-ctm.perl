@@ -15,6 +15,10 @@
 #talkid767 1 16.62 0.33      today 1.000000
 #talkid767 1 16.95 0.34      about 1.000000
 ## talkid767_17_98 17.98
+# Returns a ctm file, with one sentence per line, with each word separated with a %%% ie.
+#
+# # talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995
+# # talkid767_17_98 17.98%%%talkid767 1 16.35 0.27       talk 1.000000%%%talkid767 1 16.62 0.33      today 1.000000%%%talkid767 1 16.95 0.34      about 1.000000
 $|++;
 
 binmode(STDIN, ":utf8");
@@ -40,11 +44,11 @@ while (@ARGV) {
 }
 
 if ($HELP) {
-    print "Usage ./ctm-to-txt.perl < ctmfile > txtfile\n";
+    print "Usage ./split-sentences-ctm.perl < ctmfile > flatctmfile\n";
 	exit;
 }
 if (!$QUIET) {
-	print STDERR "CTM to TXT\n";
+	print STDERR "CTM to FlatCTM\n";
 }
 
 ##loop text, add lines together until we get a line starting with # 
@@ -73,16 +77,7 @@ sub preprocess {
 	
 	my @out;
 	my @lines = split ("\n",$text);
-	foreach my $line (@lines) {
-	  	my @fields = split /\s+/, $line;
-		if (scalar @fields < 5) {
-		  print STDERR "WARNING: input ctm not right $line, $text";
-		}
-	        push(@out,$fields[4]);	
-	}
-	my $out = join (" ", @out);
-	#Make sure all ctm input is lowercased
-	$out = lc $out;
+	my $out = join ("%%%", @lines);
 	#Moses can't handle empty txt lines, add a . as a dummy
 	if (!$out) {
 	  $out = ".";

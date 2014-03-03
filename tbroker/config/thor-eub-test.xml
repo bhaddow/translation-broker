@@ -28,9 +28,9 @@
 
     <stripctms>
         <command>${support-tools-dir}/ctm-to-txt.perl</command>
-        <stripctms>
+        <stripctm>
             <name>en-dectm</name>
-        </stripctms>
+        </stripctm>
     </stripctms>
     <restorectms>
         <command>${support-tools-dir}/mtoutput-to-ctm.perl</command>
