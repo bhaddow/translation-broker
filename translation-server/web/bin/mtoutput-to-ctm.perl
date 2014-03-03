@@ -36,6 +36,7 @@ binmode(STDIN,"utf8");
 binmode(STDOUT,"utf8");
 
 my $ctm_file = <STDIN>; #first line of input file must contain ctm file name
+chomp($ctm_file);
 
 my $text;
 my $ctm_data = [];
@@ -43,26 +44,10 @@ my $count = 0;
 open (CTM, "$ctm_file") or die ("Failed opening $ctm_file $!");
 binmode(CTM,"utf8");
 while(<CTM>){
-  if (/^;;/) {
-    #ignore comment line
-  } 
-  elsif (/^\s*$/) {
-    #ignore empty lines
-  }
-  elsif (/^#/) {
-    #time to process this block, we've hit a new line
-    if ($text) {
-      &preprocess($text,$ctm_data,$count);
-      $count++;
-      $text = "";
-    }
-  }
-  else {
-    #append the text
-    $text .= $_;
-  }
+  my $text = $_;
+  &preprocess($text,$ctm_data,$count);
+  $count++;
 }
-&preprocess($text,$ctm_data,$count) if ($text);
 $count=0;
 close(CTM);
 
@@ -81,6 +66,9 @@ while(<STDIN>){
     $phrase->{'start-pos'} = $2;
     $phrase->{'end-pos'} = $3;
     push(@{$trans_data->[$count]},$phrase);
+  }
+  if (length $line > 0 && (!defined @{$trans_data->[$count]} || scalar @{$trans_data->[$count]} == 0)){
+    print STDERR "WARNING: no source phrase information in translated text expecting source alignment eg. |0-0| for each output phrase: $line\n";
   }
   $count++;
 
@@ -111,7 +99,7 @@ foreach my $sent (@{$trans_data}){
       if (defined $ctm_sent->[$i]) {
         $duration += $ctm_sent->[$i]->{'duration'};
       } else {
-        print "Missing position $i\n";
+        print STDERR "Missing position $i\n";
       }
     }
     if (defined $start_word) {
@@ -129,7 +117,7 @@ foreach my $sent (@{$trans_data}){
 
 sub preprocess {
   my ($text,$ctm_line,$count) = @_;
-  my @lines = split ("\n",$text);
+  my @lines = split ("%%%",$text);
   foreach my $line (@lines) {
     if ($line =~ /^#/) {
       next;

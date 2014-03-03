@@ -4,17 +4,9 @@
 # Based on Preprocessor written by Philipp Koehn
 # Written by Alexandra Birch 2/2014
 # 
-#Can take in ctm with one or multiple sentences marked with #
-#;;Comments in beginning
-## talkid767_15_50 15.50
-#talkid767 1 16.02 0.14        i'm 0.999752
-#talkid767 1 16.16 0.12      going 0.999994
-#talkid767 1 16.28 0.07         to 0.999995
-## talkid767_17_98 17.98
-#talkid767 1 16.35 0.27       talk 1.000000
-#talkid767 1 16.62 0.33      today 1.000000
-#talkid767 1 16.95 0.34      about 1.000000
-## talkid767_17_98 17.98
+#Takes in a flatctm style file ie:
+## talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995
+## talkid767_17_98 17.98%%%talkid767 1 16.35 0.27       talk 1.000000%%%talkid767 1 16.62 0.33      today 1.000000%%%talkid767 1 16.95 0.34      about 1.000000
 $|++;
 
 binmode(STDIN, ":utf8");
@@ -50,29 +42,15 @@ if (!$QUIET) {
 ##loop text, add lines together until we get a line starting with # 
 my $text = "";
 while(<STDIN>) {
-	if (/^;;/) {
-	  #ignore comment line
-	} 
-	elsif (/^\s*$/) {
-	  #ignore empty lines
-	}
-	elsif (/^#/) {
-		#time to process this block, we've hit a new line
-		print &preprocess($text) if ($text);
-		$text = "";
-	}
-	else {
-		#append the text
-		$text .= $_;
-	}
+        my $text = $_;
+        print &preprocess($text) if ($text);
 }
-print &preprocess($text) if ($text);
 
 sub preprocess {
   	my ($text) = @_;
 	
 	my @out;
-	my @lines = split ("\n",$text);
+	my @lines = split ("%%%",$text);
 	foreach my $line (@lines) {
 	  	my @fields = split /\s+/, $line;
 		if (scalar @fields < 5) {

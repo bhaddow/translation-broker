@@ -8,10 +8,11 @@ pidfile=/disk4/translation-server/pids.eub
 port=8280
 mosesserver=/disk3/bhaddow/moses/dist/1796c3b/bin/mosesserver
 logdir=/disk4/translation-server/logs.eub
-mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500"
+mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500 -t "
 #mosesargs=
 export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
 
+model_dir=/disk4/html/accept/models
 configs="$model_dir/symantec-baseline.en-fr/binarised/moses.ini"
 
 ulimit -c unlimited
