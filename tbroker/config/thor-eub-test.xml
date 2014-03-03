@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<config>
+    <port>7897</port>
+
+    <support-tools-dir>/home/eubridge/software/translation-server/web/bin/</support-tools-dir>
+    <true-model-dir>/home/eubridge/experiments/2014-04-demo/enasr-fr/</true-model-dir>
+    <splitter>${support-tools-dir}/split-sentences-ctm.perl</splitter>
+
+    <!-- Translation tools -->
+    <moses-servers>
+        <moses-server>
+            <name>eub-en-fr</name>
+            <host>localhost</host>
+            <port>8280</port>
+            <system>default</system>
+        </moses-server>
+<!--
+        <moses-server>
+          <name>sb-fr-en-1009-13</name>
+          <host>localhost</host>
+          <port>8190</port>
+          <system>default</system>
+        </moses-server>
+        -->
+    </moses-servers>
+
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>fr-detok</name>
+            <language>fr</language>
+        </detokeniser>
+    </detokenisers>
+
+    <stripctms>
+        <command>${support-tools-dir}/ctm-to-txt.perl</command>
+        <stripctms>
+            <name>en-dectm</name>
+        </stripctms>
+    </stripctms>
+    <restorectms>
+        <command>${support-tools-dir}/mtoutput-to-ctm.perl</command>
+        <restorectm>
+            <name>fr-ctm</name>
+        </restorectm>
+    </restorectms>
+
+    <detruecasers>
+        <command>${support-tools-dir}/detruecase.perl</command>
+        <detruecaser>
+            <name>fr-detrue</name>
+        </detruecaser>
+    </detruecasers>
+
+
+    <!-- Translation tool chains -->
+<!--  <toolchain>
+        <name>sb-fr-en-1009-13</name>
+        <description>French->English (Symantec big data (1009-13))</description>
+        <source>fr</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>fr-tok</tool>
+        <tool>fr-true</tool>
+        <tool>sb-fr-en-1009-13</tool>
+        <tool>en-detrue</tool>
+        <tool>en-detok</tool>
+    </toolchain>
+-->
+    <toolchain>
+        <name>eub-en-fr</name>
+	<description>EnglishASRCTM->FrenchCTM (EU-Bridge)</description>
+        <source>en</source>
+        <target>fr</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-tok</tool>
+        <tool>en-true</tool>
+        <tool>tb-en-fr</tool>
+        <tool>fr-detrue</tool>
+        <tool>fr-detok</tool>
+    </toolchain>
+</config>

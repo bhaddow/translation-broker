@@ -76,8 +76,8 @@ public class Translator  implements XmlRpcHandler{
         }
          
         //Process input and remember state in job object
-        if (!config.configurationsAt("stripctm").isEmpty()) {
-	        SubnodeConfiguration subconf = config.configurationAt("stripctm");
+        if (!config.configurationsAt("stripctms").isEmpty()) {
+	        SubnodeConfiguration subconf = config.configurationAt("stripctms");
 	        String exe = subconf.getString("command");
 	        List tconfs = subconf.configurationsAt("stripctm");
 	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
@@ -88,8 +88,8 @@ public class Translator  implements XmlRpcHandler{
 	        }
         }
         //Process output and restore state from job object
-        if (!config.configurationsAt("restorectm").isEmpty()) {
-	        SubnodeConfiguration subconf = config.configurationAt("restorectm");
+        if (!config.configurationsAt("restorectms").isEmpty()) {
+	        SubnodeConfiguration subconf = config.configurationAt("restorectms");
 	        String exe = subconf.getString("command");
 	        List tconfs = subconf.configurationsAt("restorectm");
 	        for (Iterator i = tconfs.iterator(); i.hasNext();) {
@@ -222,11 +222,7 @@ public class Translator  implements XmlRpcHandler{
                     throw new RuntimeException("No sentence splitter specified");
                 }
                 _logger.debug("Sentence splitter command: " + splitterCommand);
-		if (splitterCommand.equals("ctm")){
-                  sentenceSplitter = new NewCTMSentenceSplitter();
-		} else {
-                  sentenceSplitter = new PipedSentenceSplitter(splitterCommand,sourceLanguage);
-		}
+                sentenceSplitter = new PipedSentenceSplitter(splitterCommand,sourceLanguage);
             }
             ToolChain toolChain = new ToolChain(name,description, sourceLanguage, targetLanguage,sentenceSplitter,lowercasedInput,tokenisedInput);
             toolChain.setParallel(parallel);
