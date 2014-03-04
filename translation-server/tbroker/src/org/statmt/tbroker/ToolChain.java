@@ -15,6 +15,9 @@ package org.statmt.tbroker;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Iterator;
+
 
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
@@ -133,9 +136,23 @@ public class ToolChain  {
         for (TranslationTool tool: _tools) {
                 _logger.debug(tool.getName() + "> " + job.getText());
                 tool.transform(job);
-                _logger.debug(tool.getName() +"< " + job.getText());
-            
-        }
+                _logger.debug(tool.getName() +"<< " + job.getText());
+	
+if (tool.getName().equals("eub-en-fr") ){
+  _logger.debug("HERE! ");
+  List<Map> alignments = job.getAlignments();		
+  _logger.debug("HERE2 " + alignments.size());
+  for(int i = 0; i < alignments.size(); i++){
+    Map align = alignments.get(i);
+    Iterator iter = align.keySet().iterator();
+    while(iter.hasNext()) {
+        String key = (String)iter.next();
+        Integer val = (Integer)align.get(key);
+        _logger.debug("Align response: i,key,val: "+i+ "," + key + "," + val);
+    }
+  }
+}
+	}
         if (_logger.isDebugEnabled()) {
             _logger.debug("Job times (ms): " + job.getTimings());
         }

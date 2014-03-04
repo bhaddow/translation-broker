@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 
@@ -59,6 +60,8 @@ public class TranslationJob {
 	    String systemId = (String)params.get(FIELD_SYSID);
 	    boolean debug = (params.get(FIELD_DEBUG) != null);
 	    boolean align = (params.get(FIELD_ALIGN) != null);
+    	    _logger.debug("Debug: " + params.get(FIELD_DEBUG));
+    	    _logger.debug("Align: " + params.get(FIELD_ALIGN));
       boolean topt = (params.get(FIELD_TOPT) != null);
 	    if (systemId == null) {
             throw new XmlRpcException("Missing system id");
@@ -93,6 +96,7 @@ public class TranslationJob {
 	     }
 	     if (job._alignments != null) {
 	         _alignments = new ArrayList<Map>(job._alignments);
+		 _logger.debug("Alignments in create job: " + _alignments);
 	     }
        if (job._topts != null) {
            _topts = new ArrayList<Map>(job._topts);
@@ -124,6 +128,43 @@ public class TranslationJob {
 	public List<Map> getAlignments() { 
 	    return _alignments;
 	}
+	public String getFormattedAlignments(){
+	    ArrayList<String> out = new ArrayList<String>();
+	    String[] splitted = _text.split("\\s+");
+	    if (_alignments == null) {
+	      _logger.warn("No alignment information");
+	      return "";
+	    }
+	    for(int i = 0; i < _alignments.size(); i++){
+	      Map align = _alignments.get(i);
+	      Integer end = splitted.length;
+	      if (i+1 < _alignments.size()) {
+	        Map align_next = _alignments.get(i+1);
+		end = (Integer)align_next.get("trg-start");
+	      }
+              _logger.debug("getFormattedAlignments: i" + i + " end:" + end  );
+	      Integer startSource = (Integer)align.get("src-start");
+	      Integer endSource = (Integer)align.get("src-end");
+	      Integer startTarget = (Integer)align.get("tgt-start");
+	      if (startSource == null || endSource == null || startTarget == null) {
+		  _logger.warn("Missing alignment info");
+		  return "";
+	      }
+	      if (startTarget > splitted.length || end > splitted.length) {
+		  _logger.warn("StartTarget:" + startTarget +" or end:" + end + " > length of output text string:" + _text);
+		  return "";
+	      }
+	      for (int j=startTarget; j< end; j++) {
+		  out.add(splitted[j]);
+	      }
+	      String al = "|" + startSource + "-" + endSource + "|";
+	      out.add(al);
+	    }
+	    String joinedString = StringUtils.join(out, " ");
+            _logger.debug("getFormattedAlignments: " + joinedString  );
+	    return joinedString;
+	}
+
 
   public List<Map> getTopts() {
       return _topts;
@@ -158,6 +199,7 @@ public class TranslationJob {
 		}
 		if (_alignments != null) {
 		    result.put(FIELD_ALIGN, _alignments);
+		    _logger.debug("Alignments in getResult: " + _alignments);
 		}
     if (_topts != null) {
         result.put(FIELD_TOPT, _topts);

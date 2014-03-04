@@ -96,7 +96,7 @@ public class Translator  implements XmlRpcHandler{
 	            HierarchicalConfiguration h = (HierarchicalConfiguration)i.next();
 	            String name = h.getString("name");
 	            String cmd[] = new String[]{exe};
-	            tools.put(name,new PipedToolState(name,cmd,"restore"));
+	            tools.put(name,new PipedToolState(name,cmd,"add-state-align"));
 	        }
         }
 
@@ -269,6 +269,12 @@ public class Translator  implements XmlRpcHandler{
                 throw new XmlRpcException("Incorrect number of parameters");
             }
 	        Map params = (Map)request.getParameter(0);
+		Iterator iter = params.keySet().iterator();
+		while(iter.hasNext()) {
+		  String key = (String)iter.next();
+		  String val = (String)params.get(key);
+		  _logger.debug("key,val: " + key + "," + val);
+		}
 	        TranslationJob[] jobs = TranslationJob.create(params);
 	        TranslationJob[] resultJobs = translate(jobs);
 	        Object[] result = new Object[resultJobs.length];
