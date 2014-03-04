@@ -69,6 +69,7 @@ while(<STDIN>){
   }
   if (length $line > 0 && (!defined @{$trans_data->[$count]} || scalar @{$trans_data->[$count]} == 0)){
     print STDERR "WARNING: no source phrase information in translated text expecting source alignment eg. |0-0| for each output phrase: $line\n";
+    print "$line";
   }
   $count++;
 
