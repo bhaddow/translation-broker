@@ -31,6 +31,15 @@ $topt = False;
 if (isset($_REQUEST['topt'])) {
   $topt = True;
 }
+$debug = False;
+if (isset($_REQUEST['debug'])) {
+  $debug = True;
+}
+
+$align = False;
+if (isset($_REQUEST['align'])) {
+  $align = True;
+}
 
 # Get the list of systems
 $client = new xmlrpc_client("/xmlrpc", "localhost", $port);
@@ -64,7 +73,7 @@ if (!$found) {
 }
 
 $output = "";
-$translation_result = translate($input,$sysid,$port,false, $topt);
+$translation_result = translate($input,$sysid,$port,$debug, $topt,$align);
 foreach (array_keys($translation_result) as $i) {
     $translation = $translation_result[$i]["translation"];
     if ($output) {

@@ -18,7 +18,7 @@ function debug($msg) {
 error_reporting(E_ALL);
 
 
-function translate ($input, $system_id, $port, $debug, $topt) {
+function translate ($input, $system_id, $port, $debug, $topt, $align) {
     #print "$input<br>\n";
     #$encoded = new xmlrpcval($input,"string");
     #print $encoded->scalarVal(); print "<br>\n";
@@ -36,6 +36,11 @@ function translate ($input, $system_id, $port, $debug, $topt) {
     if ($topt) {
       $param->addStruct(
         array("topt" => new xmlrpcval("yes", "string")));
+
+    }
+    if ($align) {
+      $param->addStruct(
+        array("align" => new xmlrpcval("yes", "string")));
 
     }
     $request->addParam($param);
