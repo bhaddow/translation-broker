@@ -50,6 +50,7 @@ public class PipedToolState extends PipedTool {
     public PipedToolState(String toolName, String[] progargs, boolean catchDebug, String initFinishedMessage, String finishedMessage,String stateFlag) throws IOException {
         super(toolName,progargs,catchDebug,initFinishedMessage,finishedMessage);
         _stateFlag = stateFlag;
+	_logger.info("State flag set to:" + stateFlag);
     }
 
     @Override
@@ -59,14 +60,18 @@ public class PipedToolState extends PipedTool {
         if (_substitutePipes) {
             text = text.replaceAll("\\|", MosesServerTool.PIPE);
         }
-        System.out.println("text");
-        if (_stateFlag.equals("restore")) {
-            text = job.getState() + "\n" + text;
+        //Append state info to text, so alternate text lines with state lines
+        if (_stateFlag.equals("add-state")) {
+            text += "\n" + job.getState();
         }
-	else {
-	    if (_stateFlag.equals("save")){
-                job.setState(writeStateToFile(text));
-	    }
+	else if (_stateFlag.equals("add-state-align")) {
+	    text = job.getFormattedAlignments();
+            text += "\n" + job.getState();
+        }
+	else if (_stateFlag.equals("save")){
+	        //Save in state not in file
+                //job.setState(writeStateToFile(text));
+                job.setState(text);
 	}
         
         _processInput.println(text);
@@ -91,8 +96,8 @@ public class PipedToolState extends PipedTool {
                 }
                 
             }
-            if (_stateFlag.equals("restore")) {
-	        deleteFile(job.getState());
+            if (_stateFlag.equals("add-state")) {
+	        //deleteFile(job.getState());
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -102,12 +107,12 @@ public class PipedToolState extends PipedTool {
     }
 
     private String writeStateToFile (String inputText) {
-        String fileName = stateDir + UUID.randomUUID().toString() + ".tmp";
+        String fileName = stateDir + "rpcPipedTool" + UUID.randomUUID().toString() + ".tmp";
 	BufferedWriter writer;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
 		          new FileOutputStream(fileName), "utf-8"));
-	    writer.write("inputText");
+	    writer.write(inputText);
 	    writer.close(); 
         } catch (IOException e) {
             throw new RuntimeException(e);

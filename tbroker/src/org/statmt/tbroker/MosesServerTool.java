@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.log4j.Logger;
@@ -74,6 +75,13 @@ public class MosesServerTool extends TranslationTool {
             if (topts != null) {
                 params.put(TranslationJob.FIELD_TOPT, "true");
             }
+	    Iterator iter = params.keySet().iterator();
+	    while(iter.hasNext()) {
+	        String key = (String)iter.next();
+	        String val = (String)params.get(key);
+	        _logger.info("Translate request: key,val: " + key + "," + val);
+	    }
+	    _logger.info("HERE");
             Map result = (Map)client.execute("translate", new Object[]{params});
             text = result.get(TranslationJob.FIELD_TEXT).toString();
             text = text.replaceAll(PIPE,"|");

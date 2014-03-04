@@ -10,77 +10,36 @@
 # 
 # ctm file with timing information which contains the 
 # words from the original source sentence:
-#;;Comments in beginning
-## talkid767_15_50 15.50
-#talkid767 1 16.02 0.14        i'm 0.999752
-#talkid767 1 16.16 0.12      going 0.999994
-#talkid767 1 16.28 0.07         to 0.999995
-## talkid767_17_98 17.98
-#talkid767 1 16.35 0.27       talk 1.000000
-#talkid767 1 16.62 0.33      today 1.000000
-#talkid767 1 16.95 0.34      about 1.000000
-## talkid767_17_98 17.98
-#
-# Piped input is the file of a file which is the output of 
-# the MOSES decoder which has been run with the -t option
-# So the output looks like this with the phrasal alignments to source in | |:
 # a |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|
+## talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995%%%# talkid767_17_98 17.98
 # another |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|
+## talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995%%%# talkid767_17_98 17.98
 
 use strict;
-
-#my $ctm_file = $ARGV[0];
-#my $translated_file = $ARGV[1];
 
 binmode(STDIN,"utf8");
 binmode(STDOUT,"utf8");
 
-my $ctm_file = <STDIN>; #first line of input file must contain ctm file name
-chomp($ctm_file);
-
-my $text;
-my $ctm_data = [];
-my $count = 0;
-open (CTM, "$ctm_file") or die ("Failed opening $ctm_file $!");
-binmode(CTM,"utf8");
-while(<CTM>){
-  my $text = $_;
-  &preprocess($text,$ctm_data,$count);
-  $count++;
-}
-$count=0;
-close(CTM);
-
-my $trans_data;
-
-#Bonjour |0-0| , même |1-2| avec plus |3-4| de |6-6| nuages |5-5|
-#open (TRANS, "$translated_file") or die ("Failed opening $translated_file");
-#binmode(TRANS,"utf8");
+my $alt = 0;
+my @trans_data =[];
+my @ctm_data =[];
 while(<STDIN>){
-  chomp;
-  my $line = $_;
-  $line =~ s/\s+/ /g;
-  my $working = $line;
-  while ($working =~ s/([^|]+) \|(\d+)\-(\d+)\|\s*//){
-    my $phrase->{'word'} = $1;
-    $phrase->{'start-pos'} = $2;
-    $phrase->{'end-pos'} = $3;
-    push(@{$trans_data->[$count]},$phrase);
+  my $text = $_;
+  chomp($text);
+  if ($alt == 0) {
+    &preprocess_mtout($text,\@trans_data);
+    $alt = 1;
+  } else {
+    &preprocess_ctm($text,\@ctm_data);
+    $alt = 0;
   }
-  if (length $line > 0 && (!defined @{$trans_data->[$count]} || scalar @{$trans_data->[$count]} == 0)){
-    print STDERR "WARNING: no source phrase information in translated text expecting source alignment eg. |0-0| for each output phrase: $line\n";
-    print "$line";
-  }
-  $count++;
-
 }
-#close(TRANS);
 
-$count=0;
-foreach my $sent (@{$trans_data}){
+my $count=0;
+foreach my $sent (@trans_data){
   my $ctm_sent;
-  if (defined  $ctm_data->[$count]) {
-    $ctm_sent = $ctm_data->[$count];
+  if (defined  $ctm_data[$count]) {
+    $ctm_sent = $ctm_data[$count];
   } else {
     print "Missing ctm sentence $count\n";
     $count++;
@@ -116,9 +75,10 @@ foreach my $sent (@{$trans_data}){
   print "#end of sentence\n";
 }
 
-sub preprocess {
+sub preprocess_ctm {
   my ($text,$ctm_line,$count) = @_;
   my @lines = split ("%%%",$text);
+  my @entry;
   foreach my $line (@lines) {
     if ($line =~ /^#/) {
       next;
@@ -133,7 +93,31 @@ sub preprocess {
     $word->{'somefield'} = $el[1];
     $word->{'source word'} = $el[4];
     $word->{'probability'} = $el[5];
-    push(@{$ctm_line->[$count]}, $word);
+    push(@entry,$word);
   }
+  push(@$ctm_line,@entry);
 }
 
+#Bonjour |0-0| , même |1-2| avec plus |3-4| de |6-6| nuages |5-5|
+#open (TRANS, "$translated_file") or die ("Failed opening $translated_file");
+#binmode(TRANS,"utf8");
+sub preprocess_mtout {
+  my ($line,$trans_data) = @_;
+  chomp($line);
+  $line =~ s/\s+/ /g;
+  my $working = $line;
+  my @phrase;
+  while ($working =~ s/([^|]+) \|(\d+)\-(\d+)\|\s*//){
+    my $phrase->{'word'} = $1;
+    $phrase->{'start-pos'} = $2;
+    $phrase->{'end-pos'} = $3;
+    push(@phrase,$phrase);
+  }
+  push(@$trans_data,@phrase);
+  if (length $line > 0){
+    print STDERR "WARNING: no source phrase information in translated text expecting source alignment eg. |0-0| for each output phrase: $line\n";
+    print "$line";
+  }
+  $count++;
+}
+#close(TRANS);
