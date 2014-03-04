@@ -20,8 +20,9 @@ def main():
         file = open('/home/abmayne/t', 'r')
         input_text = ""
         for line in file:
-           input_text += "\n" + line
+           input_text += line
         params = urllib.urlencode({'v' : '1.0', 'ie' : 'UTF8', \
+            'align' : "true", 'debug' : "true", \
             'system' : 'eub', 'langpair' : '%s|%s' % (source,target), 'q' : input_text})
         f = urllib.urlopen(url,params)
         for line in f:
