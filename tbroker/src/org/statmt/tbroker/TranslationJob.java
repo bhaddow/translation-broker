@@ -125,11 +125,19 @@ public class TranslationJob {
 		_state = text;
 	}
 	
+	public void setAlignments(ArrayList<Map> align) { 
+	    _alignments = align;
+	}
 	public List<Map> getAlignments() { 
 	    return _alignments;
 	}
 	public String getFormattedAlignments(){
 	    ArrayList<String> out = new ArrayList<String>();
+            _logger.debug("getFormattedAlignments here ");
+	    if (_text == null) {
+	      _logger.warn("No text information");
+	      return "";
+	    }
 	    String[] splitted = _text.split("\\s+");
 	    if (_alignments == null) {
 	      _logger.warn("No alignment information");
@@ -140,7 +148,7 @@ public class TranslationJob {
 	      Integer end = splitted.length;
 	      if (i+1 < _alignments.size()) {
 	        Map align_next = _alignments.get(i+1);
-		end = (Integer)align_next.get("trg-start");
+		end = (Integer)align_next.get("tgt-start");
 	      }
               _logger.debug("getFormattedAlignments: i" + i + " end:" + end  );
 	      Integer startSource = (Integer)align.get("src-start");
