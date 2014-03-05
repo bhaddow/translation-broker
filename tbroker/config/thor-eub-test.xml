@@ -79,7 +79,7 @@
         <tool>en-dectm</tool>
         <tool>eub-en-fr</tool>
         <tool>fr-detrue</tool>
-        <tool>fr-detok</tool>
 	<tool>fr-ctm</tool>
+        <tool>fr-detok</tool>
     </toolchain>
 </config>
