@@ -4,69 +4,75 @@
 # Outputs the MT translation with the MT source ctm timing information for aligning translated subtitles
 #
 # We need access to the MT output and to the ctm timing in alternate sentences:
-# a |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|
-## talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995%%%# talkid767_17_98 17.98
-# another |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|
-## talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995%%%# talkid767_17_98 17.98
+# a |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|@@@talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995%%%# talkid767_17_98 17.98
+# another |2-2| big |3-3| test |4-4| is |1-1| TThis |0-0|@@@talkid767_15_50 15.50%%%talkid767 1 16.02 0.14        i'm 0.999752%%%talkid767 1 16.16 0.12      going 0.999994%%%talkid767 1 16.28 0.07         to 0.999995%%%# talkid767_17_98 17.98
 
 use strict;
 
 binmode(STDIN,"utf8");
 binmode(STDOUT,"utf8");
+binmode(STDERR, ":utf8");
 
-my $alt = 0;
+print STDERR "Packaging translation in CTM \n";
+STDOUT->autoflush(1);
+STDERR->autoflush(1);
+
+my $ctm_delim = "%%%";
+my $parts_delim = "@@@";
+
 my @trans_data =();
 my @ctm_data =();
 while(<STDIN>){
   my $text = $_;
   chomp($text);
-  if ($alt == 0) {
-    preprocess_mtout($text,\@trans_data);
-    $alt = 1;
-  } else {
-    preprocess_ctm($text,\@ctm_data);
-    $alt = 0;
-  }
+  my @parts = split ($parts_delim,$text);
+  preprocess_mtout($parts[0],\@trans_data);
+  preprocess_ctm($parts[1],\@ctm_data);
+  print_ctm(\@trans_data,\@ctm_data);
+  @trans_data =();
+  @ctm_data =();
 }
 
-my $count=0;
-foreach my $sent (@trans_data){
-  my $ctm_sent;
-  if (defined  $ctm_data[$count]) {
-    $ctm_sent = $ctm_data[$count];
-  } else {
-    print "Missing ctm sentence $count\n";
-    $count++;
-    next;
+sub print_ctm {
+  my ($trans_data, $ctm_data) = @_;
+
+  my $count=0;
+  if (!defined $ctm_data or scalar @$ctm_data == 0) {
+    print "Missing ctm sentence\n";
+    return;
   } 
-  foreach my $phrase (@$sent){
+  if (!defined $trans_data or scalar @$trans_data == 0) {
+    print "Missing translation sentence\n";
+    return;
+  } 
+  foreach my $phrase (@$trans_data){
     my $start_word;
     my $start_time = 0;
-    if (defined $ctm_sent->[$phrase->{'start-pos'}]){
-      $start_word = $ctm_sent->[$phrase->{'start-pos'}];
+    if (defined $ctm_data->[$phrase->{'start-pos'}]){
+      $start_word = $ctm_data->[$phrase->{'start-pos'}];
       $start_time = $start_word->{'start-time'};
     } else {
-      print "Missing start position $phrase->{'start-pos'}\n";
+      print STDERR "Missing start position $phrase->{'start-pos'}\n";
     }
     my $duration=0;
     for (my $i=$phrase->{'start-pos'}; $i <= $phrase->{'end-pos'}; $i++){
-      if (defined $ctm_sent->[$i]) {
-        $duration += $ctm_sent->[$i]->{'duration'};
+      if (defined $ctm_data->[$i]) {
+        $duration += $ctm_data->[$i]->{'duration'};
       } else {
         print STDERR "Missing position $i\n";
       }
     }
     if (defined $start_word) {
       my $out = $phrase->{word};
-      $out =~ s/\&apos;/'/;
-      $out =~ s/' /'/;
-      $out =~ s/@\-@/\-/;
-      $out =~ s/ \- /\-/;
-      print STDOUT "$start_word->{name} $start_word->{somefield} $start_time $duration $out\n";
+      $out =~ s/\&apos;/'/g;
+      $out =~ s/' /'/g;
+      $out =~ s/@\-@/\-/g;
+      $out =~ s/ \- /\-/g;
+      print "$start_word->{name} $start_word->{somefield} $start_time $duration $out$ctm_delim";
     }
+    $count++;
   }
-  $count++;
-  print "#end of sentence\n";
+  print "#end sent\n";
 }
 
 sub preprocess_ctm {
@@ -87,9 +93,8 @@ sub preprocess_ctm {
     $word->{'somefield'} = $el[1];
     $word->{'source word'} = $el[4];
     $word->{'probability'} = $el[5];
-    push(@entry,$word);
+    push(@$ctm_line,$word);
   }
-  push(@$ctm_line,\@entry);
 }
 
 #Bonjour |0-0| , même |1-2| avec plus |3-4| de |6-6| nuages |5-5|
@@ -105,12 +110,7 @@ sub preprocess_mtout {
     my $phrase->{'word'} = $1;
     $phrase->{'start-pos'} = $2;
     $phrase->{'end-pos'} = $3;
-    push(@phrase,$phrase);
+    push(@$trans_data,$phrase);
   }
-  if (length $line > 0 and scalar @phrase ==0){
-    print STDERR "WARNING: no source phrase information in translated text expecting source alignment eg. |0-0| for each output phrase: $line\n";
-    print "$line";
-  }
-  push(@$trans_data,\@phrase);
 }
 #close(TRANS);
