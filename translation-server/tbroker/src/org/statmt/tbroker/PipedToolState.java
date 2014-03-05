@@ -65,6 +65,7 @@ public class PipedToolState extends PipedTool {
             text += "\n" + job.getState();
         }
 	else if (_stateFlag.equals("add-state-align")) {
+            //Alignments in the format source words |0-1| and more |2-3|
 	    text = job.getFormattedAlignments();
             text += "\n" + job.getState();
         }
@@ -73,6 +74,7 @@ public class PipedToolState extends PipedTool {
                 //job.setState(writeStateToFile(text));
                 job.setState(text);
 	}
+	_logger.debug("Sending to PipedToolState process:" + text);
         
         _processInput.println(text);
         _processInput.flush();
