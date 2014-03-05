@@ -76,6 +76,7 @@ sub preprocess {
   	my ($text) = @_;
 	
 	my @out;
+        $text =~ s/'/\&apos;/g;
 	my @lines = split ("\n",$text);
 	my $out = join ("%%%", @lines);
 	#Moses can't handle empty txt lines, add a . as a dummy
