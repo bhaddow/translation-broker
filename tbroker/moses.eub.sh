@@ -8,7 +8,9 @@ pidfile=/disk4/translation-server/pids.eub
 port=8280
 mosesserver=/disk3/bhaddow/moses/dist/1796c3b/bin/mosesserver
 logdir=/disk4/translation-server/logs.eub
-mosesargs="-search-algorithm 1 -cube-pruning-pop-limit 500 -s 500 -t "
+mosesargs="-mbr -persistent-cache-size 250000"
+model_dir=/disk4/html/eubridge/models
+configs="$model_dir/enasr-de/moses.ini $model_dir/enasr-fr/moses.ini $model_dir/enasr-es/moses.ini $model_dir/enasr-en/moses.ini"
 #mosesargs=
 export LD_LIBRARY_PATH=/disk4/boost/lib:$LD_LIBRARY_PATH
 

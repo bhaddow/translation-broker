@@ -3,17 +3,32 @@
     <port>7897</port>
 
     <support-tools-dir>/disk4/translation-server/web/bin</support-tools-dir>
-    <true-model-dir>/disk3/bhaddow/experiments/demo/true</true-model-dir>
-    <splitter>ctm</splitter>
-    <ctmtotxt>${support-tools-dir}/split-sentences.perl</ctmtotxt>
-    <txttoctm>${support-tools-dir}/split-sentences.perl</txttoctm>
+    <splitter>${support-tools-dir}/split-sentences-ctm.perl</splitter>
 
     <!-- Translation tools -->
     <moses-servers>
         <moses-server>
-            <name>eub-fr-en</name>
+            <name>eub-enasr-fr</name>
             <host>localhost</host>
-            <port>8280</port>
+            <port>8281</port>
+            <system>default</system>
+        </moses-server>
+        <moses-server>
+            <name>eub-enasr-es</name>
+            <host>localhost</host>
+            <port>8282</port>
+            <system>default</system>
+        </moses-server>
+        <moses-server>
+            <name>eub-enasr-de</name>
+            <host>localhost</host>
+            <port>8283</port>
+            <system>default</system>
+        </moses-server>
+        <moses-server>
+            <name>eub-enasr-en</name>
+            <host>localhost</host>
+            <port>8284</port>
             <system>default</system>
         </moses-server>
 <!--
@@ -26,49 +41,35 @@
         -->
     </moses-servers>
 
-    <tokenisers>
-        <command>${support-tools-dir}/tokenizer.perl</command>
-        <tokeniser>
-            <name>en-tok</name>
-            <language>en</language>
-        </tokeniser>
-        <tokeniser>
-            <name>fr-tok</name>
-            <language>fr</language>
-        </tokeniser>
-    </tokenisers>
-
-    <detokenisers>
-        <command>${support-tools-dir}/detokenizer.perl</command>
-        <detokeniser>
-            <name>de-detok</name>
-            <language>de</language>
-        </detokeniser>
-        <detokeniser>
-            <name>fr-detok</name>
-            <language>fr</language>
-        </detokeniser>
-        <detokeniser>
-            <name>en-detok</name>
-            <language>en</language>
-        </detokeniser>
-    </detokenisers>
 
 
-    <truecasers>
-        <command>${support-tools-dir}/truecase.perl</command>
-        <truecaser>
-            <name>en-true</name>
-            <model>${true-model-dir}/truecase-model.en</model>
-        </truecaser>
-        <truecaser>
-            <name>fr-true</name>
-            <model>${true-model-dir}/truecase-model.fr</model>
-        </truecaser>
-    </truecasers>
+    <stripctms>
+        <command>${support-tools-dir}/ctm-to-txt.perl</command>
+        <stripctm>
+            <name>en-dectm</name>
+        </stripctm>
+    </stripctms>
+    <restorectms>
+        <command>${support-tools-dir}/mtoutput-to-ctm.perl</command>
+        <restorectm>
+            <name>en-ctm</name>
+        </restorectm>
+        <restorectm>
+            <name>fr-ctm</name>
+        </restorectm>
+        <restorectm>
+            <name>de-ctm</name>
+        </restorectm>
+        <restorectm>
+            <name>es-ctm</name>
+        </restorectm>
+    </restorectms>
 
     <detruecasers>
         <command>${support-tools-dir}/detruecase.perl</command>
+        <detruecaser>
+            <name>en-detrue</name>
+        </detruecaser>
         <detruecaser>
             <name>fr-detrue</name>
         </detruecaser>
@@ -76,16 +77,29 @@
             <name>de-detrue</name>
         </detruecaser>
         <detruecaser>
-            <name>en-detrue</name>
+            <name>es-detrue</name>
         </detruecaser>
     </detruecasers>
+    <detokenisers>
+        <command>${support-tools-dir}/detokenizer.perl</command>
+        <detokeniser>
+            <name>en-detok</name>
+            <language>en</language>
+        </detokeniser>
+        <detokeniser>
+            <name>fr-detok</name>
+            <language>fr</language>
+        </detokeniser>
+        <detokeniser>
+            <name>de-detok</name>
+            <language>de</language>
+        </detokeniser>
+        <detokeniser>
+            <name>es-detok</name>
+            <language>es</language>
+        </detokeniser>
+    </detokenisers>
 
-    <desegmenters>
-        <command>${support-tools-dir}/desegmenter.perl</command>
-        <desegmenter>
-            <name>ja-deseg</name>
-        </desegmenter>
-    </desegmenters>
 
 
     <!-- Translation tool chains -->
@@ -104,16 +118,54 @@
     </toolchain>
 -->
     <toolchain>
+        <name>eub-enasr-en</name>
+        <description>EnglishASRCTM->EnglishCTM Punct Truecase (EU-Bridge)</description>
+        <source>enasr</source>
+        <target>en</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-dectm</tool>
+        <tool>tb-enasr-en</tool>
+        <tool>en-detrue</tool>
+        <tool>en-detok</tool>
+    </toolchain>
+    <toolchain>
         <name>eub-en-fr</name>
-        <description>English->French (EU-Bridge)</description>
+	<description>EnglishASRCTM->FrenchCTM (EU-Bridge)</description>
         <source>en</source>
         <target>fr</target>
         <split>true</split>
         <parallel>true</parallel>
-        <tool>en-tok</tool>
-        <tool>en-true</tool>
-        <tool>tb-en-fr</tool>
+        <tool>en-dectm</tool>
+        <tool>eub-en-fr</tool>
         <tool>fr-detrue</tool>
+	<tool>fr-ctm</tool>
         <tool>fr-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>eub-en-de</name>
+	<description>EnglishASRCTM->GermanCTM (EU-Bridge)</description>
+        <source>en</source>
+        <target>de</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-dectm</tool>
+        <tool>eub-en-de</tool>
+        <tool>de-detrue</tool>
+	<tool>de-ctm</tool>
+        <tool>de-detok</tool>
+    </toolchain>
+    <toolchain>
+        <name>eub-en-es</name>
+	<description>EnglishASRCTM->SpanishCTM (EU-Bridge)</description>
+        <source>en</source>
+        <target>es</target>
+        <split>true</split>
+        <parallel>true</parallel>
+        <tool>en-dectm</tool>
+        <tool>eub-en-es</tool>
+        <tool>es-detrue</tool>
+	<tool>es-ctm</tool>
+        <tool>es-detok</tool>
     </toolchain>
 </config>
