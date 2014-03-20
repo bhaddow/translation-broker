@@ -8,25 +8,25 @@
     <!-- Translation tools -->
     <moses-servers>
         <moses-server>
-            <name>eub-enasr-fr</name>
+            <name>eub-en-fr</name>
             <host>localhost</host>
             <port>8281</port>
             <system>default</system>
         </moses-server>
         <moses-server>
-            <name>eub-enasr-es</name>
+            <name>eub-en-es</name>
             <host>localhost</host>
             <port>8282</port>
             <system>default</system>
         </moses-server>
         <moses-server>
-            <name>eub-enasr-de</name>
+            <name>eub-en-de</name>
             <host>localhost</host>
             <port>8283</port>
             <system>default</system>
         </moses-server>
         <moses-server>
-            <name>eub-enasr-en</name>
+            <name>eub-sr-en</name>
             <host>localhost</host>
             <port>8284</port>
             <system>default</system>
@@ -47,6 +47,9 @@
         <command>${support-tools-dir}/ctm-to-txt.perl</command>
         <stripctm>
             <name>en-dectm</name>
+        </stripctm>
+        <stripctm>
+            <name>sr-dectm</name>
         </stripctm>
     </stripctms>
     <restorectms>
@@ -118,14 +121,14 @@
     </toolchain>
 -->
     <toolchain>
-        <name>eub-enasr-en</name>
+        <name>eub-sr-en</name>
         <description>EnglishASRCTM->EnglishCTM Punct Truecase (EU-Bridge)</description>
-        <source>enasr</source>
+        <source>sr</source>
         <target>en</target>
         <split>true</split>
         <parallel>true</parallel>
-        <tool>en-dectm</tool>
-        <tool>tb-enasr-en</tool>
+        <tool>sr-dectm</tool>
+        <tool>eub-sr-en</tool>
         <tool>en-detrue</tool>
         <tool>en-detok</tool>
     </toolchain>
