@@ -51,6 +51,20 @@ sub detokenize {
 	chomp($text);
 	$text = " $text ";
 	
+        $text =~ s/ \@\-\@ /-/g;
+        # de-escape special chars
+        $text =~ s/\&bar;/\|/g;   # factor separator (legacy)
+        $text =~ s/\&#124;/\|/g;  # factor separator
+        $text =~ s/\&lt;/\</g;    # xml
+        $text =~ s/\&gt;/\>/g;    # xml
+        $text =~ s/\&bra;/\[/g;   # syntax non-terminal (legacy)
+        $text =~ s/\&ket;/\]/g;   # syntax non-terminal (legacy)
+        $text =~ s/\&quot;/\"/g;  # xml
+        $text =~ s/\&apos;/\'/g;  # xml
+        $text =~ s/\&#91;/\[/g;   # syntax non-terminal
+        $text =~ s/\&#93;/\]/g;   # syntax non-terminal
+        $text =~ s/\&amp;/\&/g;   # escape escape
+
 	my $word;
 	my $i;
 	my @words = split(/ /,$text);
