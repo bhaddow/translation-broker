@@ -110,6 +110,7 @@ public class Translator  implements XmlRpcHandler{
 	            String name = h.getString("name");
 	            String language = h.getString("language");
 	            String cmd[] = new String[]{exe, "-l",language};
+              cmd = addArgs(h,cmd);
 	            tools.put(name,new PipedTool(name,cmd));
 	        }
         }
@@ -240,6 +241,23 @@ public class Translator  implements XmlRpcHandler{
         
         //System.exit(1);
         //_tool = new PipedTool("en-tok", new String[]{"/home/bhaddow/statmt/repository/experiments/trunk/scripts/tokenizer.perl", "-l", "en"});
+    }
+
+    private String[] addArgs(HierarchicalConfiguration h, String[] args) {
+      String[] newArgs;
+      if (!h.configurationsAt("args").isEmpty()) {
+        String[] extraArgs = h.getString("args").split("\\s+");
+        newArgs = new String[args.length + extraArgs.length];
+        for (int i = 0; i < args.length; ++i) {
+          newArgs[i] = args[i];
+        }
+        for (int i = 0; i < extraArgs.length; ++i) {
+          newArgs[i + args.length] = extraArgs[i];
+        }
+      } else {
+        newArgs = args;
+      }
+      return newArgs; 
     }
     
     /**

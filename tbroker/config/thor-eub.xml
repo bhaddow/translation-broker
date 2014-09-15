@@ -10,25 +10,25 @@
         <moses-server>
             <name>eub-en-fr</name>
             <host>localhost</host>
-            <port>8281</port>
+            <port>8280</port>
             <system>default</system>
         </moses-server>
         <moses-server>
             <name>eub-en-es</name>
             <host>localhost</host>
-            <port>8282</port>
+            <port>8281</port>
             <system>default</system>
         </moses-server>
         <moses-server>
             <name>eub-en-de</name>
             <host>localhost</host>
-            <port>8283</port>
+            <port>8282</port>
             <system>default</system>
         </moses-server>
         <moses-server>
             <name>eub-sr-en</name>
             <host>localhost</host>
-            <port>8284</port>
+            <port>8283</port>
             <system>default</system>
         </moses-server>
 <!--
@@ -130,6 +130,7 @@
         <tool>sr-dectm</tool>
         <tool>eub-sr-en</tool>
         <tool>en-detrue</tool>
+        <tool>en-ctm</tool>
         <tool>en-detok</tool>
     </toolchain>
     <toolchain>
