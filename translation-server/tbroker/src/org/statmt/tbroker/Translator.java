@@ -297,6 +297,9 @@ public class Translator  implements XmlRpcHandler{
 	        TranslationJob[] resultJobs = translate(jobs);
 	        Object[] result = new Object[resultJobs.length];
 	        for (int i = 0; i < result.length; ++i) {
+              if (resultJobs[i].getErrorMessage() != null) {
+                throw new XmlRpcException("Failed: " + resultJobs[i].getErrorMessage());
+              }
 	            result[i] = resultJobs[i].getResult();
                 if (_logger.isDebugEnabled()) {
                     _logger.debug("Sending response #" + i + ": " + result[i]);

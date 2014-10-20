@@ -81,7 +81,6 @@ public class MosesServerTool extends TranslationTool {
 	        String val = (String)params.get(key);
 	        _logger.info("Translate request: key,val: " + key + "," + val);
 	    }
-	    _logger.info("HERE");
             Map result = (Map)client.execute("translate", new Object[]{params});
             text = result.get(TranslationJob.FIELD_TEXT).toString();
             text = text.replaceAll(PIPE,"|");

@@ -35,6 +35,7 @@ public class TranslationJob {
 	private List<String> _debug;
 	private Map<String,Long> _timings = new HashMap<String, Long>();;
 	private long _startTime = System.currentTimeMillis();
+  private String _errorMessage;
 	
 	private static final Logger _logger = Logger.getLogger(TranslationJob.class);
 
@@ -124,6 +125,16 @@ public class TranslationJob {
 	public void setState(String text) {
 		_state = text;
 	}
+
+  public void setErrorMessage(String errorMessage) {
+    _errorMessage = errorMessage;
+  }
+
+  public String getErrorMessage() {
+    return _errorMessage;
+  }
+
+
 	
 	public void setAlignments(ArrayList<Map> align) { 
 	    _alignments = align;
