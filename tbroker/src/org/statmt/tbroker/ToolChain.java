@@ -135,7 +135,12 @@ public class ToolChain  {
     private void processJob(TranslationJob job) {
         for (TranslationTool tool: _tools) {
                 _logger.debug(tool.getName() + "> " + job.getText());
-                tool.transform(job);
+                try {
+                  tool.transform(job);
+                } catch (Exception e) {
+                  job.setErrorMessage(e.toString());
+                  return;
+                }
                 _logger.debug(tool.getName() +"<< " + job.getText());
 	
 if (tool.getName().equals("eub-en-fr") ){

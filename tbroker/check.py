@@ -12,7 +12,7 @@ import urllib
 
 url_prod = "http://demo.statmt.org/index.php";
 url_ec = "http://demo.statmt.org/ec/index.php";
-url_accept = "http://accept:motelone@accept.statmt.org/demo/index.php";
+url_accept = "http://accept:motelone@accept.statmt.org/demo.2014/index.php";
 
 systems = [\
     (url_prod,"en-de", "Zinc is a metallic chemical element with atomic number 30."),\
@@ -20,23 +20,16 @@ systems = [\
     (url_prod, "fr-en","Le centre commercial attire quinze millions de visiteurs par an pour un chiffre d’affaires de 259 M€ en 2008,"),\
     (url_prod, "es-en", "En un viaje de visita a Dinamarca contrajo matrimonio con una sobrina."),
     (url_prod, "cs-en", "Historie  je zkoumání minulosti se zaměřením na písemné zprávy týkající se činnosti lidstva během jeho existence."),
-    (url_accept, "sb-en-fr", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
-    (url_accept, "sb-en-de", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
-    (url_accept, "sb-en-ja", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
-    (url_accept, "sb-fr-en", "Mais si tu as téléchargé le fichier je ne sais pas pourquoi tu as cette demande."),
+    (url_accept, "en-fr-sym", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
+    (url_accept, "en-de-sym", "it doesn 't even look professional or promising or anything since I guess that was your aim - it simply looks ugly and creepy ."),
+    (url_accept, "fr-en-sym", "Mais si tu as téléchargé le fichier je ne sais pas pourquoi tu as cette demande."),
+    (url_accept, "fr-en-twb", "Mais si tu as téléchargé le fichier je ne sais pas pourquoi tu as cette demande."),
 #    (url_accept, "sb-fr-en-1009-13", "Mais si tu as téléchargé le fichier je ne sais pas pourquoi tu as cette demande."),
-    (url_accept, "tb-en-fr", "Careful: there is no real winner in this activity: the aim is not to find out which option had really been chosen by MSF at that time."),
-    (url_accept,"tb-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations."),
-    (url_accept, "tb13-en-fr", "Careful: there is no real winner in this activity: the aim is not to find out which option had really been chosen by MSF at that time."),
-    (url_accept,"tb13-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations.")
+#    (url_accept, "tb-en-fr", "Careful: there is no real winner in this activity: the aim is not to find out which option had really been chosen by MSF at that time."),
+#    (url_accept,"tb-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations."),
+#    (url_accept, "tb13-en-fr", "Careful: there is no real winner in this activity: the aim is not to find out which option had really been chosen by MSF at that time."),
+#    (url_accept,"tb13-fr-en", "À MSF, il y a des cycles réguliers d'innovations et de remise en question de ces innovations.")
     ]
-#    (url_ec, "fr-en", "Règlement (CE) no 753/2009 du Conseil du 27 juillet 2009 portant modification du règlement (CE) no 43/2009 en ce qui concerne les possibilités de pêche et les conditions associées applicables à certains stocks halieutiques"),\
-#    (url_ec, "it-en", "Decisione EUMM Georgia/1/2009 del Comitato politico e di sicurezza, del 31 luglio 2009, relativa alla proroga del mandato del capo della missione di vigilanza dell'Unione europea in Georgia (EUMM Georgia)"),
- #   (url_ec, "nl-el", "Richtlijn 2009/45/EG van het Europees Parlement en de Raad van 6 mei 2009 inzake veiligheidsvoorschriften en -normen voor passagiersschepen (Herschikking)"),
- #   (url_ec, "de-fr", "Bekanntmachung des bevorstehenden Außerkrafttretens bestimmter Antidumpingmaßnahmen"),
- #   (url_ec, "en-lt", "Acts adopted under the EC Treaty/Euratom Treaty whose publication is not obligatory"),
- #   (url_ec, "hu-ro", "A LexAlert értesítési szolgáltatás jelenleg kidolgozás alatt áll, az interneten keresztül történő regisztrációra még nincs lehetőség."),
- #   (url_ec, "es-en", "Decisión del Consejo, de 27 de julio de 2009, relativa a la conclusión del procedimiento de consulta con la República de Guinea en virtud del artículo 96 del Acuerdo de Cotonú")]
 
 spaces = re.compile(r"\s+")
 
