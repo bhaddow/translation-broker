@@ -66,6 +66,9 @@ public class MosesServerTool extends TranslationTool {
                 text = text.substring(0,MAX_LENGTH);
             }
             params.put(TranslationJob.FIELD_TEXT,text);
+            if (job.isDebugOn()) {
+              job.addDebug(text);
+            }
             params.put(TranslationJob.FIELD_SYSTEM,_systemId);
             List<Map> alignments = job.getAlignments();
             if (alignments != null) {
@@ -85,6 +88,9 @@ public class MosesServerTool extends TranslationTool {
             text = result.get(TranslationJob.FIELD_TEXT).toString();
             text = text.replaceAll(PIPE,"|");
             job.setText(text);
+            if (job.isDebugOn()) {
+              job.addDebug(text);
+            }
             if (alignments != null) {
                 Object[] returnedAlignments = (Object[])result.get(TranslationJob.FIELD_ALIGN);
                 if (returnedAlignments == null) {
