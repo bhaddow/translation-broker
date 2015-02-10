@@ -4,7 +4,7 @@ but I make it available in case it provides useful inspiration for others.
 Here is some instructions I wrote for a colleague once:
 
 The architecture consists of three parts:
-- a web frontend, stored in the web directory in svn
+- a web frontend, stored in the web directory
 - a  translation broker (tbroker) which handles the routing of translation
 requests
 -  moses servers.
@@ -17,8 +17,8 @@ corrections, so you can probably ignore this.
 
 The tbroker is written in java, and its source files are under tbroker/src. It
 should compile with ant and the given build.xml, and depends on a few
-apache classes, which are checked in to svn. The scripts I use to start the
-tbroker are in svn, as are its configuration files (in tbroker/config). The best
+apache classes, which are checked in. The scripts I use to start the
+tbroker are in tbroker, as are its configuration files (in tbroker/config). The best
 example is thor-prod.xml.
 
 You can see that this consists of three parts - specification of directories,
