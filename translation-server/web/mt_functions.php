@@ -1,6 +1,6 @@
 <?php
 
-# Tell xmlrpc that we're giving it utf8 strings, so that it will
+# Tell xmlrpc that we are giving it utf8 strings, so that it will
 # encode them correctly
 $GLOBALS['xmlrpc_internalencoding']='UTF-8'; 
 
@@ -40,12 +40,15 @@ function translate ($input, $system_id, $port, $debug, $topt, $align) {
     }
     if ($align) {
       $param->addStruct(
+        array("debug" => new xmlrpcval("yes", "string")));
+      $param->addStruct(
         array("align" => new xmlrpcval("yes", "string")));
 
     }
     $request->addParam($param);
-    #print "<pre>"; print $request->serialize(); print "</pre>>\n";
+#    print "<pre>"; print $request->serialize(); print "</pre>\n";
     $resp = $client->send($request);
+#    print "<pre>"; print $resp->serialize(); print "</pre>\n";
     if ($resp->faultCode()) {
         die("Unable to communicate with translation server");
     }
@@ -59,6 +62,30 @@ function translate ($input, $system_id, $port, $debug, $topt, $align) {
             for ($j = 0; $j < $debugMsgs->arraySize(); ++$j) {
                 $result[$i]["debug"][$j] = $debugMsgs->arrayMem($j)->scalarVal();
             }
+        }
+        if ($align) {
+	    $tokSource = $field->structMem("debug")->arrayMem(0)->scalarVal();
+	    $tokTarget = $field->structMem("debug")->arrayMem(1)->scalarVal();
+            $alignMsgs = $field->structMem("align");
+
+	    $tokSourceArray = explode(" ", $tokSource);
+	    $tokTargetArray = explode(" ", $tokTarget);
+	    $result[$i]["src_tokens"] = $tokSourceArray;
+	    $result[$i]["tgt_tokens"] = $tokTargetArray;
+            $result[$i]["alignment"] = array();
+	    $lasttgtstart = count($tokTargetArray);
+            for ($j = $alignMsgs->arraySize()-1; $j >= 0; --$j) {
+	        $tgtstart = $alignMsgs->arrayMem($j)->structMem("tgt-start")->scalarVal();		
+	        $srcstart = $alignMsgs->arrayMem($j)->structMem("src-start")->scalarVal();
+	        $srcend = $alignMsgs->arrayMem($j)->structMem("src-end")->scalarVal();
+		$info = array("src_start" => $srcstart,
+			      "src_end"   => $srcend,
+			      "tgt_start" => $tgtstart,
+                              "tgt_end"   => $lasttgtstart-1);
+		array_unshift($result[$i]["alignment"], $info);
+#  	        print "<pre>"; print_r($info); print "</pre>";           
+		$lasttgtstart = $tgtstart;
+	    }	    
         }
         if ($topt) {
           $result[$i]["topt"] = array();
@@ -77,14 +104,7 @@ function translate ($input, $system_id, $port, $debug, $topt, $align) {
           }
         }
     }
-#    if ($debug) {
-#        $result["debug"] = array();
-#        $debugMsgs = $resp->value()->structMem("debug");
-#        for ($i = 0; $i < $debugMsgs->arraySize(); ++$i) {
-#            $result["debug"][$i] = $debugMsgs->arrayMem($i)->scalarVal();
-#        }
-#    }
-	return $result;
+    return $result;
 
 }
 
