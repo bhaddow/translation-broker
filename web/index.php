@@ -50,10 +50,10 @@ function log_correction() {
   fwrite($fh,"=== REQUEST AT ".$_POST["time"]."\n");
   
   foreach (array_keys($_POST) as $var) {
-    if (preg_match("/^IN-(.+)/",$var,$match)) {
-      fwrite($fh,"=== IN $match[1]\n" .$_POST["IN-" .$match[1]]."\n");
-      fwrite($fh,"=== MT $match[1]\n" .$_POST["MT-" .$match[1]]."\n");
-      fwrite($fh,"=== OUT $match[1]\n".$_POST["OUT-".$match[1]]."\n");
+    if (preg_match("/^IN(.*)/",$var,$match)) {
+      fwrite($fh,"=== IN $match[1]\n" .$_POST["IN" .$match[1]]."\n");
+      fwrite($fh,"=== MT $match[1]\n" .$_POST["MT" .$match[1]]."\n");
+      fwrite($fh,"=== OUT $match[1]\n".$_POST["OUT".$match[1]]."\n");
     }
   }
   fclose($fh);
@@ -94,46 +94,35 @@ $translation_array_string = "";
 
 if ($input) {
     $moses_input_line = ""; 
-    $translation_result = translate($input,$sysid,$port,true);
+    $translation_result = translate($input,$sysid,$port,$rdebug,false,$alignment);
     foreach (array_keys($translation_result) as $i) {
 
         $translation = $translation_result[$i]["translation"];
-        $translation_array = $translation_result[$i]["debug"];
+        print "<span class=\"translation\">$translation</span><P>\n";
         $translation_array_string = $translation_array_string . 
             $translation . "\n";
 
-        print "<span class=\"translation\">$translation</span><P>\n";
 
-        $source_tokens = array_slice(explode(" ", $translation_array[1]),1);
-        $moses_input_line = $moses_input_line .  join(" ", $source_tokens) . "\n";
-
-# output phrase alignment
+	# output phrase alignment
         if ($alignment) {
-            #find mapping
-            for($i=1;$i<sizeof($translation_array);$i++) {
-                $parse_str = $translation_array[$i];
-                if (! preg_match("/^\[\[/",$parse_str)) continue;
-                $tgt_display = array();
-                $src_display = array();		
-                $matchups = split("[][]",$parse_str);
-                $range="";
-                $target="";
-                foreach ($matchups as $item) {
-                    $item = trim($item);
-                    if (!$item) continue;
-                    if (!$range) $range = $item;
-                    else if (!$target) $target = $item;
-                    if ($target && $range) {
-                        list($src_start,$src_end) = explode("..",$range);
-                        $target = substr($target,1);
-                        $src_display[] = join(" ",array_slice($source_tokens,$src_start,$src_end-$src_start+1));
-                        $tgt_display[] = $target;
-                        $target = "";
-                        $range = "";				
-                    }
-                
-                 }
-            }
+            $tgt_display = array();
+            $src_display = array();			    
+	    $source_tokens = $translation_result[$i]["src_tokens"];
+	    $target_tokens = $translation_result[$i]["tgt_tokens"];
+	    $alignment_infos = $translation_result[$i]["alignment"];
+
+	    if (count($source_tokens) > 0 && 
+		count($target_tokens) > 0 && 
+		count($alignment_infos) > 0) {
+	        for($j=0;$j<sizeof($alignment_infos);$j++) {
+  	            $src_start = $alignment_infos[$j]["src_start"];
+		    $src_end = $alignment_infos[$j]["src_end"];
+		    $tgt_start = $alignment_infos[$j]["tgt_start"];
+		    $tgt_end = $alignment_infos[$j]["tgt_end"];
+		    $src_display[] = join(" ",array_slice($source_tokens,$src_start,$src_end-$src_start+1));
+		    $tgt_display[] = join(" ",array_slice($target_tokens,$tgt_start,$tgt_end-$tgt_start+1));
+		} 
+	    }
             print "<table><tr>\n";
             foreach ($tgt_display as $tgt_token) {
                 print("<td align=center style=\"background-color:LightGray;padding:5px\">$tgt_token</td>");
@@ -146,26 +135,25 @@ if ($input) {
         }
     }
 
-
-
     if ($rdebug) {
         print "<h4>Moses debug</h4>";
         print "<pre>";
         foreach (array_keys($translation_result) as $i) {
-            $translation_array = $translation_result[$i]["debug"];
-            foreach (array_keys($translation_array) as $var) {
-                print $translation_array[$var] . "\n";
+            $debug_array = $translation_result[$i]["debug"];
+            foreach (array_keys($debug_array) as $var) {
+                print $debug_array[$var] . "\n";
             }
+	    $source_tokens = explode(" ", $debug_array[0]);
+	    $moses_input_line = $moses_input_line .  join(" ", $source_tokens) . "\n";
         }
         print "</pre>";
     }
 
-    $fh = fopen("/disk4/html/demo/log/translations.$dev$sysid","a");
+    $fh = fopen("log/translations.$dev$sysid","a");
     $time = time();
     $time = date("D M j G:i:s T Y",$time)." ($time)";
     fwrite($fh,"=== REQUEST AT $time\n");
     fwrite($fh,"=== RAW INPUT:\n$input\n");
-    $moses_input = "";
     print "<h2>Help to improve statistical machine translation!</h2>\n";
     print "<FORM ACTION=\"index.php\" METHOD=POST>\n";
     print "<INPUT TYPE=HIDDEN NAME=sysid VALUE=\"$sysid\">\n";

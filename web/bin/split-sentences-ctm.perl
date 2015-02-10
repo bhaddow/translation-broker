@@ -54,6 +54,9 @@ if (!$QUIET) {
 ##loop text, add lines together until we get a line starting with # 
 my $text = "";
 while(<STDIN>) {
+        chomp;
+        s/^\s+//g;
+        s/\s+$//g;
 	if (/^;;/) {
 	  #ignore comment line
 	} 
@@ -67,7 +70,7 @@ while(<STDIN>) {
 	}
 	else {
 		#append the text
-		$text .= $_;
+		$text .= $_ . "\n";
 	}
 }
 print &preprocess($text) if ($text);

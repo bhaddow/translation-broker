@@ -73,13 +73,29 @@ if (!$found) {
 }
 
 $output = "";
+$details = array();
+
 $translation_result = translate($input,$sysid,$port,$debug, $topt,$align);
+
 foreach (array_keys($translation_result) as $i) {
     $translation = $translation_result[$i]["translation"];
     if ($output) {
         $output = $output . " ";
     }
     $output = $output . $translation;
+
+    $detail = array();
+    $detail['source'] = $input;
+    $detail['target'] = $output;
+    if ($align) {
+        $detail['src_tokens'] = $translation_result[$i]["src_tokens"];
+        $detail['tgt_tokens'] = $translation_result[$i]["tgt_tokens"];
+        $detail['alignment'] = $translation_result[$i]["alignment"];
+    }
+    if ($debug) {
+        $detail['debug'] = $translation_result[$i]["debug"];
+    }
+    $details[] = $detail;
 }
 
 
@@ -87,7 +103,7 @@ $response = array();
 $response[$key_data] = array();
 $response[$key_data]['translatedText'] = $output; 
 $response[$key_status] = 200;
-$response[$key_details] = Null;
+$response[$key_details] = $details;
 if ($topt) {
   # Only read toptions for first sentence!
   $response[$key_data]['topt'] = $translation_result[0]["topt"];
